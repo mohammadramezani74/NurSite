@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "NurSite.Web": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:9148;http://localhost:9149"
+    }
+  }
+}

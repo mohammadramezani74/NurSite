@@ -1,0 +1,160 @@
+@inject NurSite.Web.Services.ThemeResolver ThemeResolver
+@inject NurSite.Application.Interfaces.IPersianDateService Dates
+@{
+    var request = ViewContext.HttpContext.Request;
+    var cookieTheme = request.Cookies[NurSite.Web.Services.ThemeResolver.CookieName];
+    var theme = await ThemeResolver.ResolveAsync(cookieTheme);
+    var siteName = "مؤسسه فرهنگی نورالثقلین";
+    var canonical = $"{request.Scheme}://{request.Host}{request.Path}";
+    var nowUtc = DateTime.UtcNow;
+}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="@theme.Name" data-theme-forced="@theme.IsForced.ToString().ToLowerInvariant()">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] — @siteName</title>
+
+    <seo-meta title="@(ViewData["Title"]?.ToString() ?? siteName)"
+              description="@ViewData["MetaDescription"]"
+              canonical="@canonical"
+              image="@ViewData["OgImage"]"
+              site-name="@siteName"
+              og-type="@(ViewData["OgType"]?.ToString() ?? "website")" />
+
+    <meta name="theme-color" content="#04121F">
+    <link rel="manifest" href="~/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="~/icons/icon-192.png">
+
+    @* فونت اصلی زودتر از بقیه لود شود تا متن دیرتر جابه‌جا نشود *@
+    <link rel="preload" href="~/fonts/Vazirmatn-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="~/fonts/Vazirmatn-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true">
+
+    @* پوسته پیش از رسم صفحه اعمال شود تا پرش رنگ دیده نشود *@
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body>
+    <a class="skip-link" href="#main">پرش به محتوای اصلی</a>
+
+    <div class="topbar">
+        <div class="wrap">
+            <div class="dates">
+                <span><i class="dot"></i>@Dates.ToPersianDate(nowUtc, includeWeekday: true)</span>
+                <span><i class="dot"></i>@Dates.ToHijriDate(nowUtc)</span>
+            </div>
+
+            <div class="palette" id="palette">
+                <span>پوسته:</span>
+                <button type="button" class="sw-lajvard" data-theme="lajvard" aria-pressed="@(theme.Name == "lajvard")" aria-label="پوسته لاجوردی"></button>
+                <button type="button" class="sw-sabz" data-theme="sabz" aria-pressed="@(theme.Name == "sabz")" aria-label="پوسته سبز"></button>
+                <button type="button" class="sw-anabi" data-theme="anabi" aria-pressed="@(theme.Name == "anabi")" aria-label="پوسته عنابی، ویژه ایام عزا"></button>
+            </div>
+
+            <div class="socials">
+                <a href="#">تلگرام</a><a href="#">اینستاگرام</a><a href="#">آپارات</a>
+            </div>
+        </div>
+    </div>
+
+    <header class="site-head">
+        <div class="wrap">
+            <a asp-page="/Index" class="logo">
+                <span class="logo-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19" /></svg>
+                </span>
+                <span><b>نورالثقلین</b><small>مؤسسه فرهنگی</small></span>
+            </a>
+
+            <nav class="nav" aria-label="فهرست اصلی">
+                <a asp-page="/Index">خانه</a>
+                <a asp-page="/Monasebat/Index">مناسبت‌ها</a>
+                <a asp-page="/Barnameh/Index">برنامه‌ها</a>
+                <a asp-page="/Maghalat/Index">مقالات</a>
+                <a asp-page="/Ahkam/Index">احکام</a>
+                <a asp-page="/Gallery/Index">گالری</a>
+                <a asp-page="/Tamas">تماس با ما</a>
+            </nav>
+
+            <div class="head-cta">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-area="Admin" asp-page="/Index" class="btn btn-ghost">پنل من</a>
+                    <form asp-page="/Khorooj" method="post" style="display:inline">
+                        <button type="submit" class="btn btn-fill">خروج</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-page="/Vorood" class="btn btn-ghost">ورود</a>
+                    <a asp-page="/Porsesh" class="btn btn-fill">پرسش شرعی</a>
+                }
+                <button class="burger" aria-label="باز کردن فهرست" aria-expanded="false"><span></span></button>
+            </div>
+        </div>
+    </header>
+
+    <main id="main">
+        @RenderBody()
+    </main>
+
+    <footer class="girih">
+        <div class="wrap">
+            <div class="f-grid">
+                <div class="f-brand">
+                    <a asp-page="/Index" class="logo">
+                        <span class="logo-mark" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19" /></svg>
+                        </span>
+                        <span><b>نورالثقلین</b><small>مؤسسه فرهنگی</small></span>
+                    </a>
+                    <p>مؤسسه‌ای مردمی برای ترویج معارف قرآن و اهل بیت علیهم‌السلام. همه برنامه‌ها رایگان و برای عموم آزاد است.</p>
+                </div>
+                <div>
+                    <h4>دسترسی سریع</h4>
+                    <ul>
+                        <li><a asp-page="/Monasebat/Index">تقویم مناسبت‌ها</a></li>
+                        <li><a asp-page="/Barnameh/Index">برنامه‌های هفتگی</a></li>
+                        <li><a asp-page="/Maghalat/Index">مقالات</a></li>
+                        <li><a asp-page="/Ahkam/Index">احکام</a></li>
+                        <li><a asp-page="/Gallery/Index">گالری تصاویر</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>خدمات</h4>
+                    <ul>
+                        <li><a asp-page="/Porsesh">پرسش شرعی</a></li>
+                        <li><a asp-page="/Sokhanrani/Index">آرشیو صوتی</a></li>
+                        <li><a asp-page="/Owqat">اوقات شرعی شهرها</a></li>
+                        <li><a asp-page="/Vorood">ورود اعضا</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>تماس</h4>
+                    <ul>
+                        <li>تهران، خیابان انقلاب، کوچه شهید احمدی، پلاک ۱۴</li>
+                        <li><a href="tel:+982112345678">۰۲۱ - ۱۲۳۴۵۶۷۸</a></li>
+                        <li><a href="mailto:info@example.ir">info@example.ir</a></li>
+                        <li style="color:#fff;margin-top:6px">شنبه تا چهارشنبه، ۹ تا ۱۹</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="f-bottom">
+                <p>© <fa-num>@(Dates.ToPersianDate(nowUtc).Split(' ').Last())</fa-num> مؤسسه فرهنگی نورالثقلین — تمامی حقوق محفوظ است.</p>
+                <p><a asp-page="/Harim-Khosoosi">حریم خصوصی</a> · <a asp-page="/Sharayet">شرایط استفاده</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="sw-toast" id="swToast" role="status">
+        <span>نسخه تازه‌ای از سایت آماده است.</span>
+        <button type="button" class="btn btn-gold">به‌روزرسانی</button>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+    <script src="~/js/pwa.js" asp-append-version="true" defer></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

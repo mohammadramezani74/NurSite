@@ -1,0 +1,253 @@
+@page
+@model IndexModel
+@inject NurSite.Application.Interfaces.IPersianDateService Dates
+@{
+    ViewData["Title"] = "خانه";
+    ViewData["MetaDescription"] = "اوقات شرعی، برنامه‌های هفتگی، احکام، مقالات و آرشیو سخنرانی‌های صوتی مؤسسه فرهنگی نورالثقلین.";
+}
+
+@section Head {
+    <json-ld data="@Model.BuildOrganizationSchema()" />
+    @if (Model.FaqRulings.Any())
+    {
+        <json-ld data="@Model.BuildFaqSchema()" />
+    }
+    @foreach (var ev in Model.BuildEventSchemas())
+    {
+        <json-ld data="@ev" />
+    }
+}
+
+<div class="hero girih">
+    <div class="wrap">
+        <span class="eyebrow">مؤسسه فرهنگی نورالثقلین · از سال ۱۳۷۸</span>
+
+        @if (Model.Verses.Any())
+        {
+            <div class="ayat" id="ayat" aria-live="polite">
+                @foreach (var (verse, index) in Model.Verses.Select((v, i) => (v, i)))
+                {
+                    <figure class="ayeh @(index == 0 ? "on" : "")">
+                        <p class="arabi">@verse.ArabicText</p>
+                        <figcaption class="tarjomeh">@verse.PersianText</figcaption>
+                        <p class="manba">@verse.Reference</p>
+                    </figure>
+                }
+            </div>
+            <div class="ayat-nav" id="ayatNav" role="tablist" aria-label="انتخاب آیه"></div>
+        }
+
+        <h1>خانه‌ای برای آموختن، اندیشیدن و با هم بودن</h1>
+        <p>درس‌های تفسیر و اخلاق، پاسخ به پرسش‌های شرعی، آرشیو سخنرانی‌ها و برنامه‌های هفتگی — همه در یک جا.</p>
+        <div class="hero-btns">
+            <a asp-page="/Barnameh/Index" class="btn btn-gold">برنامه‌های این هفته</a>
+            <a asp-page="/Maghalat/Index" class="btn btn-ghost">خواندن مقالات</a>
+        </div>
+    </div>
+</div>
+
+@if (Model.Times is not null)
+{
+    <div class="owqat-shell">
+        <div class="wrap">
+            <div class="owqat girih">
+                <div class="owqat-head">
+                    <div class="owqat-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+                        <h2>اوقات شرعی امروز</h2>
+                    </div>
+                    <form method="get" class="shahr">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
+                        <label class="sr" for="city">انتخاب شهر</label>
+                        <select id="city" name="city" onchange="this.form.submit()">
+                            @foreach (var c in Model.Cities)
+                            {
+                                <option value="@c.Id" selected="@(c.Id == Model.SelectedCityId)">@c.Name</option>
+                            }
+                        </select>
+                        <noscript><button type="submit" class="btn btn-ghost">نمایش</button></noscript>
+                    </form>
+                </div>
+
+                @{
+                    var markers = new (string Label, TimeOnly At)[]
+                    {
+                        ("اذان صبح", Model.Times.Fajr),
+                        ("طلوع آفتاب", Model.Times.Sunrise),
+                        ("اذان ظهر", Model.Times.Dhuhr),
+                        ("غروب آفتاب", Model.Times.Sunset),
+                        ("اذان مغرب", Model.Times.Maghrib),
+                        ("نیمه‌شب شرعی", Model.Times.Midnight)
+                    };
+                }
+                <div class="rooznavar">
+                    <div class="rail"></div>
+                    @for (var i = 0; i < markers.Length; i++)
+                    {
+                        var isNext = markers[i].Label == Model.NextPrayerName;
+                        var pos = i * 100.0 / (markers.Length - 1);
+                        <div class="marker @(isNext ? "now" : "")" style="inset-inline-start:@pos.ToString("0.##")%">
+                            <i></i>
+                            <b>@markers[i].Label</b>
+                            <s>@Dates.ToPersianDigits(markers[i].At.ToString("HH\\:mm"))</s>
+                        </div>
+                    }
+                </div>
+
+                <div class="owqat-foot">
+                    @if (Model.NextPrayerName is not null)
+                    {
+                        <p class="baadi">تا @Model.NextPrayerName <strong>@Model.TimeUntilNext</strong> مانده است</p>
+                    }
+                    <a asp-page="/Owqat" class="link-more">
+                        تقویم کامل ماه
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6 6 6" /></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.UpcomingEvents.Any())
+{
+    <section class="tone-1">
+        <div class="wrap">
+            <div class="sec-head center">
+                <span class="kicker">برنامه‌های هفتگی</span>
+                <h2>این هفته در نورالثقلین</h2>
+            </div>
+            <div class="barnameh">
+                @foreach (var ev in Model.UpcomingEvents)
+                {
+                    <article class="card">
+                        <div class="card-thumb girih">
+                            <span class="rooz">
+                                <b>@Dates.ToPersianDate(ev.StartsAtUtc).Split(' ')[0]</b>
+                                <span>@Dates.ToPersianDate(ev.StartsAtUtc).Split(' ')[1]</span>
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="meta">
+                                <span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+                                    @(ev.TimeNote ?? Dates.ToPersianDate(ev.StartsAtUtc, includeTime: true).Split("ساعت").Last().Trim())
+                                </span>
+                                @if (!string.IsNullOrWhiteSpace(ev.LocationName))
+                                {
+                                    <span>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z" /></svg>
+                                        @ev.LocationName
+                                    </span>
+                                }
+                            </div>
+                            <h3>@ev.Title</h3>
+                            <p>@ev.Summary</p>
+                            <div class="card-foot">
+                                <a asp-page="/Barnameh/Details" asp-route-slug="@ev.Slug" class="link-more">
+                                    ثبت‌نام و جزئیات
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6 6 6" /></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<div class="hairline"></div>
+
+<section class="tone-3">
+    <div class="wrap two-col">
+        <div>
+            <div class="sec-head">
+                <span class="kicker">تازه‌ترین‌ها</span>
+                <h2>مقالات و یادداشت‌ها</h2>
+            </div>
+
+            @foreach (var article in Model.LatestArticles)
+            {
+                <a asp-page="/Maghalat/Details" asp-route-slug="@article.Slug" class="maghaleh">
+                    @if (!string.IsNullOrWhiteSpace(article.CoverImagePath))
+                    {
+                        <img class="maghaleh-img" src="@article.CoverImagePath"
+                             alt="@article.CoverImageAlt" width="130" height="130" loading="lazy" decoding="async">
+                    }
+                    else
+                    {
+                        <span class="maghaleh-img girih" aria-hidden="true"></span>
+                    }
+                    <span>
+                        <span class="meta" style="margin-bottom:8px">
+                            <span>@article.Category.Title</span>
+                            <span><persian-date value="@article.PublishedAtUtc" /></span>
+                            <span><fa-num>@article.ReadingMinutes</fa-num> دقیقه مطالعه</span>
+                        </span>
+                        <h3>@article.Title</h3>
+                        <p>@article.Summary</p>
+                    </span>
+                </a>
+            }
+        </div>
+
+        <aside class="sound-box girih">
+            <h3>آرشیو سخنرانی‌ها</h3>
+            <p>سخنرانی‌های تازه منتشرشده</p>
+
+            @foreach (var lecture in Model.LatestLectures)
+            {
+                <div class="track">
+                    <a class="play" asp-page="/Sokhanrani/Details" asp-route-slug="@lecture.Slug" aria-label="پخش @lecture.Title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 12 6 20V4z" /></svg>
+                    </a>
+                    <span class="track-info">
+                        <b>@lecture.Title</b>
+                        <span>@(lecture.Speaker?.FullName ?? "")</span>
+                    </span>
+                    <time datetime="PT@(lecture.DurationSeconds)S">
+                        @Dates.ToPersianDigits(TimeSpan.FromSeconds(lecture.DurationSeconds).ToString(@"mm\:ss"))
+                    </time>
+                </div>
+            }
+
+            <a asp-page="/Sokhanrani/Index" class="btn btn-ghost" style="width:100%;margin-top:24px">همه سخنرانی‌ها</a>
+        </aside>
+    </div>
+</section>
+
+@if (Model.FaqRulings.Any())
+{
+    <section class="tone-1">
+        <div class="wrap">
+            <div class="sec-head center">
+                <span class="kicker">پرسش و پاسخ</span>
+                <h2>احکام پرتکرار</h2>
+                <p>پاسخ‌ها بر اساس فتاوای مراجع تقلید تنظیم شده است.</p>
+            </div>
+            <div class="acc">
+                @foreach (var (ruling, index) in Model.FaqRulings.Select((r, i) => (r, i)))
+                {
+                    <details class="acc-item" open="@(index == 0)">
+                        <summary class="acc-q">
+                            <span class="acc-num">@Dates.ToPersianDigits((index + 1).ToString("00"))</span>
+                            @ruling.Question
+                            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg>
+                        </summary>
+                        <div class="acc-a">
+                            @ruling.Answer
+                            @if (!string.IsNullOrWhiteSpace(ruling.FatwaNote))
+                            {
+                                <span class="marja">@ruling.FatwaNote</span>
+                            }
+                        </div>
+                    </details>
+                }
+            </div>
+            <p style="text-align:center;margin-top:34px">
+                <a asp-page="/Porsesh" class="btn btn-fill">پرسش شرعی خود را بپرسید</a>
+            </p>
+        </div>
+    </section>
+}
