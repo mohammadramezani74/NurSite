@@ -18,7 +18,8 @@
         return text
             .trim()
             .replace(/[يى]/g, 'ی').replace(/ك/g, 'ک')
-            .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه')
+            /* «آ» عمداً تبدیل نمی‌شود — حرف مستقل فارسی است */
+            .replace(/[أإ]/g, 'ا').replace(/ة/g, 'ه')
             .replace(/[\s\u200C]+/g, '-')
             .replace(/[^\p{L}\p{N}-]+/gu, '-')
             .replace(/-{2,}/g, '-')
@@ -109,7 +110,6 @@
 
     tinymce.init({
         selector: '#bodyEditor',
-        license_key: 'gpl',
         directionality: 'rtl',
         language: 'fa',
         height: 520,

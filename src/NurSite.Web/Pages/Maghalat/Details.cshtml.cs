@@ -25,7 +25,11 @@ public class DetailsModel(AppDbContext db) : PageModel
         if (article is null) return NotFound();
 
         Article = article;
-        BaseUrl = $"{Request.Scheme}://{Request.Host}";
+
+        // نشانی مبنا از تنظیمات، تا canonical و نشانه‌گذاری ساختاریافته
+        // پشت پروکسی هم درست بماند
+        var settings = await db.SiteSettings.AsNoTracking().FirstOrDefaultAsync(ct);
+        BaseUrl = (settings?.CanonicalBaseUrl ?? $"{Request.Scheme}://{Request.Host}").TrimEnd('/');
         CanonicalUrl = $"{BaseUrl}/maghalat/{article.Slug}";
 
         Related = await db.Articles.AsNoTracking()

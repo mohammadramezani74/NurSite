@@ -16,10 +16,15 @@ public class SitemapModel(AppDbContext db) : PageModel
 {
     public async Task<IActionResult> OnGetAsync(CancellationToken ct)
     {
-        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        // نشانی مبنا از تنظیمات سایت خوانده می‌شود، نه از هدر درخواست.
+        // پشت پروکسی معکوس یا CDN، مقدار Request.Host ممکن است نشانی
+        // داخلی سرور باشد و نقشه سایت با نشانی‌های غلط ساخته شود.
+        var siteSetting = await db.SiteSettings.AsNoTracking().FirstOrDefaultAsync(ct);
+        var baseUrl = (siteSetting?.CanonicalBaseUrl ?? $"{Request.Scheme}://{Request.Host}")
+            .TrimEnd('/');
 
         var sb = new StringBuilder();
-        var settings = new XmlWriterSettings
+        var xmlSettings = new XmlWriterSettings
         {
             Indent = true,
             Encoding = Encoding.UTF8,
@@ -27,7 +32,7 @@ public class SitemapModel(AppDbContext db) : PageModel
             OmitXmlDeclaration = false
         };
 
-        await using (var writer = XmlWriter.Create(sb, settings))
+        await using (var writer = XmlWriter.Create(sb, xmlSettings))
         {
             await writer.WriteStartDocumentAsync();
             await writer.WriteStartElementAsync(null, "urlset", "http://www.sitemaps.org/schemas/sitemap/0.9");

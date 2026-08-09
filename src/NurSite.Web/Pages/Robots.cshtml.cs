@@ -1,14 +1,18 @@
 ﻿using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Pages;
 
-public class RobotsModel(IWebHostEnvironment env) : PageModel
+public class RobotsModel(IWebHostEnvironment env, AppDbContext db) : PageModel
 {
-    public IActionResult OnGet()
+    public async Task<IActionResult> OnGetAsync(CancellationToken ct)
     {
-        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var settings = await db.SiteSettings.AsNoTracking().FirstOrDefaultAsync(ct);
+        var baseUrl = (settings?.CanonicalBaseUrl ?? $"{Request.Scheme}://{Request.Host}")
+            .TrimEnd('/');
         var sb = new StringBuilder();
 
         sb.AppendLine("User-agent: *");
