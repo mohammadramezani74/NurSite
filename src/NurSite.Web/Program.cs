@@ -46,9 +46,19 @@ builder.Services.AddResponseCompression(options =>
 
 builder.Services.AddOutputCache(options =>
 {
-    options.AddBasePolicy(p => p.Expire(TimeSpan.FromMinutes(5)));
-    // صفحاتی که محتوایشان کم عوض می‌شود
-    options.AddPolicy("Content", p => p.Expire(TimeSpan.FromMinutes(30)).SetVaryByQuery("page"));
+    // کوکی پوسته باید در کلید کش بیاید، وگرنه صفحه‌ای که با پوسته سبز
+    // کش شده به کاربری که لاجوردی انتخاب کرده هم سرو می‌شود.
+    // نام این متد بر خلاف SetVaryByQuery پیشوند Set ندارد.
+    options.AddBasePolicy(p => p
+        .Expire(TimeSpan.FromMinutes(5))
+        .VaryByValue(ctx => new KeyValuePair<string, string>(
+            "theme", ctx.Request.Cookies[ThemeResolver.CookieName] ?? "default")));
+
+    options.AddPolicy("Content", p => p
+        .Expire(TimeSpan.FromMinutes(30))
+        .SetVaryByQuery("page")
+        .VaryByValue(ctx => new KeyValuePair<string, string>(
+            "theme", ctx.Request.Cookies[ThemeResolver.CookieName] ?? "default")));
 });
 
 builder.Services.AddHsts(o =>

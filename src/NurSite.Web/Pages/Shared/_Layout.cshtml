@@ -46,12 +46,20 @@
                 <span><i class="dot"></i>@Dates.ToHijriDate(nowUtc)</span>
             </div>
 
-            <div class="palette" id="palette">
-                <span>پوسته:</span>
-                <button type="button" class="sw-lajvard" data-theme="lajvard" aria-pressed="@(theme.Name == "lajvard")" aria-label="پوسته لاجوردی"></button>
-                <button type="button" class="sw-sabz" data-theme="sabz" aria-pressed="@(theme.Name == "sabz")" aria-label="پوسته سبز"></button>
-                <button type="button" class="sw-anabi" data-theme="anabi" aria-pressed="@(theme.Name == "anabi")" aria-label="پوسته عنابی، ویژه ایام عزا"></button>
-            </div>
+            @if (theme.IsForced)
+            {
+                @* در ایام مناسبت، پوسته ثابت است و انتخاب کاربر نمایش داده نمی‌شود *@
+                <p class="palette-note">پوسته ویژه @theme.Reason</p>
+            }
+            else
+            {
+                <div class="palette" id="palette">
+                    <span>پوسته:</span>
+                    <button type="button" class="sw-lajvard" data-theme="lajvard" aria-pressed="@(theme.Name == "lajvard")" aria-label="پوسته لاجوردی"></button>
+                    <button type="button" class="sw-sabz" data-theme="sabz" aria-pressed="@(theme.Name == "sabz")" aria-label="پوسته سبز"></button>
+                    <button type="button" class="sw-anabi" data-theme="anabi" aria-pressed="@(theme.Name == "anabi")" aria-label="پوسته عنابی، ویژه ایام عزا"></button>
+                </div>
+            }
 
             <div class="socials">
                 <a href="#">تلگرام</a><a href="#">اینستاگرام</a><a href="#">آپارات</a>
