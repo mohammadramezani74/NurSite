@@ -1,0 +1,106 @@
+﻿@page "/maghalat"
+@model NurSite.Web.Pages.Maghalat.IndexModel
+@inject NurSite.Application.Interfaces.IPersianDateService Dates
+@{
+    ViewData["Title"] = Model.ActiveCategory is null ? "مقالات" : Model.ActiveCategory.Title;
+    ViewData["MetaDescription"] = Model.ActiveCategory?.MetaDescription
+        ?? "مقالات و یادداشت‌های مؤسسه فرهنگی نورالثقلین در زمینه اخلاق، تاریخ اسلام، خانواده و معارف قرآنی.";
+}
+
+<section class="tone-2 girih page-head">
+    <div class="wrap">
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            @if (Model.ActiveCategory is null)
+            {
+                <span aria-current="page">مقالات</span>
+            }
+            else
+            {
+                <a asp-page="/Maghalat/Index">مقالات</a>
+                <span aria-hidden="true">›</span>
+                <span aria-current="page">@Model.ActiveCategory.Title</span>
+            }
+        </nav>
+
+        <h1>@(Model.ActiveCategory?.Title ?? "مقالات و یادداشت‌ها")</h1>
+        @if (!string.IsNullOrWhiteSpace(Model.ActiveCategory?.Description))
+        {
+            <p>@Model.ActiveCategory.Description</p>
+        }
+        else
+        {
+            <p>نوشته‌هایی درباره اخلاق، تاریخ اسلام، خانواده و معارف قرآنی.</p>
+        }
+    </div>
+</section>
+
+<section class="tone-1">
+    <div class="wrap">
+
+        <nav class="chips" aria-label="دسته‌بندی مقالات">
+            <a asp-page="/Maghalat/Index" class="chip @(Model.ActiveCategory is null ? "on" : "")">همه</a>
+            @foreach (var c in Model.Categories)
+            {
+                <a asp-page="/Maghalat/Index" asp-route-dasteh="@c.Slug"
+                   class="chip @(Model.ActiveCategory?.Id == c.Id ? "on" : "")">@c.Title</a>
+            }
+        </nav>
+
+        @if (Model.Articles.Count == 0)
+        {
+            <p class="empty-public">هنوز مقاله‌ای در این بخش منتشر نشده است.</p>
+        }
+        else
+        {
+            <div class="post-grid">
+                @foreach (var a in Model.Articles)
+                {
+                    <article class="post-card">
+                        <a asp-page="/Maghalat/Details" asp-route-slug="@a.Slug" class="post-thumb">
+                            @if (!string.IsNullOrWhiteSpace(a.CoverImagePath))
+                            {
+                                <img src="@a.CoverImagePath" alt="@a.CoverImageAlt"
+                                     width="400" height="225" loading="lazy" decoding="async" />
+                            }
+                            else
+                            {
+                                <span class="girih" aria-hidden="true"></span>
+                            }
+                            <span class="post-cat">@a.Category.Title</span>
+                        </a>
+                        <div class="post-body">
+                            <div class="meta">
+                                <span><persian-date value="@a.PublishedAtUtc" /></span>
+                                <span><fa-num>@a.ReadingMinutes</fa-num> دقیقه مطالعه</span>
+                            </div>
+                            <h2>
+                                <a asp-page="/Maghalat/Details" asp-route-slug="@a.Slug">@a.Title</a>
+                            </h2>
+                            <p>@a.Summary</p>
+                            <a asp-page="/Maghalat/Details" asp-route-slug="@a.Slug" class="link-more">
+                                ادامه مطلب
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6 6 6" /></svg>
+                            </a>
+                        </div>
+                    </article>
+                }
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="pager pager-public" aria-label="صفحه‌بندی">
+                    @for (var p = 1; p <= Model.TotalPages; p++)
+                    {
+                        <a asp-page="/Maghalat/Index" asp-route-dasteh="@Model.CategorySlug" asp-route-page="@p"
+                           class="pager-item @(p == Model.PageNumber ? "on" : "")"
+                           aria-current="@(p == Model.PageNumber ? "page" : null)">
+                            <fa-num>@p</fa-num>
+                        </a>
+                    }
+                </nav>
+            }
+        }
+    </div>
+</section>

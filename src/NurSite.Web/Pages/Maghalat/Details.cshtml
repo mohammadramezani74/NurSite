@@ -1,0 +1,120 @@
+﻿@page "/maghalat/{slug}"
+@model NurSite.Web.Pages.Maghalat.DetailsModel
+@inject NurSite.Application.Interfaces.IPersianDateService Dates
+@{
+    ViewData["Title"] = Model.Article.MetaTitle ?? Model.Article.Title;
+    ViewData["MetaDescription"] = Model.Article.MetaDescription;
+    ViewData["OgType"] = "article";
+    ViewData["OgImage"] = string.IsNullOrWhiteSpace(Model.Article.OgImagePath)
+        ? null
+        : $"{Model.BaseUrl}{Model.Article.OgImagePath}";
+}
+
+@section Head {
+    <json-ld data="@Model.BuildArticleSchema()" />
+    <json-ld data="@Model.BuildBreadcrumbSchema()" />
+}
+
+<article class="tone-1 article-page">
+    <div class="wrap article-wrap">
+
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            <a asp-page="/Maghalat/Index">مقالات</a>
+            <span aria-hidden="true">›</span>
+            <a asp-page="/Maghalat/Index" asp-route-dasteh="@Model.Article.Category.Slug">@Model.Article.Category.Title</a>
+        </nav>
+
+        <header class="article-head">
+            <h1>@Model.Article.Title</h1>
+
+            <div class="article-meta">
+                @if (!string.IsNullOrWhiteSpace(Model.Article.AuthorDisplayName))
+                {
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                        @Model.Article.AuthorDisplayName
+                    </span>
+                }
+                <span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
+                    <persian-date value="@Model.Article.PublishedAtUtc" />
+                </span>
+                <span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+                    <fa-num>@Model.Article.ReadingMinutes</fa-num> دقیقه مطالعه
+                </span>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Article.Summary))
+            {
+                <p class="article-lead">@Model.Article.Summary</p>
+            }
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Article.CoverImagePath))
+        {
+            <figure class="article-cover">
+                <img src="@Model.Article.CoverImagePath" alt="@Model.Article.CoverImageAlt"
+                     width="1200" height="675" fetchpriority="high" decoding="async" />
+            </figure>
+        }
+
+        <div class="article-body">
+            @Html.Raw(Model.Article.Body)
+        </div>
+
+        <footer class="article-foot">
+            <a asp-page="/Maghalat/Index" asp-route-dasteh="@Model.Article.Category.Slug" class="chip on">
+                @Model.Article.Category.Title
+            </a>
+
+            <div class="share">
+                <span>اشتراک‌گذاری:</span>
+                <a href="https://t.me/share/url?url=@Uri.EscapeDataString(Model.CanonicalUrl)&text=@Uri.EscapeDataString(Model.Article.Title)"
+                   target="_blank" rel="noopener noreferrer">تلگرام</a>
+                <a href="https://wa.me/?text=@Uri.EscapeDataString(Model.Article.Title + " " + Model.CanonicalUrl)"
+                   target="_blank" rel="noopener noreferrer">واتساپ</a>
+                <button type="button" class="copy-link" data-copy="@Model.CanonicalUrl">کپی نشانی</button>
+            </div>
+        </footer>
+    </div>
+</article>
+
+@if (Model.Related.Count > 0)
+{
+    <section class="tone-2 girih">
+        <div class="wrap">
+            <div class="sec-head center">
+                <span class="kicker">بیشتر بخوانید</span>
+                <h2>مطالب مرتبط</h2>
+            </div>
+
+            <div class="post-grid">
+                @foreach (var a in Model.Related)
+                {
+                    <article class="post-card">
+                        <a asp-page="/Maghalat/Details" asp-route-slug="@a.Slug" class="post-thumb">
+                            @if (!string.IsNullOrWhiteSpace(a.CoverImagePath))
+                            {
+                                <img src="@a.CoverImagePath" alt="@a.CoverImageAlt"
+                                     width="400" height="225" loading="lazy" decoding="async" />
+                            }
+                            else
+                            {
+                                <span class="girih" aria-hidden="true"></span>
+                            }
+                        </a>
+                        <div class="post-body">
+                            <div class="meta">
+                                <span><persian-date value="@a.PublishedAtUtc" /></span>
+                            </div>
+                            <h3><a asp-page="/Maghalat/Details" asp-route-slug="@a.Slug">@a.Title</a></h3>
+                        </div>
+                    </article>
+                }
+            </div>
+        </div>
+    </section>
+}

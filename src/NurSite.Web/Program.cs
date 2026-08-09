@@ -6,6 +6,7 @@ using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 using NurSite.Infrastructure.Persistence.Seed;
 using NurSite.Web.Extensions;
+using NurSite.Web.Middleware;
 using NurSite.Web.Services;
 using Serilog;
 
@@ -134,6 +135,10 @@ app.UseStaticFiles(new StaticFileOptions
         }
     }
 });
+
+// ریدایرکت‌ها پیش از مسیریابی بررسی می‌شوند تا نشانی قدیمی
+// اصلاً به صفحه ۴۰۴ نرسد
+app.UseUrlRedirects();
 
 app.UseRouting();
 app.UseAuthentication();
