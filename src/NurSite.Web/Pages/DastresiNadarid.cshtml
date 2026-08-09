@@ -1,0 +1,18 @@
+﻿@page "/dastresi-nadarid"
+@{
+    ViewData["Title"] = "دسترسی ندارید";
+    Layout = "_AuthLayout";
+}
+
+<div class="auth-head">
+    <span class="auth-badge">خطای ۴۰۳</span>
+    <h1>به این بخش دسترسی ندارید</h1>
+    <p>حساب شما مجوز لازم برای دیدن این صفحه را ندارد. اگر فکر می‌کنید اشتباهی رخ داده، با مدیریت مؤسسه تماس بگیرید.</p>
+</div>
+
+<div class="auth-form">
+    <a asp-page="/Index" class="btn btn-gold auth-submit">بازگشت به صفحه اصلی</a>
+    <form method="post" asp-page="/Khorooj" style="margin-top:12px">
+        <button type="submit" class="btn btn-ghost auth-submit">ورود با حساب دیگر</button>
+    </form>
+</div>

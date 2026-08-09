@@ -78,8 +78,10 @@ public class VoroodModel(
             return Page();
         }
 
+        // isPersistent همیشه true است تا کوکی با بستن مرورگر پاک نشود؛
+        // مهلت دو هفته‌ای در IdentitySetup تنظیم شده است.
         var result = await signInManager.PasswordSignInAsync(
-            user, Input.Password, Input.RememberMe, lockoutOnFailure: true);
+            user, Input.Password, isPersistent: true, lockoutOnFailure: true);
 
         if (result.Succeeded)
         {
@@ -87,7 +89,17 @@ public class VoroodModel(
             await userManager.UpdateAsync(user);
 
             logger.LogInformation("ورود موفق کاربر {UserId}", user.Id);
-            return LocalRedirect(ReturnUrl ?? Url.Page("/Index")!);
+
+            if (ReturnUrl is not null)
+                return LocalRedirect(ReturnUrl);
+
+            // مدیران مستقیم به پنل می‌روند، بقیه به صفحه اصلی
+            var isAdmin = await userManager.IsInRoleAsync(user, AppRoles.SuperAdmin)
+                       || await userManager.IsInRoleAsync(user, AppRoles.Admin);
+
+            return isAdmin
+                ? RedirectToPage("/Index", new { area = "Admin" })
+                : RedirectToPage("/Index");
         }
 
         if (result.IsLockedOut)
