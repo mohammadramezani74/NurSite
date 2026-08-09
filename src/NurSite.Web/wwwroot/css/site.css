@@ -1541,3 +1541,395 @@ footer a:hover {
     color: var(--tala-2);
     opacity: .85
 }
+
+/* ============================================================
+   صفحات احراز هویت
+   ============================================================ */
+.auth-body {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 24px 20px;
+    background: radial-gradient(130% 110% at 78% -10%,var(--lajvard-2) 0%,var(--lajvard) 42%,var(--ink) 100%);
+}
+
+.auth-shell {
+    width: 100%;
+    max-width: 940px
+}
+
+.auth-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: linear-gradient(160deg,#0D2C46,#071B2C);
+    border: 1px solid rgba(42,167,155,.28);
+    box-shadow: 0 40px 90px -40px rgba(0,0,0,.9);
+    overflow: hidden;
+}
+
+/* --- ستون تزیینی: محراب --- */
+.auth-art {
+    position: relative;
+    background: linear-gradient(165deg,var(--lajvard-2),var(--ink));
+    border-inline-end: 1px solid var(--khat);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 40px 34px;
+    min-height: 440px;
+}
+
+.mihrab {
+    position: absolute;
+    inset: 34px 34px 150px;
+    pointer-events: none
+}
+
+    .mihrab::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: 1px solid rgba(200,162,74,.45);
+        border-radius: 50% 50% 0 0 / 42% 42% 0 0;
+    }
+
+.mihrab-inner {
+    position: absolute;
+    inset: 18px;
+    border: 1px solid rgba(42,167,155,.3);
+    border-radius: 50% 50% 0 0 / 42% 42% 0 0;
+}
+
+.mihrab-lamp {
+    position: absolute;
+    top: 26%;
+    inset-inline: 0;
+    margin-inline: auto;
+    width: 22px;
+    height: 30px;
+    background: radial-gradient(circle at 50% 35%,var(--tala-2),rgba(200,162,74,.15));
+    border-radius: 50% 50% 46% 46%;
+    box-shadow: 0 0 34px 10px rgba(200,162,74,.16);
+}
+
+    .mihrab-lamp::before {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        inset-inline: 0;
+        margin-inline: auto;
+        width: 1px;
+        height: 34px;
+        background: rgba(200,162,74,.4);
+    }
+
+.auth-art-text {
+    position: relative;
+    text-align: center
+}
+
+    .auth-art-text .arabi {
+        font-family: var(--f-arabi);
+        font-weight: 700;
+        font-size: clamp(20px,2.6vw,28px);
+        line-height: 2;
+        color: var(--tala-2);
+        margin-bottom: 10px;
+    }
+
+    .auth-art-text .tarjomeh {
+        font-family: var(--f-khosh);
+        font-size: 17px;
+        line-height: 2.2;
+        color: var(--firouze-2);
+    }
+
+    .auth-art-text .manba {
+        font-size: 12.5px;
+        color: var(--matn-2);
+        margin-top: 8px
+    }
+
+/* --- ستون فرم --- */
+.auth-panel {
+    padding: clamp(30px,4vw,44px);
+    display: flex;
+    flex-direction: column
+}
+
+.auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px
+}
+
+    .auth-logo b {
+        font-size: 18px;
+        font-weight: 800;
+        color: #fff
+    }
+
+    .auth-logo small {
+        display: block;
+        font-size: 11.5px;
+        color: var(--matn-2);
+        margin-top: -4px
+    }
+
+.auth-head {
+    margin-bottom: 26px
+}
+
+    .auth-head h1 {
+        font-size: clamp(22px,2.8vw,27px);
+        font-weight: 800;
+        color: #fff;
+        line-height: 1.6;
+        margin-bottom: 8px
+    }
+
+    .auth-head p {
+        font-size: 14.5px;
+        color: var(--matn-2);
+        font-weight: 300
+    }
+
+.auth-badge {
+    display: inline-block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--tala-2);
+    border: 1px solid rgba(200,162,74,.35);
+    padding: 5px 13px;
+    border-radius: 100px;
+    margin-bottom: 14px;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--matn)
+}
+
+.input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center
+}
+
+.input {
+    width: 100%;
+    font: inherit;
+    font-size: 15px;
+    padding: 13px 44px 13px 44px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--khat);
+    color: #fff;
+    transition: .2s;
+    font-variant-numeric: tabular-nums;
+}
+
+    .input::placeholder {
+        color: #5F778C
+    }
+
+    .input:hover {
+        border-color: rgba(255,255,255,.2)
+    }
+
+    .input:focus {
+        outline: none;
+        border-color: var(--firouze);
+        background: rgba(42,167,155,.07)
+    }
+
+.input-icon {
+    position: absolute;
+    inset-inline-start: 14px;
+    width: 19px;
+    height: 19px;
+    color: var(--matn-2);
+    pointer-events: none;
+}
+
+.input:focus ~ .input-icon {
+    color: var(--firouze-2)
+}
+
+.pass-toggle {
+    position: absolute;
+    inset-inline-end: 12px;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    color: var(--matn-2);
+    border-radius: var(--r);
+    transition: .2s;
+}
+
+    .pass-toggle:hover {
+        color: var(--firouze-2)
+    }
+
+    .pass-toggle svg {
+        width: 19px;
+        height: 19px
+    }
+
+    .pass-toggle[aria-pressed="true"] {
+        color: var(--tala)
+    }
+
+.field-error {
+    font-size: 13px;
+    color: #E8AFAF;
+    min-height: 1px
+}
+
+.caps-hint {
+    font-size: 12.5px;
+    color: var(--tala-2)
+}
+
+.field-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 14px;
+    color: var(--matn);
+    cursor: pointer
+}
+
+    .checkbox input {
+        width: 17px;
+        height: 17px;
+        accent-color: var(--firouze);
+        cursor: pointer;
+        flex: none;
+    }
+
+.link-quiet {
+    font-size: 13.5px;
+    color: var(--firouze-2)
+}
+
+    .link-quiet:hover {
+        color: var(--tala-2)
+    }
+
+.auth-submit {
+    width: 100%;
+    justify-content: center;
+    padding-block: 14px;
+    font-size: 15.5px
+}
+
+.auth-alert {
+    background: rgba(200,90,90,.13);
+    border: 1px solid rgba(230,140,140,.35);
+    color: #F0C4C4;
+    padding: 13px 16px;
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+    .auth-alert:empty {
+        display: none
+    }
+
+    .auth-alert ul {
+        list-style: none;
+        display: grid;
+        gap: 6px
+    }
+
+.auth-note {
+    margin-top: 22px;
+    font-size: 12.5px;
+    color: var(--matn-2);
+    font-weight: 300;
+    line-height: 2;
+    text-align: center;
+}
+
+    .auth-note a {
+        color: var(--firouze-2)
+    }
+
+.auth-back {
+    margin-top: auto;
+    padding-top: 26px;
+    font-size: 13.5px
+}
+
+    .auth-back a {
+        color: var(--matn-2)
+    }
+
+        .auth-back a:hover {
+            color: var(--tala-2)
+        }
+
+@media(max-width:760px) {
+    .auth-card {
+        grid-template-columns: 1fr
+    }
+
+    .auth-art {
+        display: none
+    }
+
+    .auth-panel {
+        padding: 30px 24px
+    }
+}
+
+/* نشان کاربر عادی در هدر */
+.user-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 15px;
+    border: 1px solid var(--khat);
+    border-radius: var(--r);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--matn);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+    .user-chip svg {
+        width: 17px;
+        height: 17px;
+        color: var(--firouze-2);
+        flex: none
+    }
+
+@media(max-width:980px) {
+    .user-chip {
+        display: none
+    }
+}

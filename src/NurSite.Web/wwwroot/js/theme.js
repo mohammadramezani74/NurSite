@@ -40,19 +40,14 @@
         if (persist) writeCookie(COOKIE, theme);
     }
 
-    /* پوسته اجباری مناسبت‌ها بر انتخاب کاربر مقدم است */
-    var forced = root.dataset.themeForced === 'true';
-
-    if (!forced) {
-        var saved = readCookie(COOKIE);
-        if (saved && saved !== root.getAttribute('data-theme')) {
-            apply(saved, false);
-        }
+    /* اگر کاربر قبلاً پوسته‌ای انتخاب کرده، همان اعمال می‌شود */
+    var saved = readCookie(COOKIE);
+    if (saved && saved !== root.getAttribute('data-theme')) {
+        apply(saved, false);
     }
 
     /* واگذاری رویداد به document — چون هنگام اجرای این اسکریپت دکمه‌ها هنوز ساخته نشده‌اند */
     document.addEventListener('click', function (e) {
-        if (forced) return;
         var btn = e.target.closest ? e.target.closest('#palette button[data-theme]') : null;
         if (!btn) return;
         apply(btn.dataset.theme, true);

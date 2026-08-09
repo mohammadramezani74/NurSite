@@ -10,8 +10,8 @@ public sealed record ResolvedTheme(string Name, bool IsForced, string? Reason);
 
 /// <summary>
 /// تعیین پوسته فعال. ترتیب اولویت:
-/// ۱) مناسبت عزا یا عید که پوسته اجباری دارد
-/// ۲) انتخاب کاربر در کوکی
+/// ۱) انتخاب صریح کاربر در کوکی — همیشه مقدم است
+/// ۲) مناسبت عزا یا عید که پوسته پیشنهادی دارد
 /// ۳) پوسته پیش‌فرض تنظیمات سایت
 /// </summary>
 public sealed class ThemeResolver(AppDbContext db, IMemoryCache cache)
@@ -28,20 +28,20 @@ public sealed class ThemeResolver(AppDbContext db, IMemoryCache cache)
 
         var fallback = (settings?.DefaultTheme ?? SiteTheme.Lajvard).ToString().ToLowerInvariant();
 
-        // ۱) مناسبت
-        if (settings?.EnableOccasionTheme == true)
-        {
-            var occasion = await GetActiveOccasionThemeAsync(ct);
-            if (occasion is not null)
-                return new ResolvedTheme(occasion.Value.Theme, true, occasion.Value.Title);
-        }
-
-        // ۲) انتخاب کاربر
+        // ۱) انتخاب صریح کاربر — بر همه چیز مقدم است
         if (settings?.AllowUserThemeChoice == true &&
             !string.IsNullOrWhiteSpace(cookieValue) &&
             Enum.TryParse<SiteTheme>(cookieValue, ignoreCase: true, out var chosen))
         {
             return new ResolvedTheme(chosen.ToString().ToLowerInvariant(), false, null);
+        }
+
+        // ۲) مناسبت — فقط وقتی کاربر خودش چیزی انتخاب نکرده
+        if (settings?.EnableOccasionTheme == true)
+        {
+            var occasion = await GetActiveOccasionThemeAsync(ct);
+            if (occasion is not null)
+                return new ResolvedTheme(occasion.Value.Theme, true, occasion.Value.Title);
         }
 
         // ۳) پیش‌فرض

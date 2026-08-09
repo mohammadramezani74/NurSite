@@ -1,0 +1,19 @@
+﻿@page "/khorooj"
+@model KhoroojModel
+@{
+    ViewData["Title"] = "خروج از حساب";
+    Layout = "_AuthLayout";
+}
+
+<div class="auth-head">
+    <h1>خروج از حساب</h1>
+    <p>آیا می‌خواهید از حساب خود خارج شوید؟</p>
+</div>
+
+<form method="post" class="auth-form">
+    <button type="submit" class="btn btn-gold auth-submit">بله، خارج شوم</button>
+</form>
+
+<p class="auth-note">
+    <a asp-page="/Index">بازگشت بدون خروج</a>
+</p>

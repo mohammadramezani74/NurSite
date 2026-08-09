@@ -27,8 +27,10 @@ builder.Services.AddRazorPages(options =>
 });
 
 builder.Services.AddAuthorizationBuilder()
+    // فقط مدیران به پنل راه دارند. نقش‌های محتوایی مثل نویسنده و
+    // پاسخگوی شرعی فعلاً دسترسی ندارند و هر وقت لازم شد اینجا اضافه می‌شوند.
     .AddPolicy("AdminArea", policy => policy.RequireRole(
-        AppRoles.SuperAdmin, AppRoles.Admin, AppRoles.Editor, AppRoles.Author, AppRoles.Mufti))
+        AppRoles.SuperAdmin, AppRoles.Admin))
     // هر دسترسی به صورت Claim بررسی می‌شود
     .AddPolicy(Permissions.Articles.Publish, p => p.RequireClaim(Permissions.ClaimType, Permissions.Articles.Publish))
     .AddPolicy(Permissions.Users.Manage, p => p.RequireClaim(Permissions.ClaimType, Permissions.Users.Manage))
@@ -48,12 +50,15 @@ builder.Services.AddOutputCache(options =>
 {
     // کوکی پوسته باید در کلید کش بیاید، وگرنه صفحه‌ای که با پوسته سبز
     // کش شده به کاربری که لاجوردی انتخاب کرده هم سرو می‌شود.
-    // نام این متد بر خلاف SetVaryByQuery پیشوند Set ندارد.
+    // OutputCachePolicyBuilder متدی برای کوکی ندارد، پس با VaryByValue
+    // یک کلید دستی می‌سازیم. توجه: نام این متد بر خلاف SetVaryByQuery
+    // و SetVaryByHeader پیشوند Set ندارد.
     options.AddBasePolicy(p => p
         .Expire(TimeSpan.FromMinutes(5))
         .VaryByValue(ctx => new KeyValuePair<string, string>(
             "theme", ctx.Request.Cookies[ThemeResolver.CookieName] ?? "default")));
 
+    // صفحاتی که محتوایشان کم عوض می‌شود
     options.AddPolicy("Content", p => p
         .Expire(TimeSpan.FromMinutes(30))
         .SetVaryByQuery("page")

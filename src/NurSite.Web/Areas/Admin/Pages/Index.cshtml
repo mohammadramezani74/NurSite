@@ -1,0 +1,209 @@
+﻿@page
+@model NurSite.Web.Areas.Admin.Pages.IndexModel
+@inject NurSite.Application.Interfaces.IPersianDateService Dates
+@{
+    ViewData["Title"] = "داشبورد";
+    ViewData["Subtitle"] = "نمای کلی وضعیت سایت";
+}
+
+@if (Model.NextOccasion is not null)
+{
+    <div class="occasion-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="16" rx="2" />
+            <path d="M3 10h18M8 3v4M16 3v4" />
+        </svg>
+        <p>
+            <strong>@Model.NextOccasion.Value.Title</strong>
+            @if (Model.NextOccasion.Value.DaysLeft == 0)
+            {
+                <span>امروز است</span>
+            }
+            else
+            {
+                <span><fa-num>@Model.NextOccasion.Value.DaysLeft</fa-num> روز دیگر</span>
+            }
+        </p>
+    </div>
+}
+
+@* ================= کارت‌های اقدام ================= *@
+<section class="stat-grid" aria-label="مواردی که نیاز به رسیدگی دارند">
+
+    <article class="stat @(Model.PendingQuestions > 0 ? "alert" : "")">
+        <span class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.6-2.5 2.6M12 17h.01" /></svg>
+        </span>
+        <b><fa-num>@Model.PendingQuestions</fa-num></b>
+        <span class="stat-label">پرسش بی‌پاسخ</span>
+    </article>
+
+    <article class="stat @(Model.DraftArticles > 0 ? "warn" : "")">
+        <span class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+        </span>
+        <b><fa-num>@Model.DraftArticles</fa-num></b>
+        <span class="stat-label">پیش‌نویس در انتظار</span>
+    </article>
+
+    <article class="stat @(Model.UnreadMessages > 0 ? "alert" : "")">
+        <span class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+        </span>
+        <b><fa-num>@Model.UnreadMessages</fa-num></b>
+        <span class="stat-label">پیام خوانده‌نشده</span>
+    </article>
+
+    <article class="stat">
+        <span class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
+        </span>
+        <b><fa-num>@Model.UpcomingEventCount</fa-num></b>
+        <span class="stat-label">برنامه پیش رو</span>
+    </article>
+</section>
+
+<div class="admin-cols">
+
+    @* ================= پرسش‌های در انتظار ================= *@
+    <section class="panel">
+        <header class="panel-head">
+            <h2>پرسش‌های در انتظار پاسخ</h2>
+            <a href="#" class="link-more soon-link">همه پرسش‌ها</a>
+        </header>
+
+        @if (Model.LatestQuestions.Count == 0)
+        {
+            <p class="empty">پرسش بی‌پاسخی وجود ندارد.</p>
+        }
+        else
+        {
+            <ul class="row-list">
+                @foreach (var q in Model.LatestQuestions)
+                {
+                    <li class="row">
+                        <div class="row-main">
+                            <p class="row-title">@(q.Body.Length > 90 ? q.Body[..90] + "…" : q.Body)</p>
+                            <p class="row-meta">
+                                <span>@(string.IsNullOrWhiteSpace(q.SenderName) ? "بدون نام" : q.SenderName)</span>
+                                <span><persian-date value="@q.CreatedAtUtc" /></span>
+                            </p>
+                        </div>
+                        <span class="badge @(q.Status == QuestionStatus.New ? "badge-new" : "badge-wait")">
+                            @(q.Status == QuestionStatus.New ? "تازه" : "ارجاع‌شده")
+                        </span>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    @* ================= برنامه‌های پیش رو ================= *@
+    <section class="panel">
+        <header class="panel-head">
+            <h2>برنامه‌های پیش رو</h2>
+            <a href="#" class="link-more soon-link">همه برنامه‌ها</a>
+        </header>
+
+        @if (Model.NextEvents.Count == 0)
+        {
+            <p class="empty">برنامه‌ای ثبت نشده است.</p>
+        }
+        else
+        {
+            <ul class="row-list">
+                @foreach (var ev in Model.NextEvents)
+                {
+                    <li class="row">
+                        <span class="row-date">
+                            <b>@Dates.ToPersianDate(ev.StartsAtUtc).Split(' ')[0]</b>
+                            <small>@Dates.ToPersianDate(ev.StartsAtUtc).Split(' ')[1]</small>
+                        </span>
+                        <div class="row-main">
+                            <p class="row-title">@ev.Title</p>
+                            <p class="row-meta">
+                                @if (!string.IsNullOrWhiteSpace(ev.LocationName))
+                                {
+                                    <span>@ev.LocationName</span>
+                                }
+                                <span>@(ev.TimeNote ?? Dates.ToPersianDigits(ev.StartsAtUtc.AddHours(3.5).ToString("HH\\:mm")))</span>
+                            </p>
+                        </div>
+                        @if (ev.Status != PublishStatus.Published)
+                        {
+                            <span class="badge badge-draft">پیش‌نویس</span>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>
+
+@* ================= آخرین محتوا ================= *@
+<section class="panel">
+    <header class="panel-head">
+        <h2>آخرین تغییرات محتوا</h2>
+        <a href="#" class="link-more soon-link">مدیریت مقالات</a>
+    </header>
+
+    @if (Model.RecentArticles.Count == 0)
+    {
+        <p class="empty">هنوز مقاله‌ای ثبت نشده است.</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>عنوان</th>
+                        <th>وضعیت</th>
+                        <th>نویسنده</th>
+                        <th>آخرین تغییر</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.RecentArticles)
+                    {
+                        <tr>
+                            <td class="cell-title">@a.Title</td>
+                            <td>
+                                @switch (a.Status)
+                                {
+                                    case PublishStatus.Published:
+                                        <span class="badge badge-ok">منتشرشده</span>
+                                        break;
+                                    case PublishStatus.PendingReview:
+                                        <span class="badge badge-wait">در انتظار تأیید</span>
+                                        break;
+                                    case PublishStatus.Archived:
+                                        <span class="badge">بایگانی</span>
+                                        break;
+                                    default:
+                                        <span class="badge badge-draft">پیش‌نویس</span>
+                                        break;
+                                }
+                            </td>
+                            <td>@(a.AuthorDisplayName ?? "—")</td>
+                            <td><persian-date value="@(a.UpdatedAtUtc ?? a.CreatedAtUtc)" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@* ================= آمار کلی ================= *@
+<section class="panel">
+    <header class="panel-head">
+        <h2>آمار کلی</h2>
+    </header>
+    <div class="mini-grid">
+        <div class="mini"><b><fa-num>@Model.PublishedArticles</fa-num></b><span>مقاله منتشرشده</span></div>
+        <div class="mini"><b><fa-num>@Model.PublishedRulings</fa-num></b><span>حکم منتشرشده</span></div>
+        <div class="mini"><b><fa-num>@Model.PublishedLectures</fa-num></b><span>سخنرانی</span></div>
+        <div class="mini"><b><fa-num>@Model.ActiveSubscribers</fa-num></b><span>عضو خبرنامه</span></div>
+    </div>
+</section>

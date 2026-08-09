@@ -33,11 +33,20 @@ public static class IdentitySetup
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
 
+        // بررسی مهر امنیتی هر ۲۴ ساعت به‌جای هر ۳۰ دقیقه.
+        // با نشست دو هفته‌ای، بررسی مکرر یعنی کوئری بی‌مورد به دیتابیس.
+        services.Configure<SecurityStampValidatorOptions>(options =>
+        {
+            options.ValidationInterval = TimeSpan.FromHours(24);
+        });
+
         services.ConfigureApplicationCookie(options =>
         {
             options.LoginPath = "/vorood";
             options.LogoutPath = "/khorooj";
             options.AccessDeniedPath = "/dastresi-nadarid";
+            // کاربر دو هفته وارد می‌ماند. با SlidingExpiration هر بازدید
+            // این مهلت را تازه می‌کند، پس کاربر فعال عملاً خارج نمی‌شود.
             options.ExpireTimeSpan = TimeSpan.FromDays(14);
             options.SlidingExpiration = true;
             options.Cookie.HttpOnly = true;

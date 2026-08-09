@@ -1,0 +1,63 @@
+@inject NurSite.Web.Services.ThemeResolver ThemeResolver
+@{
+    var request = ViewContext.HttpContext.Request;
+    var cookieTheme = request.Cookies[NurSite.Web.Services.ThemeResolver.CookieName];
+    var theme = await ThemeResolver.ResolveAsync(cookieTheme);
+    var siteName = "مؤسسه فرهنگی نورالثقلین";
+}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="@theme.Name">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] — @siteName</title>
+
+    @* صفحات احراز هویت نباید ایندکس شوند *@
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#04121F">
+
+    <link rel="apple-touch-icon" href="~/icons/icon-192.png">
+    <link rel="preload" href="~/fonts/Vazirmatn-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="~/fonts/Vazirmatn-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true">
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+</head>
+<body class="auth-body girih">
+
+    <main class="auth-shell">
+        <div class="auth-card">
+
+            @* ستون تزیینی — روی موبایل پنهان می‌شود *@
+            <aside class="auth-art girih" aria-hidden="true">
+                <div class="mihrab">
+                    <span class="mihrab-inner"></span>
+                    <span class="mihrab-lamp"></span>
+                </div>
+                <div class="auth-art-text">
+                    <p class="arabi">رَبِّ أَدْخِلْنِي مُدْخَلَ صِدْقٍ</p>
+                    <p class="tarjomeh">پروردگارا، مرا با ورودی راستین وارد کن</p>
+                    <p class="manba">سوره اسراء · آیه ۸۰</p>
+                </div>
+            </aside>
+
+            <section class="auth-panel">
+                <a asp-page="/Index" class="auth-logo">
+                    <span class="logo-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19" /></svg>
+                    </span>
+                    <span><b>نورالثقلین</b><small>مؤسسه فرهنگی</small></span>
+                </a>
+
+                @RenderBody()
+
+                <p class="auth-back">
+                    <a asp-page="/Index">بازگشت به صفحه اصلی</a>
+                </p>
+            </section>
+        </div>
+    </main>
+
+    <script src="~/js/Auth.js" asp-append-version="true" defer></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
