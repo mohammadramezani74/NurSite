@@ -1,4 +1,3 @@
-@using NurSite.Infrastructure.Identity
 @inject NurSite.Application.Interfaces.IPersianDateService Dates
 @{
     var request = ViewContext.HttpContext.Request;
@@ -56,9 +55,9 @@
                 </a>
 
                 <p class="nav-group">محتوا</p>
-                <a href="#" class="nav-item soon">
+                <a asp-area="Admin" asp-page="/Maghalat/Index" class="nav-item @(current.StartsWith("/Maghalat", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V6a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" /><path d="M9 8h5" /></svg>
-                    مقالات <span class="soon-tag">بعدی</span>
+                    مقالات
                 </a>
                 <a href="#" class="nav-item soon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" /></svg>

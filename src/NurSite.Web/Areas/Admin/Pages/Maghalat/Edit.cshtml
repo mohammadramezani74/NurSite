@@ -1,0 +1,201 @@
+﻿@page "{id:int?}"
+@model NurSite.Web.Areas.Admin.Pages.Maghalat.EditModel
+@{
+    ViewData["Title"] = Model.IsNew ? "مقاله تازه" : "ویرایش مقاله";
+    ViewData["Subtitle"] = Model.IsNew ? "نوشتن مطلب جدید" : Model.Input.Title;
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash flash-ok" role="status">@Model.Flash</div>
+}
+
+<form method="post" enctype="multipart/form-data" class="edit-form">
+    <input type="hidden" asp-for="Input.Id" />
+    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+    <div class="edit-cols">
+
+        @* ==================== ستون اصلی ==================== *@
+        <div class="edit-main">
+
+            <section class="panel">
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.Title" class="label">عنوان مقاله</label>
+                        <input asp-for="Input.Title" class="input input-plain" id="titleInput"
+                               placeholder="مثلاً: حسد؛ آتشی که از درون می‌سوزاند" />
+                        <span asp-validation-for="Input.Title" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Slug" class="label">
+                            نشانی صفحه
+                            <span class="label-hint">اگر خالی بماند از روی عنوان ساخته می‌شود</span>
+                        </label>
+                        <div class="slug-row">
+                            <span class="slug-prefix" dir="ltr">@Model.CanonicalBase/maghalat/</span>
+                            <input asp-for="Input.Slug" class="input input-plain" id="slugInput" />
+                        </div>
+                        <span asp-validation-for="Input.Slug" class="field-error"></span>
+                        @if (!Model.IsNew)
+                        {
+                            <p class="field-note">
+                                اگر نشانی را عوض کنید، از نشانی قبلی ریدایرکت دائمی ساخته می‌شود تا رتبه گوگل و لینک‌های بیرونی حفظ شود.
+                            </p>
+                        }
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Summary" class="label">
+                            خلاصه
+                            <span class="label-hint">در فهرست مقالات نمایش داده می‌شود</span>
+                        </label>
+                        <textarea asp-for="Input.Summary" class="input input-plain" rows="3"
+                                  maxlength="500" data-counter="summaryCount"></textarea>
+                        <span class="counter"><span id="summaryCount">۰</span> از ۵۰۰</span>
+                        <span asp-validation-for="Input.Summary" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>متن مقاله</h2></header>
+                <div class="panel-body">
+                    <textarea asp-for="Input.Body" id="bodyEditor" rows="18" class="input input-plain"></textarea>
+                    <span asp-validation-for="Input.Body" class="field-error"></span>
+                </div>
+            </section>
+
+            @* ==================== سئو ==================== *@
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>تنظیمات جستجو</h2>
+                    <span class="panel-hint">این‌ها در نتایج گوگل دیده می‌شوند</span>
+                </header>
+                <div class="panel-body">
+
+                    @* پیش‌نمایش زنده نتیجه گوگل *@
+                    <div class="serp" aria-label="پیش‌نمایش نتیجه جستجو">
+                        <p class="serp-url" dir="ltr" id="serpUrl">@Model.CanonicalBase/maghalat/</p>
+                        <p class="serp-title" id="serpTitle">عنوان مقاله</p>
+                        <p class="serp-desc" id="serpDesc">توضیح متا اینجا نمایش داده می‌شود.</p>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.MetaTitle" class="label">
+                            عنوان متا
+                            <span class="label-hint">خالی بماند از عنوان مقاله ساخته می‌شود</span>
+                        </label>
+                        <input asp-for="Input.MetaTitle" class="input input-plain" id="metaTitleInput"
+                               maxlength="70" data-counter="metaTitleCount" />
+                        <span class="counter"><span id="metaTitleCount">۰</span> از ۷۰</span>
+                        <span asp-validation-for="Input.MetaTitle" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.MetaDescription" class="label">
+                            توضیح متا
+                            <span class="label-hint">خالی بماند از خلاصه ساخته می‌شود</span>
+                        </label>
+                        <textarea asp-for="Input.MetaDescription" class="input input-plain" rows="3"
+                                  id="metaDescInput" maxlength="170" data-counter="metaDescCount"></textarea>
+                        <span class="counter"><span id="metaDescCount">۰</span> از ۱۷۰</span>
+                        <span asp-validation-for="Input.MetaDescription" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        @* ==================== ستون کناری ==================== *@
+        <aside class="edit-side">
+
+            <section class="panel">
+                <header class="panel-head"><h2>انتشار</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.Status" class="label">وضعیت</label>
+                        <select asp-for="Input.Status" class="input input-plain">
+                            <option value="@((int)PublishStatus.Draft)">پیش‌نویس</option>
+                            <option value="@((int)PublishStatus.Published)">منتشرشده</option>
+                            <option value="@((int)PublishStatus.Archived)">بایگانی</option>
+                        </select>
+                    </div>
+
+                    <label class="checkbox">
+                        <input asp-for="Input.IsFeatured" type="checkbox" />
+                        <span>نمایش در بخش ویژه صفحه اصلی</span>
+                    </label>
+
+                    <div class="side-actions">
+                        <button type="submit" class="btn btn-gold auth-submit">ذخیره</button>
+                        <a asp-page="./Index" class="btn btn-ghost auth-submit">بازگشت به فهرست</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>دسته‌بندی و نویسنده</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.CategoryId" class="label">دسته‌بندی</label>
+                        <select asp-for="Input.CategoryId" asp-items="Model.CategoryOptions" class="input input-plain">
+                            <option value="">— انتخاب کنید —</option>
+                        </select>
+                        <span asp-validation-for="Input.CategoryId" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.AuthorDisplayName" class="label">
+                            نام نویسنده
+                            <span class="label-hint">خالی بماند نام شما ثبت می‌شود</span>
+                        </label>
+                        <input asp-for="Input.AuthorDisplayName" class="input input-plain" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>تصویر شاخص</h2></header>
+                <div class="panel-body">
+                    <input type="hidden" asp-for="Input.CoverImagePath" />
+
+                    <div class="cover-preview @(string.IsNullOrEmpty(Model.Input.CoverImagePath) ? "empty" : "")" id="coverPreview">
+                        @if (!string.IsNullOrEmpty(Model.Input.CoverImagePath))
+                        {
+                            <img src="@Model.Input.CoverImagePath" alt="" id="coverImg" />
+                        }
+                        else
+                        {
+                            <span>تصویری انتخاب نشده</span>
+                        }
+                    </div>
+
+                    <div class="field">
+                        <label for="CoverFile" class="label">انتخاب تصویر</label>
+                        <input type="file" asp-for="CoverFile" id="CoverFile" class="input input-plain"
+                               accept="image/jpeg,image/png,image/webp,image/gif" />
+                        <span asp-validation-for="CoverFile" class="field-error"></span>
+                        <p class="field-note">حداکثر ۳ مگابایت. نسبت پیشنهادی ۱۶ به ۹.</p>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.CoverImageAlt" class="label">
+                            متن جایگزین تصویر
+                            <span class="label-hint">برای نابینایان و جستجوی تصاویر</span>
+                        </label>
+                        <input asp-for="Input.CoverImageAlt" class="input input-plain"
+                               placeholder="مثلاً: کتاب باز روی میز چوبی" />
+                        <span asp-validation-for="Input.CoverImageAlt" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</form>
+
+@section Scripts {
+    @* TinyMCE خودمیزبان — راهنمای نصب در README *@
+    <script src="~/lib/tinymce/tinymce.min.js" asp-append-version="true"></script>
+    <script src="~/js/article-editor.js" asp-append-version="true"></script>
+}

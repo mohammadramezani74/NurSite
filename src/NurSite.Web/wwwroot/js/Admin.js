@@ -44,3 +44,10 @@
         if (window.innerWidth > 900 && side.classList.contains('is-open')) close();
     });
 })();
+
+/* تأیید پیش از حذف — روی هر فرمی که data-confirm دارد */
+document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!form.dataset || !form.dataset.confirm) return;
+    if (!window.confirm(form.dataset.confirm)) e.preventDefault();
+});

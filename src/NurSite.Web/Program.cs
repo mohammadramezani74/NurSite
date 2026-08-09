@@ -19,11 +19,31 @@ builder.Host.UseSerilog();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddSiteIdentity();
 builder.Services.AddScoped<ThemeResolver>();
+builder.Services.Configure<UploadOptions>(builder.Configuration.GetSection("Upload"));
+builder.Services.AddScoped<FileUploadService>();
 
 builder.Services.AddRazorPages(options =>
 {
     // کل پنل ادمین پشت احراز هویت
     options.Conventions.AuthorizeAreaFolder("Admin", "/", policy: "AdminArea");
+})
+.AddMvcOptions(options =>
+{
+    // پیام‌های پیش‌فرض بایندر انگلیسی هستند و پیش از اعتبارسنجی ما
+    // نمایش داده می‌شوند؛ اینجا همه را فارسی می‌کنیم
+    var m = options.ModelBindingMessageProvider;
+
+    m.SetValueIsInvalidAccessor(_ => "مقدار واردشده معتبر نیست.");
+    m.SetValueMustNotBeNullAccessor(_ => "این فیلد را پر کنید.");
+    m.SetMissingBindRequiredValueAccessor(_ => "این فیلد را پر کنید.");
+    m.SetMissingKeyOrValueAccessor(() => "این فیلد را پر کنید.");
+    m.SetAttemptedValueIsInvalidAccessor((value, field) => $"مقدار «{value}» برای {field} معتبر نیست.");
+    m.SetUnknownValueIsInvalidAccessor(field => $"مقدار واردشده برای {field} معتبر نیست.");
+    m.SetValueMustBeANumberAccessor(field => $"{field} باید عدد باشد.");
+    m.SetNonPropertyAttemptedValueIsInvalidAccessor(value => $"مقدار «{value}» معتبر نیست.");
+    m.SetNonPropertyValueMustBeANumberAccessor(() => "مقدار باید عدد باشد.");
+    m.SetNonPropertyUnknownValueIsInvalidAccessor(() => "مقدار واردشده معتبر نیست.");
+    m.SetMissingRequestBodyRequiredValueAccessor(() => "اطلاعاتی ارسال نشده است.");
 });
 
 builder.Services.AddAuthorizationBuilder()
