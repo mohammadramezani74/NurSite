@@ -63,9 +63,17 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h6l2 2h10v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z" /></svg>
                     دسته‌بندی‌ها
                 </a>
-                <a href="#" class="nav-item soon">
+                <a asp-area="Admin" asp-page="/Ahkam/Index" class="nav-item @(current.StartsWith("/Ahkam", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" /></svg>
                     احکام
+                </a>
+                <a asp-area="Admin" asp-page="/Abvab/Index" class="nav-item @(current.StartsWith("/Abvab", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V6a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" /><path d="M9 12h5M9 8h5" /></svg>
+                    ابواب احکام
+                </a>
+                <a asp-area="Admin" asp-page="/Maraje/Index" class="nav-item @(current.StartsWith("/Maraje", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 3 8v2h18V8Z" /><path d="M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18" /></svg>
+                    مراجع تقلید
                 </a>
                 <a href="#" class="nav-item soon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>

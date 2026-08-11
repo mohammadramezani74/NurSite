@@ -1046,3 +1046,14 @@ a.badge {
     a.badge:hover {
         background: rgba(42,167,155,.25)
     }
+
+/* نشان ستاره فعال برای احکام پرتکرار */
+.icon-btn.on {
+    border-color: rgba(200,162,74,.5);
+    color: var(--tala)
+}
+
+.muted-cell {
+    font-size: 13px;
+    color: var(--matn-2)
+}

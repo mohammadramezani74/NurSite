@@ -1,4 +1,187 @@
-﻿@page
+﻿@page "{id:int?}"
 @model NurSite.Web.Areas.Admin.Pages.Ahkam.EditModel
 @{
+    ViewData["Title"] = Model.IsNew ? "حکم تازه" : "ویرایش حکم";
+    ViewData["Subtitle"] = Model.IsNew ? "ثبت پرسش و پاسخ شرعی" : Model.Input.Question;
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash flash-ok" role="status">@Model.Flash</div>
+}
+
+@if (Model.SourceQuestion is not null)
+{
+    <div class="flash flash-warn">
+        این حکم از پرسش یک کاربر ساخته می‌شود. پس از ذخیره، آن پرسش به این حکم وصل می‌شود.
+    </div>
+}
+
+<form method="post" class="edit-form">
+    <input type="hidden" asp-for="Input.Id" />
+    <input type="hidden" asp-for="Input.FromQuestionId" />
+    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+    <div class="edit-cols">
+        <div class="edit-main">
+
+            <section class="panel">
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.Question" class="label">
+                            پرسش
+                            <span class="label-hint">همان‌طور بنویسید که کاربر در گوگل جستجو می‌کند</span>
+                        </label>
+                        <textarea asp-for="Input.Question" class="input input-plain" rows="2" id="titleInput"
+                                  maxlength="400" data-counter="questionCount"
+                                  placeholder="مثلاً: اگر در سفر باشم، نماز و روزه‌ام چه حکمی دارد؟"></textarea>
+                        <span class="counter"><span id="questionCount">۰</span> از ۴۰۰</span>
+                        <span asp-validation-for="Input.Question" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Answer" class="label">پاسخ</label>
+                        <textarea asp-for="Input.Answer" id="bodyEditor" rows="12" class="input input-plain"></textarea>
+                        <span asp-validation-for="Input.Answer" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Slug" class="label">
+                            نشانی صفحه
+                            <span class="label-hint">خالی بماند از متن پرسش ساخته می‌شود</span>
+                        </label>
+                        <div class="slug-row">
+                            <span class="slug-prefix" dir="ltr">@Model.CanonicalBase/ahkam/</span>
+                            <input asp-for="Input.Slug" class="input input-plain" id="slugInput" />
+                        </div>
+                        <span asp-validation-for="Input.Slug" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>استناد فتوا</h2>
+                    <span class="panel-hint">حکم بدون منبع منتشر نمی‌شود</span>
+                </header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.MarjaId" class="label">مرجع تقلید</label>
+                        <select asp-for="Input.MarjaId" asp-items="Model.MarjaOptions" class="input input-plain">
+                            <option value="">— انتخاب نشده —</option>
+                        </select>
+                        <span asp-validation-for="Input.MarjaId" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.FatwaNote" class="label">
+                            عبارت استناد
+                            <span class="label-hint">زیر پاسخ به کاربر نمایش داده می‌شود</span>
+                        </label>
+                        <input asp-for="Input.FatwaNote" class="input input-plain"
+                               placeholder="مثلاً: مطابق فتوای آیت‌الله سیستانی" />
+                        <span asp-validation-for="Input.FatwaNote" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.SourceReference" class="label">
+                            منبع
+                            <span class="label-hint">نام کتاب و شماره مسئله</span>
+                        </label>
+                        <input asp-for="Input.SourceReference" class="input input-plain"
+                               placeholder="مثلاً: توضیح‌المسائل، مسئله ۱۵۷۳" />
+                        <span asp-validation-for="Input.SourceReference" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>تنظیمات جستجو</h2>
+                    <span class="panel-hint">احکام مستقیم در نتایج گوگل نمایش داده می‌شوند</span>
+                </header>
+                <div class="panel-body">
+                    <div class="serp" aria-label="پیش‌نمایش نتیجه جستجو">
+                        <p class="serp-url" dir="ltr" id="serpUrl">@Model.CanonicalBase/ahkam/</p>
+                        <p class="serp-title" id="serpTitle">متن پرسش</p>
+                        <p class="serp-desc" id="serpDesc">خلاصه پاسخ اینجا نمایش داده می‌شود.</p>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.MetaTitle" class="label">
+                            عنوان متا
+                            <span class="label-hint">خالی بماند از متن پرسش ساخته می‌شود</span>
+                        </label>
+                        <input asp-for="Input.MetaTitle" class="input input-plain" id="metaTitleInput"
+                               maxlength="70" data-counter="metaTitleCount" />
+                        <span class="counter"><span id="metaTitleCount">۰</span> از ۷۰</span>
+                        <span asp-validation-for="Input.MetaTitle" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.MetaDescription" class="label">
+                            توضیح متا
+                            <span class="label-hint">خالی بماند از ابتدای پاسخ ساخته می‌شود</span>
+                        </label>
+                        <textarea asp-for="Input.MetaDescription" class="input input-plain" rows="3"
+                                  id="metaDescInput" maxlength="170" data-counter="metaDescCount"></textarea>
+                        <span class="counter"><span id="metaDescCount">۰</span> از ۱۷۰</span>
+                        <span asp-validation-for="Input.MetaDescription" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <aside class="edit-side">
+            <section class="panel">
+                <header class="panel-head"><h2>انتشار</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.Status" class="label">وضعیت</label>
+                        <select asp-for="Input.Status" class="input input-plain">
+                            <option value="@((int)PublishStatus.Draft)">پیش‌نویس</option>
+                            <option value="@((int)PublishStatus.Published)">منتشرشده</option>
+                            <option value="@((int)PublishStatus.Archived)">بایگانی</option>
+                        </select>
+                    </div>
+
+                    <label class="checkbox">
+                        <input asp-for="Input.IsFrequentlyAsked" type="checkbox" />
+                        <span>نمایش در احکام پرتکرار صفحه اصلی</span>
+                    </label>
+
+                    <div class="side-actions">
+                        <button type="submit" class="btn btn-gold auth-submit">ذخیره</button>
+                        <a asp-page="./Index" class="btn btn-ghost auth-submit">بازگشت به فهرست</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>دسته‌بندی</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.RulingCategoryId" class="label">باب احکام</label>
+                        <select asp-for="Input.RulingCategoryId" asp-items="Model.CategoryOptions" class="input input-plain">
+                            <option value="">— انتخاب کنید —</option>
+                        </select>
+                        <span asp-validation-for="Input.RulingCategoryId" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.SortOrder" class="label">
+                            ترتیب در باب
+                            <span class="label-hint">عدد کوچک‌تر بالاتر می‌آید</span>
+                        </label>
+                        <input asp-for="Input.SortOrder" class="input input-plain" type="number" min="0" max="999" />
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/lib/tinymce/tinymce.min.js" asp-append-version="true"></script>
+    <script src="~/js/article-editor.js" asp-append-version="true"></script>
 }

@@ -110,6 +110,7 @@
 
     tinymce.init({
         selector: '#bodyEditor',
+        license_key: 'gpl',
         directionality: 'rtl',
         language: 'fa',
         height: 520,

@@ -1,0 +1,149 @@
+﻿@page
+@model NurSite.Web.Areas.Admin.Pages.Maraje.IndexModel
+@{
+    ViewData["Title"] = "مراجع تقلید";
+    ViewData["Subtitle"] = "منابعی که احکام به آنها استناد می‌شوند";
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash @(Model.FlashKind == "ok" ? "flash-ok" : "flash-warn")" role="status">@Model.Flash</div>
+}
+
+<div class="edit-cols">
+    <div class="edit-main">
+        <section class="panel">
+            <header class="panel-head">
+                <h2>مراجع <span class="count"><fa-num>@Model.Rows.Count</fa-num></span></h2>
+            </header>
+
+            @if (Model.Rows.Count == 0)
+            {
+                <p class="empty">هنوز مرجعی ثبت نشده است. از فرم کنار شروع کنید.</p>
+            }
+            else
+            {
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>نام</th>
+                                <th>سایت رسمی</th>
+                                <th>احکام</th>
+                                <th>وضعیت</th>
+                                <th class="cell-actions">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.Rows)
+                            {
+                                <tr>
+                                    <td class="cell-title">
+                                        <a asp-page="./Index" asp-route-edit="@row.Marja.Id">@row.Marja.FullName</a>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(row.Marja.OfficialSiteUrl))
+                                        {
+                                            <a href="@row.Marja.OfficialSiteUrl" target="_blank" rel="noopener noreferrer"
+                                               class="link-quiet" dir="ltr">@row.Marja.OfficialSiteUrl</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="seo-dot miss">ثبت نشده</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (row.RulingCount > 0)
+                                        {
+                                            <a asp-area="Admin" asp-page="/Ahkam/Index" asp-route-marjaId="@row.Marja.Id" class="badge badge-ok">
+                                                <fa-num>@row.RulingCount</fa-num> حکم
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-draft">خالی</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (row.Marja.IsActive)
+                                        {
+                                            <span class="badge badge-ok">فعال</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge">غیرفعال</span>
+                                        }
+                                    </td>
+                                    <td class="cell-actions">
+                                        <div class="actions">
+                                            <a asp-page="./Index" asp-route-edit="@row.Marja.Id" class="icon-btn" title="ویرایش">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                                            </a>
+                                            <form method="post" asp-page-handler="Delete" asp-route-id="@row.Marja.Id"
+                                                  data-confirm="«@row.Marja.FullName» حذف شود؟">
+                                                <button type="submit" class="icon-btn danger" title="حذف">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" /></svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </div>
+
+    <aside class="edit-side">
+        <form method="post">
+            <input type="hidden" asp-for="Input.Id" />
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>@(Model.Input.Id == 0 ? "مرجع تازه" : "ویرایش مرجع")</h2>
+                </header>
+                <div class="panel-body">
+                    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+                    <div class="field">
+                        <label asp-for="Input.FullName" class="label">نام</label>
+                        <input asp-for="Input.FullName" class="input input-plain"
+                               placeholder="مثلاً: آیت‌الله سیستانی" />
+                        <span asp-validation-for="Input.FullName" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.OfficialSiteUrl" class="label">
+                            سایت رسمی
+                            <span class="label-hint">کاربر می‌تواند فتوا را راستی‌آزمایی کند</span>
+                        </label>
+                        <input asp-for="Input.OfficialSiteUrl" class="input input-plain" dir="ltr"
+                               placeholder="https://www.sistani.org" />
+                        <span asp-validation-for="Input.OfficialSiteUrl" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.SortOrder" class="label">ترتیب</label>
+                        <input asp-for="Input.SortOrder" class="input input-plain" type="number" min="0" max="999" />
+                    </div>
+
+                    <label class="checkbox">
+                        <input asp-for="Input.IsActive" type="checkbox" />
+                        <span>در فهرست انتخاب مرجع نمایش داده شود</span>
+                    </label>
+
+                    <div class="side-actions">
+                        <button type="submit" class="btn btn-gold auth-submit">
+                            @(Model.Input.Id == 0 ? "افزودن" : "ذخیره")
+                        </button>
+                        @if (Model.Input.Id != 0)
+                        {
+                            <a asp-page="./Index" class="btn btn-ghost auth-submit">انصراف</a>
+                        }
+                    </div>
+                </div>
+            </section>
+        </form>
+    </aside>
+</div>
