@@ -7,6 +7,7 @@ using NurSite.Application.Interfaces;
 using NurSite.Domain.Entities;
 using NurSite.Domain.Enums;
 using NurSite.Infrastructure.Persistence;
+using NurSite.Application.Services;
 using NurSite.Web.Services;
 
 namespace NurSite.Web.Areas.Admin.Pages.Maghalat;
@@ -178,6 +179,11 @@ public class EditModel(
             : Input.OgImagePath;
 
         article.ReadingMinutes = ReadingTime.Estimate(article.Body);
+
+        // متن جستجو از عنوان و خلاصه و بدنه ساخته می‌شود.
+        // عنوان دو بار می‌آید تا در امتیازدهی وزن بیشتری بگیرد.
+        article.SearchText = PersianText.Normalize(
+            $"{article.Title} {article.Title} {article.Summary} {article.Body}");
 
         // ---------- وضعیت انتشار ----------
         article.Status = Input.Status;
