@@ -28,6 +28,10 @@ public static class DependencyInjection
         services.AddScoped<IPrayerTimeService, PrayerTimeService>();
         services.AddScoped<ISearchService, SearchService>();
 
+        // اطلاع‌رسانی: فعلاً فقط لاگ می‌گیرد و کاربر با کد رهگیری پیگیری می‌کند.
+        // برای فعال کردن پیامک، فقط همین خط به پیاده‌سازی تازه تغییر می‌کند.
+        services.AddScoped<INotificationService, LoggingNotificationService>();
+
         return services;
     }
 }

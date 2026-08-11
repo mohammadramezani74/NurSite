@@ -69,7 +69,7 @@
     <section class="panel">
         <header class="panel-head">
             <h2>پرسش‌های در انتظار پاسخ</h2>
-            <a href="#" class="link-more soon-link">همه پرسش‌ها</a>
+            <a asp-area="Admin" asp-page="/Porseshha/Index" class="link-more">همه پرسش‌ها</a>
         </header>
 
         @if (Model.LatestQuestions.Count == 0)

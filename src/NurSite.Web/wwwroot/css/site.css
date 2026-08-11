@@ -2692,3 +2692,183 @@ mark {
         margin-top: 10px
     }
 }
+
+/* ============================================================
+   پرسش شرعی و پیگیری
+   ============================================================ */
+
+/* تله هرزنامه — باید از دید کاربر پنهان باشد ولی برای ربات قابل پر کردن */
+.hp-field {
+    position: absolute;
+    inset-inline-start: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden
+}
+
+.ask-form {
+    max-width: 100%
+}
+
+/* ---------- کارت کد رهگیری ---------- */
+.code-box {
+    text-align: center;
+    padding: 40px 26px;
+    background: linear-gradient(160deg,rgba(42,167,155,.12),transparent);
+    border: 1px solid rgba(42,167,155,.35);
+}
+
+.code-icon {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 18px;
+    background: rgba(42,167,155,.16);
+    color: var(--firouze-2);
+    border-radius: 50%;
+}
+
+    .code-icon svg {
+        width: 26px;
+        height: 26px
+    }
+
+.code-box h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 10px
+}
+
+.code-box p {
+    font-size: 15px;
+    color: var(--matn-2);
+    font-weight: 300
+}
+
+.code-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    margin: 22px 0 8px;
+    padding: 16px 26px;
+    background: rgba(0,0,0,.25);
+    border: 1px dashed rgba(200,162,74,.5);
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--tala-2);
+    letter-spacing: 3px;
+    font-variant-numeric: tabular-nums;
+}
+
+    .code-value .copy-link {
+        font-size: 13px;
+        letter-spacing: normal;
+        font-weight: 600
+    }
+
+.code-hint {
+    font-size: 13.5px;
+    margin-top: 14px
+}
+
+    .code-hint a {
+        color: var(--firouze-2);
+        margin-inline-start: 8px
+    }
+
+/* ---------- کارت پیگیری ---------- */
+.track-card {
+    background: var(--panel);
+    border: 1px solid var(--khat)
+}
+
+.track-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--khat-2);
+}
+
+.track-code {
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--tala-2);
+    letter-spacing: 2px;
+    font-variant-numeric: tabular-nums;
+}
+
+.track-meta {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 9px 20px;
+    padding: 20px 24px;
+    font-size: 14.5px;
+    border-bottom: 1px solid var(--khat-2);
+}
+
+    .track-meta dt {
+        color: var(--matn-2);
+        font-weight: 600;
+        white-space: nowrap
+    }
+
+    .track-meta dd {
+        color: var(--matn)
+    }
+
+.track-block {
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--khat-2)
+}
+
+    .track-block:last-child {
+        border-bottom: 0
+    }
+
+    .track-block h2 {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--matn-2);
+        margin-bottom: 12px
+    }
+
+    .track-block p {
+        font-size: 15.5px;
+        line-height: 2.2;
+        color: var(--matn)
+    }
+
+    .track-block.answer {
+        background: rgba(42,167,155,.06);
+        border-inline-start: 3px solid var(--firouze)
+    }
+
+        .track-block.answer h2 {
+            color: var(--firouze-2)
+        }
+
+    .track-block.pending {
+        background: rgba(200,162,74,.06)
+    }
+
+        .track-block.pending p {
+            color: var(--tala-2)
+        }
+
+.track-date {
+    font-size: 12.5px;
+    color: var(--matn-2);
+    margin-top: 14px
+}
+
+/* در پنل هم استفاده می‌شود */
+.admin-body .track-meta {
+    padding: 0;
+    border: 0;
+    font-size: 14px
+}

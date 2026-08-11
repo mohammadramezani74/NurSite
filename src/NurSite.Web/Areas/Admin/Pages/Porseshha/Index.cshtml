@@ -1,0 +1,149 @@
+﻿@page
+@model NurSite.Web.Areas.Admin.Pages.Porseshha.IndexModel
+@{
+    ViewData["Title"] = "پرسش‌های شرعی";
+    ViewData["Subtitle"] = "صف پاسخگویی";
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash @(Model.FlashKind == "ok" ? "flash-ok" : "flash-warn")" role="status">@Model.Flash</div>
+}
+
+<section class="stat-grid" style="grid-template-columns:repeat(2,1fr)">
+    <article class="stat @(Model.NewCount > 0 ? "alert" : "")">
+        <span class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.6-2.5 2.6M12 17h.01" /></svg>
+        </span>
+        <b><fa-num>@Model.NewCount</fa-num></b>
+        <span class="stat-label">در نوبت بررسی</span>
+    </article>
+
+    <article class="stat @(Model.AssignedCount > 0 ? "warn" : "")">
+        <span class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+        </span>
+        <b><fa-num>@Model.AssignedCount</fa-num></b>
+        <span class="stat-label">در حال پاسخ</span>
+    </article>
+</section>
+
+<section class="panel">
+    <header class="panel-head">
+        <h2>پرسش‌ها <span class="count"><fa-num>@Model.TotalCount</fa-num></span></h2>
+    </header>
+
+    <form method="get" class="filter-bar">
+        <div class="filter-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <label class="sr" for="q">جستجو</label>
+            <input id="q" name="q" value="@Model.Q" placeholder="جستجو در متن، کد رهگیری یا شماره…" />
+        </div>
+
+        <label class="sr" for="status">وضعیت</label>
+        <select id="status" name="status" class="filter-select">
+            <option value="">همه</option>
+            <option value="@((int)QuestionStatus.New)" selected="@(Model.Status == QuestionStatus.New)">در نوبت بررسی</option>
+            <option value="@((int)QuestionStatus.Assigned)" selected="@(Model.Status == QuestionStatus.Assigned)">در حال پاسخ</option>
+            <option value="@((int)QuestionStatus.Answered)" selected="@(Model.Status == QuestionStatus.Answered)">پاسخ داده شده</option>
+            <option value="@((int)QuestionStatus.Published)" selected="@(Model.Status == QuestionStatus.Published)">منتشرشده در آرشیو</option>
+            <option value="@((int)QuestionStatus.Rejected)" selected="@(Model.Status == QuestionStatus.Rejected)">بدون پاسخ</option>
+        </select>
+
+        <button type="submit" class="btn btn-ghost btn-sm">اعمال</button>
+    </form>
+
+    @if (Model.Questions.Count == 0)
+    {
+        <p class="empty">پرسشی در این وضعیت نیست.</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>پرسش</th>
+                        <th>کد رهگیری</th>
+                        <th>باب</th>
+                        <th>وضعیت</th>
+                        <th>تاریخ</th>
+                        <th class="cell-actions">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var q in Model.Questions)
+                    {
+                        <tr>
+                            <td class="cell-title">
+                                <a asp-page="./Answer" asp-route-id="@q.Id">
+                                    @(q.Body.Length > 100 ? q.Body[..100] + "…" : q.Body)
+                                </a>
+                                <span class="cell-slug">
+                                    @(string.IsNullOrWhiteSpace(q.SenderName) ? "بدون نام" : q.SenderName)
+                                    @if (!q.AllowPublish)
+                                    {
+                                        <span class="badge badge-draft">اجازه انتشار ندارد</span>
+                                    }
+                                </span>
+                            </td>
+                            <td><span dir="ltr" class="muted-cell">@q.TrackingCode</span></td>
+                            <td>@(q.RulingCategory?.Title ?? "—")</td>
+                            <td>
+                                @switch (q.Status)
+                                {
+                                    case QuestionStatus.New:
+                                        <span class="badge badge-new">در نوبت</span>
+                                        break;
+                                    case QuestionStatus.Assigned:
+                                        <span class="badge badge-wait">در حال پاسخ</span>
+                                        break;
+                                    case QuestionStatus.Answered:
+                                        <span class="badge badge-ok">پاسخ داده شده</span>
+                                        break;
+                                    case QuestionStatus.Published:
+                                        <span class="badge badge-ok">منتشرشده</span>
+                                        break;
+                                    default:
+                                        <span class="badge">بدون پاسخ</span>
+                                        break;
+                                }
+                            </td>
+                            <td><persian-date value="@q.CreatedAtUtc" /></td>
+                            <td class="cell-actions">
+                                <div class="actions">
+                                    <a asp-page="./Answer" asp-route-id="@q.Id" class="icon-btn" title="پاسخ">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" /></svg>
+                                    </a>
+                                    @if (q.Status is QuestionStatus.New or QuestionStatus.Assigned)
+                                    {
+                                        <form method="post" asp-page-handler="Reject" asp-route-id="@q.Id"
+                                              asp-route-status="@Model.Status" asp-route-page="@Model.PageNumber"
+                                              data-confirm="این پرسش بدون پاسخ بسته شود؟">
+                                            <button type="submit" class="icon-btn danger" title="بستن بدون پاسخ">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="pager" aria-label="صفحه‌بندی">
+                @for (var p = 1; p <= Model.TotalPages; p++)
+                {
+                    <a asp-page="./Index" asp-route-status="@Model.Status" asp-route-q="@Model.Q" asp-route-page="@p"
+                       class="pager-item @(p == Model.PageNumber ? "on" : "")">
+                        <fa-num>@p</fa-num>
+                    </a>
+                }
+            </nav>
+        }
+    }
+</section>

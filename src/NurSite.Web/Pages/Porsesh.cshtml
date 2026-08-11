@@ -1,0 +1,118 @@
+﻿@page "/porsesh"
+@model PorseshModel
+@{
+    ViewData["Title"] = "پرسش شرعی";
+    ViewData["MetaDescription"] = "پرسش شرعی خود را بپرسید. پاسخ‌ها مستند به فتاوای مراجع تقلید و حداکثر ظرف ۴۸ ساعت آماده می‌شود.";
+    var justSent = Request.Query.ContainsKey("sent") && !string.IsNullOrEmpty(Model.IssuedCode);
+}
+
+<section class="tone-2 girih page-head">
+    <div class="wrap">
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            <span aria-current="page">پرسش شرعی</span>
+        </nav>
+        <h1>پرسش شرعی خود را بپرسید</h1>
+        <p>پاسخ‌ها مستند به فتاوای مراجع تقلید تنظیم می‌شود. پیش از پرسیدن، بخش <a asp-page="/Ahkam/Index">احکام</a> را ببینید — شاید پاسخ پرسشتان آنجا باشد.</p>
+    </div>
+</section>
+
+<section class="tone-1">
+    <div class="wrap" style="max-width:720px">
+
+        @if (justSent)
+        {
+            <div class="code-box" role="status">
+                <span class="code-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5" /></svg>
+                </span>
+                <h2>پرسش شما ثبت شد</h2>
+                <p>این کد رهگیری را نگه دارید. با آن می‌توانید پاسخ را پیگیری کنید.</p>
+
+                <p class="code-value" dir="ltr">
+                    <span id="codeText">@Model.IssuedCode</span>
+                    <button type="button" class="copy-link" data-copy="@Model.IssuedCode">کپی</button>
+                </p>
+
+                <p class="code-hint">
+                    پاسخ معمولاً ظرف ۴۸ ساعت آماده می‌شود.
+                    <a asp-page="/Peygiri">پیگیری پرسش</a>
+                </p>
+            </div>
+        }
+        else
+        {
+            <form method="post" class="auth-form ask-form">
+                <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+                <div class="field">
+                    <label asp-for="Input.Body" class="label">
+                        پرسش شما
+                        <span class="label-hint">هرچه دقیق‌تر بنویسید، پاسخ روشن‌تری می‌گیرید</span>
+                    </label>
+                    <textarea asp-for="Input.Body" class="input input-plain" rows="7"
+                              maxlength="4000" data-counter="bodyCount"
+                              placeholder="مثلاً: من هفته‌ای دو روز برای کار به شهر دیگری می‌روم. نماز و روزه‌ام چه حکمی دارد؟"></textarea>
+                    <span class="counter"><span id="bodyCount">۰</span> از ۴۰۰۰</span>
+                    <span asp-validation-for="Input.Body" class="field-error"></span>
+                </div>
+
+                <div class="field">
+                    <label asp-for="Input.RulingCategoryId" class="label">
+                        باب
+                        <span class="label-hint">اگر مطمئن نیستید، خالی بگذارید</span>
+                    </label>
+                    <select asp-for="Input.RulingCategoryId" asp-items="Model.CategoryOptions" class="input input-plain">
+                        <option value="">— مشخص نیست —</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label asp-for="Input.SenderName" class="label">
+                        نام
+                        <span class="label-hint">اختیاری</span>
+                    </label>
+                    <input asp-for="Input.SenderName" class="input input-plain" />
+                </div>
+
+                <div class="field">
+                    <label asp-for="Input.SenderMobile" class="label">
+                        شماره موبایل
+                        <span class="label-hint">برای پیگیری و اطلاع‌رسانی پاسخ</span>
+                    </label>
+                    <input asp-for="Input.SenderMobile" class="input input-plain" type="tel"
+                           inputmode="numeric" dir="ltr" placeholder="۰۹۱۲۳۴۵۶۷۸۹" data-persian-digits />
+                    <span asp-validation-for="Input.SenderMobile" class="field-error"></span>
+                </div>
+
+                <label class="checkbox">
+                    <input asp-for="Input.AllowPublish" type="checkbox" />
+                    <span>اگر پرسشم برای دیگران هم مفید بود، بدون نام من در آرشیو عمومی منتشر شود</span>
+                </label>
+
+                @* تله هرزنامه — از دید کاربر پنهان است *@
+                <div class="hp-field" aria-hidden="true">
+                    <label for="Input_Website">این فیلد را خالی بگذارید</label>
+                    <input asp-for="Input.Website" tabindex="-1" autocomplete="off" />
+                </div>
+
+                <button type="submit" class="btn btn-gold auth-submit">ارسال پرسش</button>
+
+                <p class="auth-note" style="text-align:start">
+                    شماره موبایل شما فقط برای پیگیری استفاده می‌شود و در سایت نمایش داده نمی‌شود.
+                    پاسخ‌ها جایگزین مراجعه به دفتر مرجع تقلید نیستند.
+                </p>
+            </form>
+
+            <p style="text-align:center;margin-top:26px;font-size:14.5px;color:var(--matn-2)">
+                قبلاً پرسشی فرستاده‌اید؟ <a asp-page="/Peygiri" class="link-quiet">پیگیری با کد رهگیری</a>
+            </p>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/auth.js" asp-append-version="true" defer></script>
+    <script src="~/js/article-editor.js" asp-append-version="true" defer></script>
+}

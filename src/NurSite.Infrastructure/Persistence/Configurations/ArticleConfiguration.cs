@@ -148,6 +148,11 @@ public class UserQuestionConfiguration : IEntityTypeConfiguration<UserQuestion>
         b.Property(x => x.SenderMobile).HasMaxLength(15);
         b.Property(x => x.SenderEmail).HasMaxLength(200);
         b.Property(x => x.AssignedToUserId).HasMaxLength(450);
+        b.Property(x => x.TrackingCode).HasMaxLength(12).IsRequired();
+        b.Property(x => x.SenderIpHash).HasMaxLength(64);
+
+        // پیگیری با کد رهگیری انجام می‌شود، پس باید یکتا و ایندکس‌دار باشد
+        b.HasIndex(x => x.TrackingCode).IsUnique();
         b.HasIndex(x => x.Status);
         // صف پرسش‌های ارجاع‌شده به هر پاسخگو
         b.HasIndex(x => new { x.AssignedToUserId, x.Status });

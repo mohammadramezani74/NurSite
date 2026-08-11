@@ -1,0 +1,118 @@
+﻿@page "/peygiri"
+@model PeygiriModel
+@using NurSite.Domain.Enums
+@{
+    ViewData["Title"] = "پیگیری پرسش";
+    ViewData["MetaDescription"] = "با کد رهگیری، وضعیت پرسش شرعی خود را پیگیری کنید.";
+    ViewData["NoIndex"] = true;
+}
+
+<section class="tone-2 girih page-head">
+    <div class="wrap">
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            <a asp-page="/Porsesh">پرسش شرعی</a>
+            <span aria-hidden="true">›</span>
+            <span aria-current="page">پیگیری</span>
+        </nav>
+        <h1>پیگیری پرسش</h1>
+        <p>کد رهگیری‌ای که هنگام ثبت پرسش گرفتید را وارد کنید.</p>
+
+        <form method="get" class="search-form" style="margin-top:24px">
+            <div class="search-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                <label class="sr" for="code">کد رهگیری</label>
+                <input id="code" name="code" value="@Model.Code" dir="ltr"
+                       placeholder="ABCD-1234" maxlength="12" autofocus />
+            </div>
+            <button type="submit" class="btn btn-gold">پیگیری</button>
+        </form>
+    </div>
+</section>
+
+<section class="tone-1">
+    <div class="wrap" style="max-width:720px">
+
+        @if (Model.Searched && Model.Question is null)
+        {
+            <div class="search-empty">
+                <p class="big">پرسشی با این کد پیدا نشد.</p>
+                <ul>
+                    <li>کد را دوباره بررسی کنید — حروف بزرگ و کوچک فرقی ندارند</li>
+                    <li>خط تیره اختیاری است</li>
+                    <li>اگر کد را گم کرده‌اید، <a asp-page="/Porsesh">پرسش تازه‌ای بفرستید</a></li>
+                </ul>
+            </div>
+        }
+        else if (Model.Question is { } q)
+        {
+            <div class="track-card">
+                <div class="track-head">
+                    <span class="track-code" dir="ltr">@q.TrackingCode</span>
+                    <span class="badge @(q.Status is QuestionStatus.Answered or QuestionStatus.Published ? "badge-ok" : "badge-wait")">
+                        @PeygiriModel.StatusLabel(q.Status)
+                    </span>
+                </div>
+
+                <dl class="track-meta">
+                    <dt>تاریخ ثبت</dt>
+                    <dd><persian-date value="@q.CreatedAtUtc" weekday="true" /></dd>
+
+                    @if (q.RulingCategory is not null)
+                    {
+                        <dt>باب</dt>
+                        <dd>@q.RulingCategory.Title</dd>
+                    }
+                </dl>
+
+                <div class="track-block">
+                    <h2>پرسش شما</h2>
+                    <p>@q.Body</p>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(q.AnswerBody))
+                {
+                    <div class="track-block answer">
+                        <h2>پاسخ</h2>
+                        <div class="article-body">@Html.Raw(q.AnswerBody)</div>
+
+                        @if (q.AnsweredAtUtc is not null)
+                        {
+                            <p class="track-date">
+                                پاسخ داده شده در <persian-date value="@q.AnsweredAtUtc" />
+                            </p>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.PublishedSlug))
+                        {
+                            <p style="margin-top:14px">
+                                <a asp-page="/Ahkam/Details" asp-route-slug="@Model.PublishedSlug" class="link-more">
+                                    این پرسش در آرشیو عمومی
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6 6 6" /></svg>
+                                </a>
+                            </p>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="track-block pending">
+                        <p>پاسخ هنوز آماده نشده است. معمولاً ظرف ۴۸ ساعت پاسخ داده می‌شود.</p>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="search-tips">
+                <h2>کد رهگیری چیست؟</h2>
+                <ul>
+                    <li>کدی هشت‌رقمی مانند <span dir="ltr">ABCD-1234</span> که هنگام ثبت پرسش به شما داده می‌شود</li>
+                    <li>با آن می‌توانید بدون ورود به سایت، وضعیت و پاسخ پرسشتان را ببینید</li>
+                    <li>کد را نزد خود نگه دارید؛ هر کسی آن را داشته باشد می‌تواند پرسش و پاسخ را ببیند</li>
+                </ul>
+            </div>
+        }
+    </div>
+</section>

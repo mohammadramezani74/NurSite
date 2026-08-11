@@ -89,7 +89,7 @@
                 </a>
 
                 <p class="nav-group">ارتباطات</p>
-                <a href="#" class="nav-item soon">
+                <a asp-area="Admin" asp-page="/Porseshha/Index" class="nav-item @(current.StartsWith("/Porseshha", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.6-2.5 2.6M12 17h.01" /></svg>
                     پرسش‌های شرعی
                 </a>

@@ -1,0 +1,134 @@
+﻿@page "{id:int}"
+@model NurSite.Web.Areas.Admin.Pages.Porseshha.AnswerModel
+@{
+    ViewData["Title"] = "پاسخ به پرسش";
+    ViewData["Subtitle"] = Model.Question.TrackingCode;
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash flash-ok" role="status">@Model.Flash</div>
+}
+
+<div class="edit-cols">
+    <div class="edit-main">
+
+        <section class="panel">
+            <header class="panel-head">
+                <h2>متن پرسش</h2>
+                <span class="panel-hint" dir="ltr">@Model.Question.TrackingCode</span>
+            </header>
+            <div class="panel-body">
+                <p style="font-size:15.5px;line-height:2.2;color:#fff">@Model.Question.Body</p>
+            </div>
+        </section>
+
+        <form method="post" asp-route-id="@Model.Question.Id" class="edit-form">
+            <input type="hidden" asp-for="Input.Id" />
+
+            <section class="panel">
+                <header class="panel-head"><h2>پاسخ</h2></header>
+                <div class="panel-body">
+                    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+                    <div class="field">
+                        <label asp-for="Input.AnswerBody" class="label">متن پاسخ</label>
+                        <textarea asp-for="Input.AnswerBody" id="bodyEditor" rows="12" class="input input-plain"></textarea>
+                        <span asp-validation-for="Input.AnswerBody" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.RulingCategoryId" class="label">
+                            باب
+                            <span class="label-hint">برای وقتی که پاسخ به آرشیو منتقل شود</span>
+                        </label>
+                        <select asp-for="Input.RulingCategoryId" asp-items="Model.CategoryOptions" class="input input-plain">
+                            <option value="">— مشخص نشده —</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-gold auth-submit">ذخیره پاسخ</button>
+                </div>
+            </section>
+        </form>
+    </div>
+
+    <aside class="edit-side">
+        <section class="panel">
+            <header class="panel-head"><h2>وضعیت</h2></header>
+            <div class="panel-body">
+                <dl class="track-meta">
+                    <dt>وضعیت</dt>
+                    <dd>@NurSite.Web.Pages.PeygiriModel.StatusLabel(Model.Question.Status)</dd>
+
+                    <dt>تاریخ ثبت</dt>
+                    <dd><persian-date value="@Model.Question.CreatedAtUtc" /></dd>
+
+                    @if (Model.Question.AnsweredAtUtc is not null)
+                    {
+                        <dt>تاریخ پاسخ</dt>
+                        <dd><persian-date value="@Model.Question.AnsweredAtUtc" /></dd>
+                    }
+                </dl>
+
+                @if (Model.Question.Status == QuestionStatus.New)
+                {
+                    <form method="post" asp-page-handler="Assign" asp-route-id="@Model.Question.Id" style="margin-top:16px">
+                        <button type="submit" class="btn btn-ghost auth-submit">ارجاع به من</button>
+                    </form>
+                }
+            </div>
+        </section>
+
+        <section class="panel">
+            <header class="panel-head"><h2>پرسشگر</h2></header>
+            <div class="panel-body">
+                <dl class="track-meta">
+                    <dt>نام</dt>
+                    <dd>@(string.IsNullOrWhiteSpace(Model.Question.SenderName) ? "—" : Model.Question.SenderName)</dd>
+
+                    <dt>موبایل</dt>
+                    <dd dir="ltr">@(Model.Question.SenderMobile ?? "—")</dd>
+
+                    <dt>انتشار عمومی</dt>
+                    <dd>@(Model.Question.AllowPublish ? "اجازه داده" : "اجازه نداده")</dd>
+                </dl>
+            </div>
+        </section>
+
+        <section class="panel">
+            <header class="panel-head"><h2>آرشیو عمومی</h2></header>
+            <div class="panel-body">
+                @if (!string.IsNullOrWhiteSpace(Model.PublishedSlug))
+                {
+                    <p class="field-note">این پرسش در آرشیو منتشر شده است.</p>
+                    <a asp-area="" asp-page="/Ahkam/Details" asp-route-slug="@Model.PublishedSlug"
+                       target="_blank" rel="noopener" class="btn btn-ghost auth-submit">مشاهده در سایت</a>
+                }
+                else if (!Model.Question.AllowPublish)
+                {
+                    <p class="field-note">پرسشگر اجازه انتشار عمومی نداده است.</p>
+                }
+                else if (string.IsNullOrWhiteSpace(Model.Question.AnswerBody))
+                {
+                    <p class="field-note">اول پاسخ را ذخیره کنید.</p>
+                }
+                else
+                {
+                    <p class="field-note">
+                        اگر این پرسش برای دیگران هم مفید است، به آرشیو احکام منتقلش کنید.
+                    </p>
+                    <a asp-area="Admin" asp-page="/Ahkam/Edit" asp-route-fromQuestion="@Model.Question.Id"
+                       class="btn btn-gold auth-submit">انتقال به آرشیو احکام</a>
+                }
+            </div>
+        </section>
+
+        <a asp-page="./Index" class="btn btn-ghost auth-submit">بازگشت به صف</a>
+    </aside>
+</div>
+
+@section Scripts {
+    <script src="~/lib/tinymce/tinymce.min.js" asp-append-version="true"></script>
+    <script src="~/js/article-editor.js" asp-append-version="true"></script>
+}
