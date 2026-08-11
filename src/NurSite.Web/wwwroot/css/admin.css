@@ -1025,3 +1025,24 @@ select.input-plain option {
         position: static
     }
 }
+
+/* درخت دسته‌بندی */
+.tree-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px
+}
+
+.tree-mark {
+    color: var(--matn-2);
+    opacity: .55;
+    font-size: 13px
+}
+
+a.badge {
+    transition: .18s
+}
+
+    a.badge:hover {
+        background: rgba(42,167,155,.25)
+    }

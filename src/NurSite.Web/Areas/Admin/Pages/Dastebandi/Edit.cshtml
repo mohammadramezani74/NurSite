@@ -1,0 +1,135 @@
+﻿@page "{id:int?}"
+@model NurSite.Web.Areas.Admin.Pages.Dastebandi.EditModel
+@{
+    ViewData["Title"] = Model.IsNew ? "دسته تازه" : "ویرایش دسته";
+    ViewData["Subtitle"] = Model.IsNew ? "ساخت دسته‌بندی جدید" : Model.Input.Title;
+}
+
+<form method="post" class="edit-form">
+    <input type="hidden" asp-for="Input.Id" />
+    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+    <div class="edit-cols">
+        <div class="edit-main">
+
+            <section class="panel">
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.Title" class="label">عنوان دسته</label>
+                        <input asp-for="Input.Title" class="input input-plain" id="titleInput"
+                               placeholder="مثلاً: اخلاق و معنویت" />
+                        <span asp-validation-for="Input.Title" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Slug" class="label">
+                            نشانی صفحه
+                            <span class="label-hint">خالی بماند از عنوان ساخته می‌شود</span>
+                        </label>
+                        <div class="slug-row">
+                            <span class="slug-prefix" dir="ltr">@Model.CanonicalBase/maghalat?dasteh=</span>
+                            <input asp-for="Input.Slug" class="input input-plain" id="slugInput" />
+                        </div>
+                        <span asp-validation-for="Input.Slug" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Description" class="label">
+                            توضیح
+                            <span class="label-hint">بالای صفحه دسته نمایش داده می‌شود</span>
+                        </label>
+                        <textarea asp-for="Input.Description" class="input input-plain" rows="3"
+                                  maxlength="500" data-counter="descCount"></textarea>
+                        <span class="counter"><span id="descCount">۰</span> از ۵۰۰</span>
+                        <span asp-validation-for="Input.Description" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>تنظیمات جستجو</h2>
+                    <span class="panel-hint">صفحه دسته هم در گوگل ایندکس می‌شود</span>
+                </header>
+                <div class="panel-body">
+                    <div class="serp" aria-label="پیش‌نمایش نتیجه جستجو">
+                        <p class="serp-url" dir="ltr" id="serpUrl">@Model.CanonicalBase/maghalat?dasteh=</p>
+                        <p class="serp-title" id="serpTitle">عنوان دسته</p>
+                        <p class="serp-desc" id="serpDesc">توضیح متا اینجا نمایش داده می‌شود.</p>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.MetaTitle" class="label">
+                            عنوان متا
+                            <span class="label-hint">خالی بماند «مقالات + عنوان دسته» می‌شود</span>
+                        </label>
+                        <input asp-for="Input.MetaTitle" class="input input-plain" id="metaTitleInput"
+                               maxlength="70" data-counter="metaTitleCount" />
+                        <span class="counter"><span id="metaTitleCount">۰</span> از ۷۰</span>
+                        <span asp-validation-for="Input.MetaTitle" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.MetaDescription" class="label">
+                            توضیح متا
+                            <span class="label-hint">خالی بماند از توضیح دسته ساخته می‌شود</span>
+                        </label>
+                        <textarea asp-for="Input.MetaDescription" class="input input-plain" rows="3"
+                                  id="metaDescInput" maxlength="170" data-counter="metaDescCount"></textarea>
+                        <span class="counter"><span id="metaDescCount">۰</span> از ۱۷۰</span>
+                        <span asp-validation-for="Input.MetaDescription" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <aside class="edit-side">
+            <section class="panel">
+                <header class="panel-head"><h2>ذخیره</h2></header>
+                <div class="panel-body">
+                    @if (!Model.IsNew && Model.ArticleCount > 0)
+                    {
+                        <p class="field-note">
+                            این دسته <fa-num>@Model.ArticleCount</fa-num> مقاله دارد.
+                            تغییر نشانی صفحه، آدرس فهرست دسته را عوض می‌کند.
+                        </p>
+                    }
+
+                    <div class="side-actions">
+                        <button type="submit" class="btn btn-gold auth-submit">ذخیره</button>
+                        <a asp-page="./Index" class="btn btn-ghost auth-submit">بازگشت به فهرست</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>جایگاه در ساختار</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.ParentId" class="label">
+                            دسته والد
+                            <span class="label-hint">خالی بماند دسته اصلی می‌شود</span>
+                        </label>
+                        <select asp-for="Input.ParentId" asp-items="Model.ParentOptions" class="input input-plain">
+                            <option value="">— دسته اصلی —</option>
+                        </select>
+                        <span asp-validation-for="Input.ParentId" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.SortOrder" class="label">
+                            ترتیب نمایش
+                            <span class="label-hint">عدد کوچک‌تر بالاتر می‌آید</span>
+                        </label>
+                        <input asp-for="Input.SortOrder" class="input input-plain" type="number" min="0" max="999" />
+                        <span asp-validation-for="Input.SortOrder" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/js/article-editor.js" asp-append-version="true"></script>
+}

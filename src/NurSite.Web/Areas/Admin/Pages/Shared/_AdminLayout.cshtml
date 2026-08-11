@@ -59,6 +59,10 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V6a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" /><path d="M9 8h5" /></svg>
                     مقالات
                 </a>
+                <a asp-area="Admin" asp-page="/Dastebandi/Index" class="nav-item @(current.StartsWith("/Dastebandi", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h6l2 2h10v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z" /></svg>
+                    دسته‌بندی‌ها
+                </a>
                 <a href="#" class="nav-item soon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" /></svg>
                     احکام
@@ -153,8 +157,6 @@
     </div>
 
     <script src="~/js/admin.js" asp-append-version="true" defer></script>
-    <script src="~/lib/tinymce/tinymce.min.js" asp-append-version="true"></script>
-    <script src="~/js/article-editor.js" asp-append-version="true" defer></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

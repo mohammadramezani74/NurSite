@@ -1,0 +1,111 @@
+﻿@page
+@model NurSite.Web.Areas.Admin.Pages.Dastebandi.IndexModel
+@{
+    ViewData["Title"] = "دسته‌بندی‌ها";
+    ViewData["Subtitle"] = "سازماندهی موضوعی مقالات";
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash @(Model.FlashKind == "ok" ? "flash-ok" : "flash-warn")" role="status">@Model.Flash</div>
+}
+
+<section class="panel">
+    <header class="panel-head">
+        <h2>فهرست دسته‌ها <span class="count"><fa-num>@Model.Nodes.Count</fa-num></span></h2>
+        <a asp-page="./Edit" class="btn btn-gold btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M12 5v14M5 12h14" /></svg>
+            دسته تازه
+        </a>
+    </header>
+
+    @if (Model.Nodes.Count == 0)
+    {
+        <p class="empty">هنوز دسته‌بندی‌ای ساخته نشده است.</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>عنوان</th>
+                        <th>مقالات</th>
+                        <th>سئو</th>
+                        <th class="cell-actions">ترتیب</th>
+                        <th class="cell-actions">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var node in Model.Nodes)
+                    {
+                        var c = node.Category;
+                        var seoOk = !string.IsNullOrWhiteSpace(c.MetaTitle)
+                        && !string.IsNullOrWhiteSpace(c.MetaDescription);
+                        <tr>
+                            <td class="cell-title">
+                                <span class="tree-cell" style="padding-inline-start:@(node.Depth * 22)px">
+                                    @if (node.Depth > 0)
+                                    {
+                                        <span class="tree-mark" aria-hidden="true">└</span>
+                                    }
+                                    <a asp-page="./Edit" asp-route-id="@c.Id">@c.Title</a>
+                                </span>
+                                <span class="cell-slug">/maghalat?dasteh=@c.Slug</span>
+                            </td>
+                            <td>
+                                @if (node.ArticleCount > 0)
+                                {
+                                    <a asp-area="Admin" asp-page="/Maghalat/Index" asp-route-categoryId="@c.Id" class="badge badge-ok">
+                                        <fa-num>@node.ArticleCount</fa-num> مقاله
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-draft">خالی</span>
+                                }
+                            </td>
+                            <td>
+                                @if (seoOk)
+                                {
+                                    <span class="seo-dot ok">کامل</span>
+                                }
+                                else
+                                {
+                                    <span class="seo-dot miss">ناقص</span>
+                                }
+                            </td>
+                            <td class="cell-actions">
+                                <div class="actions">
+                                    <form method="post" asp-page-handler="Move" asp-route-id="@c.Id" asp-route-direction="up">
+                                        <button type="submit" class="icon-btn" title="یک پله بالا">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6" /></svg>
+                                        </button>
+                                    </form>
+                                    <form method="post" asp-page-handler="Move" asp-route-id="@c.Id" asp-route-direction="down">
+                                        <button type="submit" class="icon-btn" title="یک پله پایین">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" /></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                            <td class="cell-actions">
+                                <div class="actions">
+                                    <a asp-page="./Edit" asp-route-id="@c.Id" class="icon-btn" title="ویرایش">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                                    </a>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@c.Id"
+                                          data-confirm="دسته «@c.Title» حذف شود؟">
+                                        <button type="submit" class="icon-btn danger" title="حذف">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" /></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
