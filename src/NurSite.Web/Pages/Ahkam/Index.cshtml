@@ -1,0 +1,148 @@
+﻿@page "/ahkam"
+@model NurSite.Web.Pages.Ahkam.IndexModel
+@{
+    ViewData["Title"] = Model.ActiveCategory is null ? "احکام شرعی" : $"احکام {Model.ActiveCategory.Title}";
+    ViewData["MetaDescription"] = Model.ActiveCategory?.MetaDescription
+        ?? "پرسش و پاسخ‌های شرعی در ابواب طهارت، نماز، روزه، خمس و خانواده، مستند به فتاوای مراجع تقلید.";
+
+    // صفحه نتایج جستجوی درون‌صفحه‌ای ایندکس نشود
+    if (Model.HasQuery) { ViewData["NoIndex"] = true; }
+}
+
+@section Head {
+    <json-ld data="@Model.BuildBreadcrumbSchema()" />
+    @if (!Model.HasQuery && Model.BuildFaqSchema() is { } faq)
+    {
+        <json-ld data="@faq" />
+    }
+}
+
+<section class="tone-2 girih page-head">
+    <div class="wrap">
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            @if (Model.ActiveCategory is null)
+            {
+                <span aria-current="page">احکام</span>
+            }
+            else
+            {
+                <a asp-page="/Ahkam/Index">احکام</a>
+                <span aria-hidden="true">›</span>
+                <span aria-current="page">@Model.ActiveCategory.Title</span>
+            }
+        </nav>
+
+        <h1>@(Model.ActiveCategory is null ? "احکام شرعی" : $"احکام {Model.ActiveCategory.Title}")</h1>
+        <p>
+            @if (!string.IsNullOrWhiteSpace(Model.ActiveCategory?.Description))
+            {
+                @Model.ActiveCategory.Description
+            }
+            else
+            {
+                <text>پاسخ پرسش‌های شرعی، مستند به فتاوای مراجع تقلید. روی هر پرسش بزنید تا پاسخش باز شود.</text>
+            }
+        </p>
+
+        <form method="get" class="search-form" role="search" style="margin-top:24px">
+            <input type="hidden" name="bab" value="@Model.CategorySlug" />
+            <div class="search-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                <label class="sr" for="q">جستجو در احکام</label>
+                <input id="q" name="q" value="@Model.Query" placeholder="جستجو در احکام…" />
+            </div>
+            <button type="submit" class="btn btn-gold">جستجو</button>
+        </form>
+    </div>
+</section>
+
+<section class="tone-1">
+    <div class="wrap">
+
+        <nav class="chips" aria-label="ابواب احکام">
+            <a asp-page="/Ahkam/Index" asp-route-q="@Model.Query"
+               class="chip @(Model.ActiveCategory is null ? "on" : "")">همه ابواب</a>
+            @foreach (var c in Model.Categories)
+            {
+                <a asp-page="/Ahkam/Index" asp-route-bab="@c.Slug" asp-route-q="@Model.Query"
+                   class="chip @(Model.ActiveCategory?.Id == c.Id ? "on" : "")">@c.Title</a>
+            }
+        </nav>
+
+        @if (Model.TotalCount == 0)
+        {
+            <div class="search-empty" style="max-width:640px">
+                @if (Model.HasQuery)
+                {
+                    <p class="big">نتیجه‌ای برای «@Model.Query» پیدا نشد.</p>
+                    <ul>
+                        <li>با کلمه‌های کمتر یا عمومی‌تر جستجو کنید</li>
+                        <li>یا <a asp-page="/Ahkam/Index">همه احکام</a> را ببینید</li>
+                    </ul>
+                }
+                else
+                {
+                    <p class="big">هنوز حکمی در این بخش منتشر نشده است.</p>
+                }
+                <p style="margin-top:18px">
+                    پرسش شرعی دارید؟ <a asp-page="/Porsesh">مستقیم بپرسید</a>.
+                </p>
+            </div>
+        }
+        else
+        {
+            @if (Model.HasQuery)
+            {
+                <p class="search-count"><fa-num>@Model.TotalCount</fa-num> نتیجه برای «@Model.Query»</p>
+            }
+
+            @foreach (var group in Model.Groups)
+            {
+                <div class="bab-block">
+                    <h2 class="bab-title">@group.Key</h2>
+
+                    <div class="acc">
+                        @foreach (var (ruling, index) in group.Select((r, i) => (r, i)))
+                        {
+                            <details class="acc-item" open="@(Model.HasQuery || index == 0)">
+                                <summary class="acc-q">
+                                    <span class="acc-num">@(index + 1)</span>
+                                    @ruling.Question
+                                    @if (ruling.IsFrequentlyAsked)
+                                    {
+                                        <span class="faq-star" title="از پرسش‌های پرتکرار" aria-hidden="true">★</span>
+                                    }
+                                    <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg>
+                                </summary>
+                                <div class="acc-a">
+                                    @Html.Raw(ruling.Answer)
+
+                                    <div class="ruling-foot">
+                                        @if (!string.IsNullOrWhiteSpace(ruling.FatwaNote))
+                                        {
+                                            <span class="marja">@ruling.FatwaNote</span>
+                                        }
+                                        @if (ruling.Marja is not null && !string.IsNullOrWhiteSpace(ruling.Marja.OfficialSiteUrl))
+                                        {
+                                            <a href="@ruling.Marja.OfficialSiteUrl" target="_blank" rel="noopener noreferrer nofollow" class="link-quiet">
+                                                سایت رسمی @ruling.Marja.FullName
+                                            </a>
+                                        }
+                                        <a asp-page="/Ahkam/Details" asp-route-slug="@ruling.Slug" class="link-quiet">نشانی این حکم</a>
+                                    </div>
+                                </div>
+                            </details>
+                        }
+                    </div>
+                </div>
+            }
+        }
+
+        <div class="ask-cta">
+            <p>پاسخ پرسشتان را پیدا نکردید؟</p>
+            <a asp-page="/Porsesh" class="btn btn-fill">پرسش شرعی خود را بپرسید</a>
+        </div>
+    </div>
+</section>

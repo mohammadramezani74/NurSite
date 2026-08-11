@@ -253,7 +253,8 @@
                             <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg>
                         </summary>
                         <div class="acc-a">
-                            @ruling.Answer
+                            @* پاسخ از ویرایشگر می‌آید و HTML دارد، پس باید خام رندر شود *@
+                            @Html.Raw(ruling.Answer)
                             @if (!string.IsNullOrWhiteSpace(ruling.FatwaNote))
                             {
                                 <span class="marja">@ruling.FatwaNote</span>

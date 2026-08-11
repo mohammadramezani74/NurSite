@@ -1,0 +1,112 @@
+﻿@page "/ahkam/{slug}"
+@model NurSite.Web.Pages.Ahkam.DetailsModel
+@{
+    ViewData["Title"] = Model.Ruling.MetaTitle ?? Model.Ruling.Question;
+    ViewData["MetaDescription"] = Model.Ruling.MetaDescription;
+    ViewData["OgType"] = "article";
+}
+
+@section Head {
+    <json-ld data="@Model.BuildQaSchema()" />
+    <json-ld data="@Model.BuildBreadcrumbSchema()" />
+}
+
+<article class="tone-1 article-page">
+    <div class="wrap article-wrap">
+
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            <a asp-page="/Ahkam/Index">احکام</a>
+            <span aria-hidden="true">›</span>
+            <a asp-page="/Ahkam/Index" asp-route-bab="@Model.Ruling.RulingCategory.Slug">@Model.Ruling.RulingCategory.Title</a>
+        </nav>
+
+        <header class="article-head">
+            <span class="kicker" style="margin-bottom:14px">پرسش شرعی</span>
+            <h1>@Model.Ruling.Question</h1>
+        </header>
+
+        <div class="answer-box">
+            <span class="answer-label">پاسخ</span>
+            <div class="article-body">
+                @Html.Raw(Model.Ruling.Answer)
+            </div>
+        </div>
+
+        @if (Model.Ruling.Marja is not null
+                || !string.IsNullOrWhiteSpace(Model.Ruling.FatwaNote)
+                || !string.IsNullOrWhiteSpace(Model.Ruling.SourceReference))
+        {
+            <aside class="sanad">
+                <h2>استناد</h2>
+                <dl>
+                    @if (Model.Ruling.Marja is not null)
+                    {
+                        <dt>مرجع تقلید</dt>
+                        <dd>
+                            @Model.Ruling.Marja.FullName
+                            @if (!string.IsNullOrWhiteSpace(Model.Ruling.Marja.OfficialSiteUrl))
+                            {
+                                <a href="@Model.Ruling.Marja.OfficialSiteUrl" target="_blank"
+                                   rel="noopener noreferrer nofollow" class="link-quiet">سایت رسمی</a>
+                            }
+                        </dd>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Ruling.FatwaNote))
+                    {
+                        <dt>فتوا</dt>
+                        <dd>@Model.Ruling.FatwaNote</dd>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Ruling.SourceReference))
+                    {
+                        <dt>منبع</dt>
+                        <dd>@Model.Ruling.SourceReference</dd>
+                    }
+                </dl>
+                <p class="sanad-note">
+                    برای اطمینان، متن فتوا را از منبع اصلی نیز بررسی کنید.
+                </p>
+            </aside>
+        }
+
+        <footer class="article-foot">
+            <a asp-page="/Ahkam/Index" asp-route-bab="@Model.Ruling.RulingCategory.Slug" class="chip on">
+                @Model.Ruling.RulingCategory.Title
+            </a>
+
+            <div class="share">
+                <span>اشتراک‌گذاری:</span>
+                <a href="https://t.me/share/url?url=@Uri.EscapeDataString(Model.CanonicalUrl)&text=@Uri.EscapeDataString(Model.Ruling.Question)"
+                   target="_blank" rel="noopener noreferrer">تلگرام</a>
+                <a href="https://wa.me/?text=@Uri.EscapeDataString(Model.Ruling.Question + " " + Model.CanonicalUrl)"
+                   target="_blank" rel="noopener noreferrer">واتساپ</a>
+                <button type="button" class="copy-link" data-copy="@Model.CanonicalUrl">کپی نشانی</button>
+            </div>
+        </footer>
+    </div>
+</article>
+
+@if (Model.Related.Count > 0)
+{
+    <section class="tone-2 girih">
+        <div class="wrap" style="max-width:820px">
+            <div class="sec-head">
+                <span class="kicker">در همین باب</span>
+                <h2>پرسش‌های مرتبط</h2>
+            </div>
+
+            <ul class="related-list">
+                @foreach (var r in Model.Related)
+                {
+                    <li>
+                        <a asp-page="/Ahkam/Details" asp-route-slug="@r.Slug">
+                            <span>@r.Question</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6 6 6" /></svg>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </section>
+}

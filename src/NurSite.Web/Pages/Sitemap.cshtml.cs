@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using System.Xml;
+using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +14,8 @@ namespace NurSite.Web.Pages;
 /// </summary>
 public class SitemapModel(AppDbContext db) : PageModel
 {
+    private static readonly XNamespace Ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
+
     public async Task<IActionResult> OnGetAsync(CancellationToken ct)
     {
         // نشانی مبنا از تنظیمات سایت خوانده می‌شود، نه از هدر درخواست.
@@ -23,65 +25,69 @@ public class SitemapModel(AppDbContext db) : PageModel
         var baseUrl = (siteSetting?.CanonicalBaseUrl ?? $"{Request.Scheme}://{Request.Host}")
             .TrimEnd('/');
 
-        var sb = new StringBuilder();
-        var xmlSettings = new XmlWriterSettings
+        var urls = new List<XElement>
         {
-            Indent = true,
-            Encoding = Encoding.UTF8,
-            Async = true,
-            OmitXmlDeclaration = false
+            Url($"{baseUrl}/", DateTime.UtcNow, "daily", "1.0"),
+            Url($"{baseUrl}/maghalat", DateTime.UtcNow, "daily", "0.9"),
+            Url($"{baseUrl}/ahkam", DateTime.UtcNow, "daily", "0.9")
         };
 
-        await using (var writer = XmlWriter.Create(sb, xmlSettings))
-        {
-            await writer.WriteStartDocumentAsync();
-            await writer.WriteStartElementAsync(null, "urlset", "http://www.sitemaps.org/schemas/sitemap/0.9");
+        // دسته‌بندی‌ها
+        var categorySlugs = await db.Categories.AsNoTracking()
+            .OrderBy(c => c.SortOrder)
+            .Select(c => c.Slug)
+            .ToListAsync(ct);
 
-            // صفحه اصلی
-            await WriteUrlAsync(writer, baseUrl, DateTime.UtcNow, "daily", "1.0");
+        urls.AddRange(categorySlugs.Select(slug =>
+            Url($"{baseUrl}/maghalat?dasteh={Uri.EscapeDataString(slug)}",
+                DateTime.UtcNow, "weekly", "0.6")));
 
-            // فهرست مقالات
-            await WriteUrlAsync(writer, $"{baseUrl}/maghalat", DateTime.UtcNow, "daily", "0.9");
+        // مقالات منتشرشده
+        var articles = await db.Articles.AsNoTracking()
+            .Where(a => a.Status == PublishStatus.Published)
+            .OrderByDescending(a => a.PublishedAtUtc)
+            .Select(a => new { a.Slug, a.PublishedAtUtc, a.UpdatedAtUtc })
+            .ToListAsync(ct);
 
-            // دسته‌بندی‌ها
-            var categories = await db.Categories.AsNoTracking()
-                .Select(c => c.Slug)
-                .ToListAsync(ct);
+        urls.AddRange(articles.Select(a =>
+            Url($"{baseUrl}/maghalat/{Uri.EscapeDataString(a.Slug)}",
+                a.UpdatedAtUtc ?? a.PublishedAtUtc ?? DateTime.UtcNow,
+                "monthly", "0.8")));
 
-            foreach (var slug in categories)
-                await WriteUrlAsync(writer, $"{baseUrl}/maghalat?dasteh={Uri.EscapeDataString(slug)}",
-                    DateTime.UtcNow, "weekly", "0.6");
+        // ابواب احکام
+        var chapterSlugs = await db.RulingCategories.AsNoTracking()
+            .OrderBy(c => c.SortOrder)
+            .Select(c => c.Slug)
+            .ToListAsync(ct);
 
-            // مقالات منتشرشده
-            var articles = await db.Articles.AsNoTracking()
-                .Where(a => a.Status == PublishStatus.Published)
-                .OrderByDescending(a => a.PublishedAtUtc)
-                .Select(a => new { a.Slug, a.PublishedAtUtc, a.UpdatedAtUtc })
-                .ToListAsync(ct);
+        urls.AddRange(chapterSlugs.Select(slug =>
+            Url($"{baseUrl}/ahkam?bab={Uri.EscapeDataString(slug)}",
+                DateTime.UtcNow, "weekly", "0.7")));
 
-            foreach (var a in articles)
-            {
-                var lastMod = a.UpdatedAtUtc ?? a.PublishedAtUtc ?? DateTime.UtcNow;
-                await WriteUrlAsync(writer,
-                    $"{baseUrl}/maghalat/{Uri.EscapeDataString(a.Slug)}",
-                    lastMod, "monthly", "0.8");
-            }
+        // احکام منتشرشده — اولویت بالاتر از مقالات، چون بیشتر جستجو می‌شوند
+        var rulings = await db.Rulings.AsNoTracking()
+            .Where(r => r.Status == PublishStatus.Published)
+            .OrderBy(r => r.RulingCategoryId).ThenBy(r => r.SortOrder)
+            .Select(r => new { r.Slug, r.CreatedAtUtc, r.UpdatedAtUtc })
+            .ToListAsync(ct);
 
-            await writer.WriteEndElementAsync();
-            await writer.WriteEndDocumentAsync();
-        }
+        urls.AddRange(rulings.Select(r =>
+            Url($"{baseUrl}/ahkam/{Uri.EscapeDataString(r.Slug)}",
+                r.UpdatedAtUtc ?? r.CreatedAtUtc,
+                "monthly", "0.8")));
 
-        return Content(sb.ToString(), "application/xml", Encoding.UTF8);
+        var document = new XDocument(
+            new XDeclaration("1.0", "utf-8", null),
+            new XElement(Ns + "urlset", urls));
+
+        return Content(document.Declaration + Environment.NewLine + document,
+            "application/xml", Encoding.UTF8);
     }
 
-    private static async Task WriteUrlAsync(
-        XmlWriter writer, string location, DateTime lastModified, string changeFreq, string priority)
-    {
-        await writer.WriteStartElementAsync(null, "url", null);
-        await writer.WriteElementStringAsync(null, "loc", null, location);
-        await writer.WriteElementStringAsync(null, "lastmod", null, lastModified.ToString("yyyy-MM-dd"));
-        await writer.WriteElementStringAsync(null, "changefreq", null, changeFreq);
-        await writer.WriteElementStringAsync(null, "priority", null, priority);
-        await writer.WriteEndElementAsync();
-    }
+    private static XElement Url(string location, DateTime lastModified, string changeFrequency, string priority) =>
+        new(Ns + "url",
+            new XElement(Ns + "loc", location),
+            new XElement(Ns + "lastmod", lastModified.ToString("yyyy-MM-dd")),
+            new XElement(Ns + "changefreq", changeFrequency),
+            new XElement(Ns + "priority", priority));
 }

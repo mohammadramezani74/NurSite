@@ -2525,3 +2525,170 @@ mark {
     .search-empty a, .search-tips a {
         color: var(--firouze-2)
     }
+
+/* ============================================================
+   صفحات عمومی احکام
+   ============================================================ */
+
+.bab-block {
+    margin-bottom: 44px
+}
+
+.bab-title {
+    font-size: clamp(19px,2.4vw,24px);
+    font-weight: 800;
+    color: var(--tala-2);
+    line-height: 1.7;
+    margin-bottom: 18px;
+    padding-inline-start: 14px;
+    border-inline-start: 3px solid var(--tala);
+}
+
+.faq-star {
+    color: var(--tala);
+    font-size: 14px;
+    margin-inline-start: 8px;
+    flex: none
+}
+
+.ruling-foot {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--khat-2);
+}
+
+    .ruling-foot .marja {
+        margin-top: 0
+    }
+
+.ask-cta {
+    margin-top: 48px;
+    padding: 34px 24px;
+    text-align: center;
+    background: var(--panel);
+    border: 1px solid var(--khat);
+}
+
+    .ask-cta p {
+        font-size: 16px;
+        color: var(--matn);
+        margin-bottom: 18px
+    }
+
+/* ---------- صفحه تک حکم ---------- */
+.answer-box {
+    margin-top: 30px;
+    padding: 26px;
+    background: var(--panel);
+    border: 1px solid var(--khat);
+    border-inline-start: 3px solid var(--firouze);
+    position: relative;
+}
+
+.answer-label {
+    display: inline-block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--firouze-2);
+    background: rgba(42,167,155,.13);
+    padding: 5px 13px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+}
+
+.answer-box .article-body {
+    font-size: 16.5px
+}
+
+/* ---------- جعبه استناد ---------- */
+.sanad {
+    margin-top: 28px;
+    padding: 24px 26px;
+    background: rgba(200,162,74,.07);
+    border: 1px solid rgba(200,162,74,.28);
+}
+
+    .sanad h2 {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--tala-2);
+        margin-bottom: 16px
+    }
+
+    .sanad dl {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 10px 20px;
+        font-size: 14.5px
+    }
+
+    .sanad dt {
+        color: var(--matn-2);
+        font-weight: 600;
+        white-space: nowrap
+    }
+
+    .sanad dd {
+        color: var(--matn);
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center
+    }
+
+.sanad-note {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(200,162,74,.2);
+    font-size: 12.5px;
+    color: var(--matn-2);
+    font-weight: 300;
+}
+
+/* ---------- پرسش‌های مرتبط ---------- */
+.related-list {
+    list-style: none;
+    display: grid;
+    gap: 1px;
+    background: var(--khat);
+    border: 1px solid var(--khat)
+}
+
+    .related-list a {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: var(--ink);
+        padding: 16px 20px;
+        font-size: 15px;
+        color: var(--matn);
+        transition: .2s;
+    }
+
+        .related-list a:hover {
+            background: var(--lajvard-2);
+            color: #fff
+        }
+
+    .related-list svg {
+        width: 16px;
+        height: 16px;
+        color: var(--firouze-2);
+        flex: none;
+        margin-inline-start: auto
+    }
+
+@media(max-width:620px) {
+    .sanad dl {
+        grid-template-columns: 1fr;
+        gap: 4px 0
+    }
+
+    .sanad dt {
+        margin-top: 10px
+    }
+}
