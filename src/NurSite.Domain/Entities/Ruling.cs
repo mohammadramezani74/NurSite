@@ -29,6 +29,9 @@ public class Ruling : BaseEntity, IAuditable, ISoftDelete, ISeoAware
     public string? MetaDescription { get; set; }
     public string? OgImagePath { get; set; }
 
+    /// <summary>متن یکسان‌شده پرسش و پاسخ، فقط برای جستجو.</summary>
+    public string? SearchText { get; set; }
+
     public DateTime CreatedAtUtc { get; set; }
     public string? CreatedById { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }

@@ -26,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<ISlugService, SlugService>();
         services.AddSingleton<IPersianDateService, PersianDateService>();
         services.AddScoped<IPrayerTimeService, PrayerTimeService>();
+        services.AddScoped<ISearchService, SearchService>();
 
         return services;
     }

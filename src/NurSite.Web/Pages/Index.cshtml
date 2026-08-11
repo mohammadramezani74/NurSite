@@ -39,6 +39,23 @@
 
         <h1>خانه‌ای برای آموختن، اندیشیدن و با هم بودن</h1>
         <p>درس‌های تفسیر و اخلاق، پاسخ به پرسش‌های شرعی، آرشیو سخنرانی‌ها و برنامه‌های هفتگی — همه در یک جا.</p>
+        <form method="get" asp-page="/Jostojoo" class="search-form hero-search" role="search">
+            <div class="search-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                <label class="sr" for="heroSearch">جستجو در مقالات و احکام</label>
+                <input id="heroSearch" name="q" placeholder="پرسش یا موضوعی را جستجو کنید…" />
+            </div>
+            <button type="submit" class="btn btn-gold">جستجو</button>
+        </form>
+
+        <p class="search-hints">
+            <span>جستجوهای پرتکرار:</span>
+            <a asp-page="/Jostojoo" asp-route-q="نماز مسافر">نماز مسافر</a>
+            <a asp-page="/Jostojoo" asp-route-q="خمس">خمس</a>
+            <a asp-page="/Jostojoo" asp-route-q="روزه قضا">روزه قضا</a>
+            <a asp-page="/Jostojoo" asp-route-q="وضو">وضو</a>
+        </p>
+
         <div class="hero-btns">
             <a asp-page="/Barnameh/Index" class="btn btn-gold">برنامه‌های این هفته</a>
             <a asp-page="/Maghalat/Index" class="btn btn-ghost">خواندن مقالات</a>

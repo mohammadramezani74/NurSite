@@ -21,7 +21,8 @@
               canonical="@canonical"
               image="@ViewData["OgImage"]"
               site-name="@siteName"
-              og-type="@(ViewData["OgType"]?.ToString() ?? "website")" />
+              og-type="@(ViewData["OgType"]?.ToString() ?? "website")"
+              no-index="@(ViewData["NoIndex"] is true)" />
 
     <meta name="theme-color" content="#04121F">
     <link rel="manifest" href="~/manifest.webmanifest">

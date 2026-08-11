@@ -1,0 +1,113 @@
+﻿@page "/jostojoo"
+@model JostojooModel
+@using NurSite.Application.DTOs
+@{
+    ViewData["Title"] = Model.HasQuery ? $"جستجوی «{Model.Query}»" : "جستجو";
+    ViewData["MetaDescription"] = "جستجو در مقالات و احکام مؤسسه فرهنگی نورالثقلین.";
+
+    // صفحه نتایج جستجو نباید ایندکس شود — محتوای تکراری تولید می‌کند
+    ViewData["NoIndex"] = true;
+}
+
+<section class="tone-2 girih page-head">
+    <div class="wrap">
+        <h1>جستجو</h1>
+        <p>در مقالات و احکام سایت بگردید.</p>
+
+        <form method="get" class="search-form big" role="search">
+            <div class="search-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                <label class="sr" for="q">عبارت جستجو</label>
+                <input id="q" name="q" value="@Model.Query" autofocus
+                       placeholder="مثلاً: نماز مسافر، خمس، حسد" data-persian-digits />
+            </div>
+            <button type="submit" class="btn btn-gold">جستجو</button>
+        </form>
+
+        @if (Model.HasQuery)
+        {
+            <nav class="chips" style="margin-top:22px;margin-bottom:0" aria-label="نوع محتوا">
+                <a asp-page="/Jostojoo" asp-route-q="@Model.Query" asp-route-type="@SearchKind.All"
+                   class="chip @(Model.Kind == SearchKind.All ? "on" : "")">همه</a>
+                <a asp-page="/Jostojoo" asp-route-q="@Model.Query" asp-route-type="@SearchKind.Ruling"
+                   class="chip @(Model.Kind == SearchKind.Ruling ? "on" : "")">احکام</a>
+                <a asp-page="/Jostojoo" asp-route-q="@Model.Query" asp-route-type="@SearchKind.Article"
+                   class="chip @(Model.Kind == SearchKind.Article ? "on" : "")">مقالات</a>
+            </nav>
+        }
+    </div>
+</section>
+
+<section class="tone-1">
+    <div class="wrap" style="max-width:820px">
+
+        @if (!Model.HasQuery)
+        {
+            <div class="search-tips">
+                <h2>چطور بهتر جستجو کنیم؟</h2>
+                <ul>
+                    <li>چند کلمه کلیدی بنویسید، نه جمله کامل. مثلاً «روزه مسافر» بهتر از «آیا روزه مسافر صحیح است؟»</li>
+                    <li>نگارش مهم نیست — «میشود» و «می‌شود» یکسان در نظر گرفته می‌شوند.</li>
+                    <li>اگر نتیجه‌ای پیدا نشد، کلمه‌های کمتری بنویسید.</li>
+                </ul>
+            </div>
+        }
+        else if (Model.Result is null || Model.Result.TotalCount == 0)
+        {
+            <div class="search-empty">
+                <p class="big">نتیجه‌ای برای «@Model.Query» پیدا نشد.</p>
+                <ul>
+                    <li>املای واژه‌ها را بررسی کنید</li>
+                    <li>با کلمه‌های کمتر یا عمومی‌تر جستجو کنید</li>
+                    <li>اگر پرسش شرعی دارید، می‌توانید <a asp-page="/Porsesh">مستقیم بپرسید</a></li>
+                </ul>
+            </div>
+        }
+        else
+        {
+            <p class="search-count">
+                <fa-num>@Model.Result.TotalCount</fa-num> نتیجه برای «@Model.Query»
+            </p>
+
+            <ol class="hit-list">
+                @foreach (var hit in Model.Result.Hits)
+                {
+                    <li class="hit">
+                        <span class="hit-kind @(hit.Kind == SearchKind.Ruling ? "kind-ruling" : "kind-article")">
+                            @(hit.Kind == SearchKind.Ruling ? "حکم" : "مقاله")
+                        </span>
+
+                        <h2><a href="@hit.Url">@Model.Highlight(hit.Title)</a></h2>
+                        <p class="hit-snippet">@Model.Highlight(hit.Snippet)</p>
+
+                        <p class="hit-meta">
+                            @if (!string.IsNullOrWhiteSpace(hit.CategoryTitle))
+                            {
+                                <span>@hit.CategoryTitle</span>
+                            }
+                            @if (hit.DateUtc is not null)
+                            {
+                                <span><persian-date value="@hit.DateUtc" /></span>
+                            }
+                            <span class="hit-url" dir="ltr">@hit.Url</span>
+                        </p>
+                    </li>
+                }
+            </ol>
+
+            @if (Model.Result.TotalPages > 1)
+            {
+                <nav class="pager pager-public" aria-label="صفحه‌بندی">
+                    @for (var p = 1; p <= Model.Result.TotalPages; p++)
+                    {
+                        <a asp-page="/Jostojoo" asp-route-q="@Model.Query" asp-route-type="@Model.Kind" asp-route-page="@p"
+                           class="pager-item @(p == Model.Result.PageNumber ? "on" : "")"
+                           aria-current="@(p == Model.Result.PageNumber ? "page" : null)">
+                            <fa-num>@p</fa-num>
+                        </a>
+                    }
+                </nav>
+            }
+        }
+    </div>
+</section>

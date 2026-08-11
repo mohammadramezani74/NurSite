@@ -2323,3 +2323,205 @@ footer a:hover {
         align-items: flex-start
     }
 }
+
+/* ============================================================
+   جستجو
+   ============================================================ */
+.search-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    max-width: 620px;
+    margin-inline: auto
+}
+
+    .search-form.big {
+        max-width: 720px;
+        margin-top: 26px
+    }
+
+.hero-search {
+    margin-block: 8px 14px
+}
+
+.search-input-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 230px;
+    display: flex;
+    align-items: center
+}
+
+    .search-input-wrap svg {
+        position: absolute;
+        inset-inline-start: 16px;
+        width: 19px;
+        height: 19px;
+        color: var(--matn-2);
+        pointer-events: none;
+    }
+
+    .search-input-wrap input {
+        width: 100%;
+        font: inherit;
+        font-size: 15.5px;
+        padding: 15px 48px 15px 18px;
+        background: rgba(255,255,255,.07);
+        border: 1px solid var(--khat);
+        color: #fff;
+        transition: .2s;
+    }
+
+        .search-input-wrap input::placeholder {
+            color: #6F869A
+        }
+
+        .search-input-wrap input:hover {
+            border-color: rgba(255,255,255,.22)
+        }
+
+        .search-input-wrap input:focus {
+            outline: none;
+            border-color: var(--firouze);
+            background: rgba(42,167,155,.09)
+        }
+
+.search-hints {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 13.5px;
+    color: var(--matn-2);
+    margin-bottom: 26px;
+}
+
+    .search-hints a {
+        color: var(--firouze-2)
+    }
+
+        .search-hints a:hover {
+            color: var(--tala-2)
+        }
+
+.search-count {
+    font-size: 14.5px;
+    color: var(--matn-2);
+    margin-bottom: 26px
+}
+
+/* ---------- فهرست نتایج ---------- */
+.hit-list {
+    list-style: none;
+    display: grid;
+    gap: 26px
+}
+
+.hit {
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--khat-2)
+}
+
+    .hit:last-child {
+        border-bottom: 0
+    }
+
+.hit-kind {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 11px;
+    border-radius: 100px;
+    margin-bottom: 10px;
+}
+
+.kind-ruling {
+    background: rgba(200,162,74,.15);
+    color: var(--tala-2)
+}
+
+.kind-article {
+    background: rgba(42,167,155,.15);
+    color: var(--firouze-2)
+}
+
+.hit h2 {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.75;
+    margin-bottom: 8px
+}
+
+    .hit h2 a {
+        color: #9FC0FF
+    }
+
+        .hit h2 a:hover {
+            color: var(--firouze-2)
+        }
+
+.hit-snippet {
+    font-size: 14.5px;
+    line-height: 2.1;
+    color: var(--matn-2);
+    font-weight: 300
+}
+
+.hit-meta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--matn-2);
+    margin-top: 10px
+}
+
+.hit-url {
+    color: var(--firouze);
+    opacity: .75
+}
+
+mark {
+    background: rgba(200,162,74,.3);
+    color: var(--tala-2);
+    padding: 0 2px;
+    border-radius: 2px
+}
+
+/* ---------- حالت خالی و راهنما ---------- */
+.search-empty, .search-tips {
+    padding: 20px 0
+}
+
+    .search-empty .big {
+        font-size: 18px;
+        color: #fff;
+        font-weight: 600;
+        margin-bottom: 16px
+    }
+
+    .search-tips h2 {
+        font-size: 19px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 16px
+    }
+
+    .search-empty ul, .search-tips ul {
+        list-style: none;
+        display: grid;
+        gap: 11px;
+        font-size: 14.5px;
+        color: var(--matn-2);
+        font-weight: 300
+    }
+
+    .search-empty li::before, .search-tips li::before {
+        content: '—';
+        color: var(--tala);
+        margin-inline-end: 9px
+    }
+
+    .search-empty a, .search-tips a {
+        color: var(--firouze-2)
+    }

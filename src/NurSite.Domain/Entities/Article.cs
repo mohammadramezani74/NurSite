@@ -32,6 +32,12 @@ public class Article : BaseEntity, IAuditable, ISoftDelete, ISeoAware
     public string? MetaDescription { get; set; }
     public string? OgImagePath { get; set; }
 
+    /// <summary>
+    /// متن یکسان‌شده عنوان و خلاصه و بدنه، فقط برای جستجو.
+    /// هنگام ذخیره پر می‌شود و هرگز به کاربر نمایش داده نمی‌شود.
+    /// </summary>
+    public string? SearchText { get; set; }
+
     public DateTime CreatedAtUtc { get; set; }
     public string? CreatedById { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
