@@ -1,0 +1,155 @@
+﻿@page "/owqat"
+@model OwqatModel
+@inject NurSite.Application.Interfaces.IPersianDateService Dates
+@{
+    ViewData["Title"] = Model.SelectedCity is null ? "اوقات شرعی" : $"اوقات شرعی {Model.SelectedCity.Name}";
+    ViewData["MetaDescription"] = Model.SelectedCity is null
+        ? "اوقات شرعی شهرهای ایران: اذان صبح، طلوع آفتاب، اذان ظهر، غروب، اذان مغرب و نیمه‌شب شرعی."
+        : $"اوقات شرعی {Model.SelectedCity.Name}: اذان صبح، طلوع آفتاب، اذان ظهر، غروب، اذان مغرب و نیمه‌شب شرعی به همراه تقویم ماهانه.";
+}
+
+<section class="tone-2 girih page-head">
+    <div class="wrap">
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            <span aria-current="page">اوقات شرعی</span>
+        </nav>
+
+        <h1>اوقات شرعی @Model.SelectedCity?.Name</h1>
+        <p>محاسبه به روش مؤسسه ژئوفیزیک دانشگاه تهران.</p>
+
+        <form method="get" class="city-picker">
+            <label class="sr" for="shahr">انتخاب شهر</label>
+            <select id="shahr" name="shahr" onchange="this.form.submit()">
+                @foreach (var c in Model.Cities)
+                {
+                    <option value="@c.Slug" selected="@(Model.SelectedCity?.Id == c.Id)">
+                        @c.Name@(string.IsNullOrWhiteSpace(c.ProvinceName) ? "" : $" — {c.ProvinceName}")
+                    </option>
+                }
+            </select>
+            <noscript><button type="submit" class="btn btn-ghost btn-sm">نمایش</button></noscript>
+        </form>
+    </div>
+</section>
+
+@if (Model.Today is { } today)
+{
+    <section class="tone-1">
+        <div class="wrap">
+
+            @* ---------- اوقات امروز ---------- *@
+            <div class="today-card">
+                <header class="today-head">
+                    <div>
+                        <h2>امروز</h2>
+                        <p>
+                            @Dates.ToPersianDate(DateTime.UtcNow, includeWeekday: true)
+                            <span class="dot-sep" aria-hidden="true">·</span>
+                            @Dates.ToHijriDate(DateTime.UtcNow)
+                        </p>
+                    </div>
+
+                    @if (Model.NextPrayerName is not null)
+                    {
+                        <p class="next-prayer">
+                            تا @Model.NextPrayerName
+                            <strong>@Model.TimeUntilNext</strong>
+                        </p>
+                    }
+                </header>
+
+                <div class="times-grid">
+                    @{
+                        var slots = new (string Label, TimeOnly At, bool Major)[]
+                        {
+                                ("اذان صبح", today.Fajr, true),
+                                ("طلوع آفتاب", today.Sunrise, false),
+                                ("اذان ظهر", today.Dhuhr, true),
+                                ("غروب آفتاب", today.Sunset, false),
+                                ("اذان مغرب", today.Maghrib, true),
+                                ("نیمه‌شب شرعی", today.Midnight, false)
+                        };
+                    }
+                    @foreach (var slot in slots)
+                    {
+                        <div class="time-cell @(slot.Major ? "major" : "") @(slot.Label == Model.NextPrayerName ? "next" : "")">
+                            <span class="time-label">@slot.Label</span>
+                            <b class="time-value">@Dates.ToPersianDigits(slot.At.ToString("HH\\:mm"))</b>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* ---------- تقویم ماهانه ---------- *@
+            <div class="month-head">
+                <a asp-page="/Owqat" asp-route-shahr="@Model.SelectedCity?.Slug"
+                   asp-route-sal="@Model.PreviousMonth.Year" asp-route-mah="@Model.PreviousMonth.Month"
+                   class="month-nav" rel="prev" aria-label="ماه قبل">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6l6 6-6 6" /></svg>
+                </a>
+
+                <h2>@Model.MonthTitle</h2>
+
+                <a asp-page="/Owqat" asp-route-shahr="@Model.SelectedCity?.Slug"
+                   asp-route-sal="@Model.NextMonth.Year" asp-route-mah="@Model.NextMonth.Month"
+                   class="month-nav" rel="next" aria-label="ماه بعد">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6 6 6" /></svg>
+                </a>
+            </div>
+
+            <div class="table-wrap">
+                <table class="owqat-table">
+                    <caption class="sr">اوقات شرعی @Model.SelectedCity?.Name در @Model.MonthTitle</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">روز</th>
+                            <th scope="col">اذان صبح</th>
+                            <th scope="col">طلوع</th>
+                            <th scope="col">اذان ظهر</th>
+                            <th scope="col">غروب</th>
+                            <th scope="col">اذان مغرب</th>
+                            <th scope="col">نیمه‌شب</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var day in Model.MonthDays)
+                        {
+                            var isToday = day.LocalDate == Model.TodayLocal;
+                            var hasOccasion = Model.MonthOccasions.TryGetValue(day.LocalDate, out var dayOccasions);
+
+                            <tr class="@(isToday ? "is-today" : "") @(Model.IsFriday(day.LocalDate) ? "is-friday" : "")">
+                                <th scope="row" class="day-cell">
+                                    <span class="day-num"><fa-num>@Model.PersianDayOf(day.LocalDate)</fa-num></span>
+                                    <span class="day-name">@Model.WeekdayOf(day.LocalDate)</span>
+                                    @if (hasOccasion)
+                                    {
+                                        <span class="day-occasions">
+                                            @foreach (var o in dayOccasions!)
+                                            {
+                                                <span class="occ-tag @(o.Kind == OccasionKind.Mourning ? "aza" : "eid")">@o.Title</span>
+                                            }
+                                        </span>
+                                    }
+                                </th>
+                                <td>@Dates.ToPersianDigits(day.Fajr.ToString("HH\\:mm"))</td>
+                                <td class="dim">@Dates.ToPersianDigits(day.Sunrise.ToString("HH\\:mm"))</td>
+                                <td>@Dates.ToPersianDigits(day.Dhuhr.ToString("HH\\:mm"))</td>
+                                <td class="dim">@Dates.ToPersianDigits(day.Sunset.ToString("HH\\:mm"))</td>
+                                <td>@Dates.ToPersianDigits(day.Maghrib.ToString("HH\\:mm"))</td>
+                                <td class="dim">@Dates.ToPersianDigits(day.Midnight.ToString("HH\\:mm"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="owqat-note">
+                اوقات بر اساس مختصات جغرافیایی @Model.SelectedCity?.Name و ارتفاع
+                <fa-num>@Model.SelectedCity?.Elevation.ToString("0")</fa-num> متر از سطح دریا محاسبه شده است.
+                اختلاف چند دقیقه‌ای با تقویم‌های دیگر طبیعی است و ناشی از روش محاسبه متفاوت است.
+            </p>
+        </div>
+    </section>
+}

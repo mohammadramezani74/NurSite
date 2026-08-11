@@ -1,0 +1,108 @@
+﻿@page "/monasebat"
+@model NurSite.Web.Pages.Monasebat.IndexModel
+@inject NurSite.Application.Interfaces.IPersianDateService Dates
+@{
+    ViewData["Title"] = "تقویم مناسبت‌ها";
+    ViewData["MetaDescription"] = "تقویم مناسبت‌های قمری: اعیاد، ولادت‌ها، شهادت‌ها و ایام عزاداری، با تاریخ شمسی و شمارش معکوس.";
+}
+
+@section Head {
+    @foreach (var schema in Model.BuildEventSchemas())
+    {
+        <json-ld data="@schema" />
+    }
+}
+
+<section class="tone-2 girih page-head">
+    <div class="wrap">
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            <span aria-current="page">مناسبت‌ها</span>
+        </nav>
+
+        <h1>تقویم مناسبت‌ها</h1>
+        <p>مناسبت‌های یک سال پیش رو، بر اساس تقویم قمری سال <span>@Model.HijriYearLabel</span> هجری.</p>
+    </div>
+</section>
+
+@if (Model.Next is { } next)
+{
+    <section class="tone-1" style="padding-block:clamp(30px,4vw,44px)">
+        <div class="wrap">
+            <div class="next-occasion @(next.Kind == OccasionKind.Mourning ? "aza" : "eid")">
+                <span class="next-label">مناسبت بعدی</span>
+                <h2>@next.Title</h2>
+                <p class="next-dates">
+                    <span><persian-date value="@next.Date.ToDateTime(TimeOnly.MinValue)" weekday="true" /></span>
+                    <span class="dot-sep" aria-hidden="true">·</span>
+                    <span>@Model.HijriDateOf(next) قمری</span>
+                </p>
+                <span class="next-countdown">@Model.CountdownOf(next)</span>
+            </div>
+        </div>
+    </section>
+}
+
+<section class="tone-1" style="padding-top:0">
+    <div class="wrap">
+
+        <nav class="chips" aria-label="نوع مناسبت">
+            <a asp-page="/Monasebat/Index" class="chip @(Model.Kind is null ? "on" : "")">همه</a>
+            <a asp-page="/Monasebat/Index" asp-route-noe="@OccasionKind.Celebration"
+               class="chip @(Model.Kind == OccasionKind.Celebration ? "on" : "")">اعیاد و ولادت‌ها</a>
+            <a asp-page="/Monasebat/Index" asp-route-noe="@OccasionKind.Mourning"
+               class="chip @(Model.Kind == OccasionKind.Mourning ? "on" : "")">ایام عزا</a>
+        </nav>
+
+        @if (Model.TotalCount == 0)
+        {
+            <p class="empty-public">مناسبتی در این بازه ثبت نشده است.</p>
+        }
+        else
+        {
+            @foreach (var group in Model.Groups)
+            {
+                <div class="bab-block">
+                    <h2 class="bab-title">ماه @group.Key</h2>
+
+                    <ul class="occ-list">
+                        @foreach (var o in group)
+                        {
+                            <li class="occ @(o.Kind == OccasionKind.Mourning ? "aza" : "eid") @(o.IsToday ? "is-today" : "")">
+                                <span class="occ-date">
+                                    <b><fa-num>@o.HijriDay</fa-num></b>
+                                    <small>@group.Key</small>
+                                </span>
+
+                                <div class="occ-main">
+                                    <h3>
+                                        @o.Title
+                                        @if (o.IsPublicHoliday)
+                                        {
+                                            <span class="holiday-tag">تعطیل رسمی</span>
+                                        }
+                                    </h3>
+                                    <p class="occ-shamsi">
+                                        <persian-date value="@o.Date.ToDateTime(TimeOnly.MinValue)" weekday="true" />
+                                    </p>
+                                    @if (!string.IsNullOrWhiteSpace(o.Description))
+                                    {
+                                        <p class="occ-desc">@o.Description</p>
+                                    }
+                                </div>
+
+                                <span class="occ-countdown">@Model.CountdownOf(o)</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        }
+
+        <div class="ask-cta">
+            <p>برنامه‌های ویژه هر مناسبت یک هفته پیش از آن روی سایت اعلام می‌شود.</p>
+            <a asp-page="/Owqat" class="btn btn-ghost">اوقات شرعی</a>
+        </div>
+    </div>
+</section>

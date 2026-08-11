@@ -27,6 +27,7 @@ public static class DependencyInjection
         services.AddSingleton<IPersianDateService, PersianDateService>();
         services.AddScoped<IPrayerTimeService, PrayerTimeService>();
         services.AddScoped<ISearchService, SearchService>();
+        services.AddScoped<IOccasionService, OccasionService>();
 
         // اطلاع‌رسانی: فعلاً فقط لاگ می‌گیرد و کاربر با کد رهگیری پیگیری می‌کند.
         // برای فعال کردن پیامک، فقط همین خط به پیاده‌سازی تازه تغییر می‌کند.

@@ -10,9 +10,9 @@ public class OccasionConfiguration : IEntityTypeConfiguration<Occasion>
     {
         b.Property(x => x.Title).HasMaxLength(200).IsRequired();
         b.Property(x => x.Slug).HasMaxLength(200).IsRequired();
+        b.Property(x => x.Description).HasMaxLength(1000);
         b.HasIndex(x => x.Slug).IsUnique();
         b.HasIndex(x => new { x.HijriMonth, x.HijriDay });
-        b.Property(x => x.Description).HasMaxLength(1000);
 
         // هر دو محدودیت باید در یک فراخوانی ToTable تعریف شوند
         b.ToTable(t =>

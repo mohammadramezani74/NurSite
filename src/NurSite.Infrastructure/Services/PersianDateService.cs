@@ -70,9 +70,10 @@ public sealed class PersianDateService : IPersianDateService
         return ToPersianDigits(sb.ToString());
     }
 
-    public string ToHijriDate(DateTime utc)
+    public string ToHijriDate(DateTime utc, int dayOffset = 1)
     {
-        var local = ToLocal(utc);
+        // تقویم ام‌القری معمولاً یک روز با تقویم قمری ایران فاصله دارد
+        var local = ToLocal(utc).AddDays(dayOffset);
         var year = Hijri.GetYear(local);
         var month = Hijri.GetMonth(local);
         var day = Hijri.GetDayOfMonth(local);

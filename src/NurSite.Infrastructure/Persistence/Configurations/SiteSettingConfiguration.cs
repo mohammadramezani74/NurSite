@@ -28,7 +28,12 @@ public class SiteSettingConfiguration : IEntityTypeConfiguration<SiteSetting>
         b.HasOne(x => x.DefaultCity).WithMany()
          .HasForeignKey(x => x.DefaultCityId).OnDelete(DeleteBehavior.SetNull);
 
-        // این جدول باید همیشه دقیقاً یک رکورد داشته باشد
-        b.ToTable(t => t.HasCheckConstraint("CK_SiteSetting_SingleRow", "[Id] = 1"));
+        // هر دو محدودیت باید در یک فراخوانی ToTable باشند،
+        // وگرنه فراخوانی دوم اولی را بی‌اثر می‌کند
+        b.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_SiteSetting_SingleRow", "[Id] = 1");
+            t.HasCheckConstraint("CK_SiteSetting_HijriOffset", "[HijriDayOffset] BETWEEN -3 AND 3");
+        });
     }
 }

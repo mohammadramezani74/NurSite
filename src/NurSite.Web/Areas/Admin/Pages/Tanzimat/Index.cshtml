@@ -1,0 +1,196 @@
+﻿@page
+@model NurSite.Web.Areas.Admin.Pages.Tanzimat.IndexModel
+@{
+    ViewData["Title"] = "تنظیمات سایت";
+    ViewData["Subtitle"] = "پیکربندی عمومی";
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash flash-ok" role="status">@Model.Flash</div>
+}
+
+<form method="post" class="edit-form">
+    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+    <div class="edit-cols">
+        <div class="edit-main">
+
+            <section class="panel">
+                <header class="panel-head"><h2>هویت سایت</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.SiteName" class="label">نام سایت</label>
+                        <input asp-for="Input.SiteName" class="input input-plain" />
+                        <span asp-validation-for="Input.SiteName" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Tagline" class="label">شعار</label>
+                        <input asp-for="Input.Tagline" class="input input-plain" />
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.CanonicalBaseUrl" class="label">
+                            نشانی مبنای سایت
+                            <span class="label-hint">در نقشه سایت، canonical و لینک‌های اشتراک‌گذاری استفاده می‌شود</span>
+                        </label>
+                        <input asp-for="Input.CanonicalBaseUrl" class="input input-plain" dir="ltr"
+                               placeholder="https://example.ir" />
+                        <span asp-validation-for="Input.CanonicalBaseUrl" class="field-error"></span>
+                        <p class="field-note">پیش از انتشار، این را به دامنه واقعی تغییر دهید.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>تقویم قمری</h2>
+                    <span class="panel-hint">تنظیم اختلاف با تقویم رسمی ایران</span>
+                </header>
+                <div class="panel-body">
+                    <div class="hijri-check">
+                        <div>
+                            <span class="hijri-label">با تنظیم فعلی</span>
+                            <b>@Model.HijriToday</b>
+                        </div>
+                        <div>
+                            <span class="hijri-label">بدون تنظیم</span>
+                            <b class="dim">@Model.HijriWithoutOffset</b>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.HijriDayOffset" class="label">اختلاف روز</label>
+                        <input asp-for="Input.HijriDayOffset" class="input input-plain"
+                               type="number" min="-3" max="3" step="1" />
+                        <span asp-validation-for="Input.HijriDayOffset" class="field-error"></span>
+                        <p class="field-note">
+                            محاسبات داخلی بر مبنای تقویم ام‌القری است که تقویم رسمی عربستان است.
+                            تقویم ایران بر مبنای رؤیت هلال تنظیم می‌شود و معمولاً یک روز اختلاف دارد.
+                            تاریخ بالا را با تقویم رسمی مقایسه کنید و در صورت نیاز این عدد را تغییر دهید.
+                            چون اختلاف هر ماه ثابت نیست، ابتدای هر ماه قمری یک بار بررسی کنید.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>سئوی پیش‌فرض</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.DefaultMetaTitle" class="label">عنوان متای پیش‌فرض</label>
+                        <input asp-for="Input.DefaultMetaTitle" class="input input-plain" maxlength="70" />
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.DefaultMetaDescription" class="label">توضیح متای پیش‌فرض</label>
+                        <textarea asp-for="Input.DefaultMetaDescription" class="input input-plain" rows="3" maxlength="170"></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>تماس</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.ContactAddress" class="label">نشانی</label>
+                        <textarea asp-for="Input.ContactAddress" class="input input-plain" rows="2"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.ContactPhone" class="label">تلفن</label>
+                        <input asp-for="Input.ContactPhone" class="input input-plain" dir="ltr" />
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.ContactEmail" class="label">رایانامه</label>
+                        <input asp-for="Input.ContactEmail" class="input input-plain" dir="ltr" />
+                        <span asp-validation-for="Input.ContactEmail" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.WorkingHours" class="label">ساعات کاری</label>
+                        <input asp-for="Input.WorkingHours" class="input input-plain" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>شبکه‌های اجتماعی</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.TelegramUrl" class="label">تلگرام</label>
+                        <input asp-for="Input.TelegramUrl" class="input input-plain" dir="ltr" />
+                    </div>
+                    <div class="field">
+                        <label asp-for="Input.InstagramUrl" class="label">اینستاگرام</label>
+                        <input asp-for="Input.InstagramUrl" class="input input-plain" dir="ltr" />
+                    </div>
+                    <div class="field">
+                        <label asp-for="Input.AparatUrl" class="label">آپارات</label>
+                        <input asp-for="Input.AparatUrl" class="input input-plain" dir="ltr" />
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <aside class="edit-side">
+            <section class="panel">
+                <header class="panel-head"><h2>ذخیره</h2></header>
+                <div class="panel-body">
+                    <div class="side-actions">
+                        <button type="submit" class="btn btn-gold auth-submit">ذخیره تنظیمات</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>ظاهر</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.DefaultTheme" class="label">پوسته پیش‌فرض</label>
+                        <select asp-for="Input.DefaultTheme" class="input input-plain">
+                            <option value="@((int)SiteTheme.Lajvard)">لاجوردی</option>
+                            <option value="@((int)SiteTheme.Sabz)">سبز</option>
+                            <option value="@((int)SiteTheme.Anabi)">عنابی</option>
+                        </select>
+                    </div>
+
+                    <label class="checkbox">
+                        <input asp-for="Input.AllowUserThemeChoice" type="checkbox" />
+                        <span>بازدیدکننده بتواند پوسته را عوض کند</span>
+                    </label>
+
+                    <label class="checkbox">
+                        <input asp-for="Input.EnableOccasionTheme" type="checkbox" />
+                        <span>پوسته در ایام عزا خودکار عوض شود</span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>اوقات شرعی</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.DefaultCityId" class="label">شهر پیش‌فرض</label>
+                        <select asp-for="Input.DefaultCityId" asp-items="Model.CityOptions" class="input input-plain">
+                            <option value="">— انتخاب نشده —</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel danger-panel">
+                <header class="panel-head"><h2>حالت تعمیر</h2></header>
+                <div class="panel-body">
+                    <label class="checkbox">
+                        <input asp-for="Input.IsMaintenanceMode" type="checkbox" />
+                        <span>سایت در حالت تعمیر باشد</span>
+                    </label>
+                    <p class="field-note">در این حالت بازدیدکنندگان پیام تعمیر می‌بینند.</p>
+                </div>
+            </section>
+        </aside>
+    </div>
+</form>

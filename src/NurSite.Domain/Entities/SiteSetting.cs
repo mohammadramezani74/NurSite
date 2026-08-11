@@ -29,6 +29,18 @@ public class SiteSetting : BaseEntity
     public int? DefaultCityId { get; set; }
     public City? DefaultCity { get; set; }
 
+    /// <summary>
+    /// اختلاف روز بین تقویم ام‌القری و تقویم قمری ایران.
+    ///
+    /// محاسبات داخلی بر مبنای ام‌القری است که تقویم رسمی عربستان و بر پایه
+    /// محاسبه نجومی همان‌جاست. تقویم ایران بر مبنای رؤیت هلال در افق ایران
+    /// تنظیم می‌شود و معمولاً یک روز عقب‌تر است.
+    ///
+    /// مقدار مثبت یعنی مناسبت‌ها دیرتر می‌افتند. چون این اختلاف هر ماه ثابت
+    /// نیست، ادمین باید در ابتدای هر ماه قمری آن را با تقویم رسمی تطبیق دهد.
+    /// </summary>
+    public int HijriDayOffset { get; set; } = 1;
+
     public string? ContactAddress { get; set; }
     public string? ContactPhone { get; set; }
     public string? ContactEmail { get; set; }

@@ -5,8 +5,11 @@ public interface IPersianDateService
     /// <summary>تاریخ UTC را به رشته شمسی تبدیل می‌کند. مثال: ۱۸ مرداد ۱۴۰۵</summary>
     string ToPersianDate(DateTime utc, bool includeWeekday = false, bool includeTime = false);
 
-    /// <summary>تاریخ UTC را به رشته قمری تبدیل می‌کند. مثال: ١٥ صفر ١٤٤٨</summary>
-    string ToHijriDate(DateTime utc);
+    /// <summary>
+    /// تاریخ UTC را به رشته قمری تبدیل می‌کند. مثال: ١٥ صفر ١٤٤٨
+    /// آفست اختلاف تقویم ام‌القری با تقویم ایران را می‌پذیرد.
+    /// </summary>
+    string ToHijriDate(DateTime utc, int dayOffset = 1);
 
     /// <summary>ارقام لاتین را به ارقام فارسی تبدیل می‌کند.</summary>
     string ToPersianDigits(string input);

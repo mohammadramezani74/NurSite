@@ -33,6 +33,27 @@ public sealed class PrayerTimeService(AppDbContext db, IMemoryCache cache) : IPr
         return result;
     }
 
+    public async Task<IReadOnlyList<PrayerTimesDto>> GetForRangeAsync(
+        int cityId, DateOnly from, DateOnly to, CancellationToken ct = default)
+    {
+        if (to < from) (from, to) = (to, from);
+
+        // سقف محافظتی: بیشتر از ۹۲ روز یعنی درخواست غیرعادی
+        var days = Math.Min(to.DayNumber - from.DayNumber + 1, 92);
+
+        var city = await db.Cities.AsNoTracking().FirstOrDefaultAsync(c => c.Id == cityId, ct)
+                   ?? throw new InvalidOperationException($"شهر با شناسه {cityId} پیدا نشد.");
+
+        var result = new List<PrayerTimesDto>(days);
+        for (var i = 0; i < days; i++)
+        {
+            var date = from.AddDays(i);
+            result.Add(Calculate(city.Id, city.Name, city.Latitude, city.Longitude, city.Elevation, date));
+        }
+
+        return result;
+    }
+
     private static PrayerTimesDto Calculate(
         int cityId, string cityName, double lat, double lng, double elevation, DateOnly date)
     {
@@ -55,8 +76,10 @@ public sealed class PrayerTimeService(AppDbContext db, IMemoryCache cache) : IPr
         // ظهر شرعی
         var dhuhr = 12.0 + tzOffset - lng / 15.0 - eqTime / 60.0;
 
-        // اصلاح افق به‌خاطر ارتفاع از سطح دریا
-        var horizonDip = 0.0347 * Math.Sqrt(Math.Max(elevation, 0));
+        // توجه: اصلاح افق بر اساس ارتفاع عمداً اعمال نمی‌شود.
+        // تقویم‌های رسمی ایران اوقات را روی افق استاندارد محاسبه می‌کنند،
+        // نه ارتفاع واقعی شهر. با اعمال آن، طلوع و غروب تهران حدود شش دقیقه
+        // با تقویم رسمی اختلاف پیدا می‌کرد.
 
         double HourAngle(double angleDeg)
         {
@@ -67,17 +90,18 @@ public sealed class PrayerTimeService(AppDbContext db, IMemoryCache cache) : IPr
             return Rad2Deg(Math.Acos(cosH)) / 15.0;
         }
 
-        var sunriseOffset = HourAngle(90.833 + horizonDip);
-        var fajrOffset    = HourAngle(90 + FajrAngle);
+        var sunriseOffset = HourAngle(90.833);
+        var fajrOffset = HourAngle(90 + FajrAngle);
         var maghribOffset = HourAngle(90 + MaghribAngle);
 
-        var fajr    = dhuhr - fajrOffset;
+        var fajr = dhuhr - fajrOffset;
         var sunrise = dhuhr - sunriseOffset;
-        var sunset  = dhuhr + sunriseOffset;
+        var sunset = dhuhr + sunriseOffset;
         var maghrib = dhuhr + maghribOffset;
 
-        // نیمه‌شب شرعی: وسط فاصله مغرب تا اذان صبح روز بعد
-        var midnight = maghrib + ((fajr + 24) - maghrib) / 2;
+        // نیمه‌شب شرعی: وسط فاصله غروب آفتاب تا اذان صبح روز بعد.
+        // مبنا غروب است، نه اذان مغرب — با مغرب حدود ده دقیقه اختلاف می‌شد.
+        var midnight = sunset + ((fajr + 24) - sunset) / 2;
         if (midnight >= 24) midnight -= 24;
 
         return new PrayerTimesDto(
