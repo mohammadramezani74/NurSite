@@ -1,0 +1,98 @@
+﻿@page "/khata/{code:int?}"
+@model KhataModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["MetaDescription"] = Model.Message;
+
+    // صفحات خطا هرگز نباید ایندکس شوند
+    ViewData["NoIndex"] = true;
+}
+
+<section class="tone-1 err-page">
+    <div class="wrap err-wrap">
+
+        <p class="err-code" aria-hidden="true"><fa-num>@Model.StatusCode</fa-num></p>
+
+        <div class="err-ornament" aria-hidden="true">
+            <span></span><span></span><span></span>
+        </div>
+
+        <h1>@Model.Title</h1>
+        <p class="err-msg">@Model.Message</p>
+
+        @if (Model.StatusCode == 404 && !string.IsNullOrWhiteSpace(Model.AttemptedPath))
+        {
+            <p class="err-path" dir="ltr">@Model.AttemptedPath</p>
+        }
+
+        <div class="err-actions">
+            <a asp-page="/Index" class="btn btn-gold">صفحه اصلی</a>
+            <a asp-page="/Jostojoo" class="btn btn-ghost">جستجو در سایت</a>
+        </div>
+
+        @if (Model.StatusCode >= 500 && !string.IsNullOrWhiteSpace(Model.ErrorId))
+        {
+            <p class="err-id">
+                شناسه پیگیری: <code dir="ltr">@Model.ErrorId</code>
+                <br />
+                اگر مشکل ادامه داشت، این شناسه را همراه گزارش بفرستید.
+            </p>
+        }
+    </div>
+</section>
+
+@if (Model.StatusCode == 404 &&
+     (Model.SuggestedLinks.Count > 0 || Model.SuggestedArticles.Count > 0 || Model.SuggestedRulings.Count > 0))
+{
+    <section class="tone-2 girih">
+        <div class="wrap" style="max-width:820px">
+            <div class="sec-head center">
+                <span class="kicker">شاید دنبال این‌ها بودید</span>
+                <h2>پیشنهاد ما</h2>
+            </div>
+
+            @if (Model.SuggestedLinks.Count > 0)
+            {
+                <ul class="related-list">
+                    @foreach (var link in Model.SuggestedLinks)
+                    {
+                        <li>
+                            <a href="@link.Url">
+                                <span class="hit-kind @(link.IsRuling ? "kind-ruling" : "kind-article")">
+                                    @(link.IsRuling ? "حکم" : "مقاله")
+                                </span>
+                                <span>@link.Title</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6 6 6" /></svg>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <ul class="related-list">
+                    @foreach (var r in Model.SuggestedRulings)
+                    {
+                        <li>
+                            <a asp-page="/Ahkam/Details" asp-route-slug="@r.Slug">
+                                <span class="hit-kind kind-ruling">حکم</span>
+                                <span>@r.Question</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6 6 6" /></svg>
+                            </a>
+                        </li>
+                    }
+                    @foreach (var a in Model.SuggestedArticles)
+                    {
+                        <li>
+                            <a asp-page="/Maghalat/Details" asp-route-slug="@a.Slug">
+                                <span class="hit-kind kind-article">مقاله</span>
+                                <span>@a.Title</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6 6 6" /></svg>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </section>
+}

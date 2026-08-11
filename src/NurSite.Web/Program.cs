@@ -105,6 +105,7 @@ else
     app.UseHsts();
 }
 
+// صفحه خطا نباید خودش دوباره وارد چرخه خطا شود
 app.UseStatusCodePagesWithReExecute("/khata/{0}");
 app.UseHttpsRedirection();
 app.UseResponseCompression();

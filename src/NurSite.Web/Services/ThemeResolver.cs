@@ -20,6 +20,21 @@ public sealed class ThemeResolver(AppDbContext db, IMemoryCache cache)
 
     public async Task<ResolvedTheme> ResolveAsync(string? cookieValue, CancellationToken ct = default)
     {
+        // اگر دیتابیس در دسترس نباشد، Layout نباید بشکند — وگرنه صفحه خطا
+        // که خودش از همین Layout استفاده می‌کند هم از کار می‌افتد و کاربر
+        // به‌جای پیام خطا، صفحه سفید می‌بیند.
+        try
+        {
+            return await ResolveCoreAsync(cookieValue, ct);
+        }
+        catch
+        {
+            return new ResolvedTheme(SiteTheme.Lajvard.ToString().ToLowerInvariant(), false, null);
+        }
+    }
+
+    private async Task<ResolvedTheme> ResolveCoreAsync(string? cookieValue, CancellationToken ct)
+    {
         var settings = await cache.GetOrCreateAsync("site:settings", async entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
