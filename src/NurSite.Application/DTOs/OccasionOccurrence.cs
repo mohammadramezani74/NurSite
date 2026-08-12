@@ -22,3 +22,16 @@ public sealed record OccasionOccurrence(
     public bool IsToday => DaysFromToday == 0;
     public bool IsPast => DaysFromToday < 0;
 }
+
+/// <summary>یک تاریخ قمری، با نشانه اینکه از تقویم رسمی آمده یا محاسبه تقریبی.</summary>
+public sealed record HijriDate(int Year, int Month, int Day, bool FromOfficialTable)
+{
+    private static readonly string[] MonthNames =
+    {
+        "محرم","صفر","ربیع‌الأول","ربیع‌الثانی","جمادی‌الأول","جمادی‌الثانی",
+        "رجب","شعبان","رمضان","شوال","ذی‌القعده","ذی‌الحجه"
+    };
+
+    public string MonthName => MonthNames[Month - 1];
+    public override string ToString() => $"{Day} {MonthName} {Year}";
+}

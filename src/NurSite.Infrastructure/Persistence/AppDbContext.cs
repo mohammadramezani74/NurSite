@@ -26,6 +26,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<Event> Events => Set<Event>();
     public DbSet<Occasion> Occasions => Set<Occasion>();
+    public DbSet<HijriMonthStart> HijriMonthStarts => Set<HijriMonthStart>();
 
     public DbSet<Album> Albums => Set<Album>();
     public DbSet<Photo> Photos => Set<Photo>();

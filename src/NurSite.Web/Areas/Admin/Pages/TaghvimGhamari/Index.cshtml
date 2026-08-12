@@ -1,0 +1,132 @@
+﻿@page
+@model NurSite.Web.Areas.Admin.Pages.TaghvimGhamari.IndexModel
+@inject NurSite.Application.Interfaces.IPersianDateService Dates
+@{
+    ViewData["Title"] = "تقویم قمری";
+    ViewData["Subtitle"] = $"آغاز ماه‌های سال {Dates.ToPersianDigits(Model.HijriYear.ToString())} هجری قمری";
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash @(Model.FlashKind == "ok" ? "flash-ok" : "flash-warn")" role="status">@Model.Flash</div>
+}
+
+<section class="panel">
+    <header class="panel-head">
+        <h2>
+            سال <fa-num>@Model.HijriYear</fa-num>
+            <span class="count"><fa-num>@Model.SavedCount</fa-num> از ۱۲ ماه ثبت شده</span>
+        </h2>
+
+        <div class="year-nav">
+            <a asp-page="./Index" asp-route-sal="@(Model.HijriYear - 1)" class="icon-btn" title="سال قبل">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6l6 6-6 6" /></svg>
+            </a>
+            <a asp-page="./Index" asp-route-sal="@(Model.HijriYear + 1)" class="icon-btn" title="سال بعد">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6 6 6" /></svg>
+            </a>
+        </div>
+    </header>
+
+    <div class="panel-body" style="gap:14px">
+        <p class="field-note">
+            تاریخ شمسی روز اول هر ماه قمری را از تقویم رسمی وارد کنید — به شکل
+            <code dir="ltr">۱۴۰۵/۰۵/۳۰</code>.
+            با این کار تاریخ همه مناسبت‌های آن ماه دقیق محاسبه می‌شود.
+            ماه‌هایی که خالی بمانند، با محاسبه تقریبی ام‌القری نمایش داده می‌شوند که
+            گاهی یک روز اختلاف دارد.
+        </p>
+
+        @if (Model.SavedCount == 0)
+        {
+            <form method="post" asp-page-handler="Fill" asp-route-sal="@Model.HijriYear">
+                <button type="submit" class="btn btn-ghost btn-sm">
+                    پر کردن با مقادیر محاسبه‌شده به‌عنوان نقطه شروع
+                </button>
+            </form>
+        }
+    </div>
+
+    <form method="post">
+        <input type="hidden" asp-for="Input.HijriYear" value="@Model.HijriYear" />
+
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ماه قمری</th>
+                        <th>آغاز ماه — تاریخ شمسی</th>
+                        <th>معادل</th>
+                        <th>محاسبه‌شده</th>
+                        <th>روز</th>
+                        <th>یادداشت</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < Model.Rows.Count; i++)
+                    {
+                        var row = Model.Rows[i];
+                        var index = i;
+                        var differs = row.SavedStart is not null
+                        && row.ComputedStart is not null
+                        && row.SavedStart != row.ComputedStart;
+                        <tr class="@(row.SavedStart is null ? "row-empty" : "")">
+                            <td class="cell-title">
+                                @row.MonthName
+                                <span class="cell-slug">ماه <fa-num>@row.Month</fa-num></span>
+                            </td>
+
+                            <td>
+                                <input name="Input.Starts[@index]" class="input input-plain input-date"
+                                       dir="ltr" placeholder="۱۴۰۵/۰۰/۰۰" autocomplete="off"
+                                       value="@Model.ToPersianDateString(row.SavedStart)"
+                                       data-persian-digits />
+                            </td>
+
+                            <td class="muted-cell">@Model.ToPersianDisplay(row.SavedStart)</td>
+
+                            <td class="muted-cell">
+                                @Model.ToPersianDateString(row.ComputedStart)
+                                @if (differs)
+                                {
+                                    <span class="badge badge-wait">اصلاح‌شده</span>
+                                }
+                            </td>
+
+                            <td>
+                                @if (row.DayCount is { } days)
+                                {
+                                    <span class="badge @(days is 29 or 30 ? "badge-ok" : "badge-new")">
+                                        <fa-num>@days</fa-num>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="muted-cell">—</span>
+                                }
+                            </td>
+
+                            <td>
+                                <input name="Input.Notes[@index]" class="input input-plain"
+                                       value="@row.Note" placeholder="منبع یا توضیح" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="panel-body">
+            <button type="submit" class="btn btn-gold" style="justify-self:start">ذخیره تقویم</button>
+            <p class="field-note">
+                ستون «روز» فاصله تا ماه بعد را نشان می‌دهد و باید ۲۹ یا ۳۰ باشد.
+                اگر عدد دیگری دید، یکی از تاریخ‌ها اشتباه وارد شده است.
+                برای محاسبه روزهای ذی‌الحجه، محرم سال بعد را هم وارد کنید.
+            </p>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <script src="~/js/auth.js" asp-append-version="true" defer></script>
+}

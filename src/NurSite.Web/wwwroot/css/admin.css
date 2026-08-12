@@ -1098,3 +1098,77 @@ a.badge {
     .danger-panel .panel-head h2 {
         color: #E8AFAF
     }
+
+/* تقویم قمری */
+.year-nav {
+    display: flex;
+    gap: 8px
+}
+
+.info-note {
+    background: rgba(42,167,155,.08);
+    border: 1px solid rgba(42,167,155,.25);
+    padding: 16px 18px;
+    display: grid;
+    gap: 10px;
+}
+
+    .info-note p {
+        font-size: 13.5px;
+        color: var(--matn-2);
+        font-weight: 300;
+        line-height: 2
+    }
+
+.input-date {
+    max-width: 150px;
+    text-align: center;
+    font-variant-numeric: tabular-nums
+}
+
+.row-saved .cell-title span {
+    color: var(--firouze-2)
+}
+
+.suggest-btn {
+    font-size: 13px;
+    color: var(--matn-2);
+    padding: 5px 11px;
+    border: 1px dashed var(--khat);
+    border-radius: var(--r);
+    transition: .18s;
+    font-variant-numeric: tabular-nums;
+}
+
+    .suggest-btn:hover {
+        border-color: var(--tala);
+        color: var(--tala-2);
+        border-style: solid
+    }
+
+/* تقویم قمری */
+.year-nav {
+    display: flex;
+    gap: 6px
+}
+
+.input-date {
+    max-width: 150px;
+    font-variant-numeric: tabular-nums;
+    text-align: center
+}
+
+.row-empty {
+    opacity: .62
+}
+
+    .row-empty:hover {
+        opacity: 1
+    }
+
+.admin-table code {
+    background: rgba(0,0,0,.3);
+    padding: 2px 7px;
+    color: var(--tala-2);
+    font-size: 12.5px
+}

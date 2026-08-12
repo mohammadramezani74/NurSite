@@ -97,12 +97,12 @@ public static class DbInitializer
         if (await db.Cities.AnyAsync(ct)) return;
 
         db.Cities.AddRange(
-            new City { Name = "تهران",  Slug = "tehran",  ProvinceName = "تهران",         Latitude = 35.6892, Longitude = 51.3890, Elevation = 1200, IsDefault = true, SortOrder = 1 },
-            new City { Name = "قم",     Slug = "qom",     ProvinceName = "قم",            Latitude = 34.6416, Longitude = 50.8746, Elevation = 928,  SortOrder = 2 },
-            new City { Name = "مشهد",   Slug = "mashhad", ProvinceName = "خراسان رضوی",   Latitude = 36.2605, Longitude = 59.6168, Elevation = 995,  SortOrder = 3 },
-            new City { Name = "اصفهان", Slug = "isfahan", ProvinceName = "اصفهان",        Latitude = 32.6539, Longitude = 51.6660, Elevation = 1590, SortOrder = 4 },
-            new City { Name = "شیراز",  Slug = "shiraz",  ProvinceName = "فارس",          Latitude = 29.5918, Longitude = 52.5837, Elevation = 1500, SortOrder = 5 },
-            new City { Name = "تبریز",  Slug = "tabriz",  ProvinceName = "آذربایجان شرقی", Latitude = 38.0800, Longitude = 46.2919, Elevation = 1350, SortOrder = 6 }
+            new City { Name = "تهران", Slug = "tehran", ProvinceName = "تهران", Latitude = 35.6892, Longitude = 51.3890, Elevation = 1200, IsDefault = true, SortOrder = 1 },
+            new City { Name = "قم", Slug = "qom", ProvinceName = "قم", Latitude = 34.6416, Longitude = 50.8746, Elevation = 928, SortOrder = 2 },
+            new City { Name = "مشهد", Slug = "mashhad", ProvinceName = "خراسان رضوی", Latitude = 36.2605, Longitude = 59.6168, Elevation = 995, SortOrder = 3 },
+            new City { Name = "اصفهان", Slug = "isfahan", ProvinceName = "اصفهان", Latitude = 32.6539, Longitude = 51.6660, Elevation = 1590, SortOrder = 4 },
+            new City { Name = "شیراز", Slug = "shiraz", ProvinceName = "فارس", Latitude = 29.5918, Longitude = 52.5837, Elevation = 1500, SortOrder = 5 },
+            new City { Name = "تبریز", Slug = "tabriz", ProvinceName = "آذربایجان شرقی", Latitude = 38.0800, Longitude = 46.2919, Elevation = 1350, SortOrder = 6 }
         );
     }
 
@@ -130,7 +130,8 @@ public static class DbInitializer
             new Occasion { Title = "اربعین حسینی", Slug = "arbaeen", HijriMonth = 2, HijriDay = 20, Kind = OccasionKind.Mourning, IsPublicHoliday = true, ForcedTheme = SiteTheme.Anabi, ThemeStartsDaysBefore = 5, ThemeEndsDaysAfter = 2 },
             new Occasion { Title = "رحلت پیامبر اکرم ﷺ", Slug = "rehlat-payambar", HijriMonth = 2, HijriDay = 28, Kind = OccasionKind.Mourning, IsPublicHoliday = true, ForcedTheme = SiteTheme.Anabi, ThemeStartsDaysBefore = 2, ThemeEndsDaysAfter = 1 },
             new Occasion { Title = "شهادت امام حسن عسکری ؑ", Slug = "shahadat-emam-askari", HijriMonth = 3, HijriDay = 8, Kind = OccasionKind.Mourning, IsPublicHoliday = true },
-            new Occasion { Title = "آغاز امامت حضرت ولی‌عصر ؑ", Slug = "aghaz-emamat", HijriMonth = 3, HijriDay = 9, Kind = OccasionKind.Celebration, ForcedTheme = SiteTheme.Sabz, ThemeStartsDaysBefore = 0, ThemeEndsDaysAfter = 1 },
+            // آغاز امامت همان روز شهادت امام حسن عسکری است، نه فردایش
+            new Occasion { Title = "آغاز امامت حضرت ولی‌عصر ؑ", Slug = "aghaz-emamat", HijriMonth = 3, HijriDay = 8, Kind = OccasionKind.Celebration, ForcedTheme = SiteTheme.Sabz, ThemeStartsDaysBefore = 0, ThemeEndsDaysAfter = 1 },
             new Occasion { Title = "ولادت پیامبر اکرم ﷺ", Slug = "veladat-payambar", HijriMonth = 3, HijriDay = 17, Kind = OccasionKind.Celebration, IsPublicHoliday = true, ForcedTheme = SiteTheme.Sabz, ThemeStartsDaysBefore = 1, ThemeEndsDaysAfter = 1 },
             new Occasion { Title = "عید سعید فطر", Slug = "eid-fetr", HijriMonth = 10, HijriDay = 1, Kind = OccasionKind.Celebration, IsPublicHoliday = true, ForcedTheme = SiteTheme.Sabz, ThemeStartsDaysBefore = 0, ThemeEndsDaysAfter = 2 },
             new Occasion { Title = "عید سعید غدیر خم", Slug = "eid-ghadir", HijriMonth = 12, HijriDay = 18, Kind = OccasionKind.Celebration, IsPublicHoliday = true, ForcedTheme = SiteTheme.Sabz, ThemeStartsDaysBefore = 1, ThemeEndsDaysAfter = 1 }
