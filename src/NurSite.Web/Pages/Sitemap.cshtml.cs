@@ -31,7 +31,8 @@ public class SitemapModel(AppDbContext db) : PageModel
             Url($"{baseUrl}/maghalat", DateTime.UtcNow, "daily", "0.9"),
             Url($"{baseUrl}/ahkam", DateTime.UtcNow, "daily", "0.9"),
             Url($"{baseUrl}/owqat", DateTime.UtcNow, "daily", "0.8"),
-            Url($"{baseUrl}/monasebat", DateTime.UtcNow, "weekly", "0.7")
+            Url($"{baseUrl}/monasebat", DateTime.UtcNow, "weekly", "0.7"),
+            Url($"{baseUrl}/tamas", DateTime.UtcNow, "monthly", "0.5")
         };
 
         // دسته‌بندی‌ها

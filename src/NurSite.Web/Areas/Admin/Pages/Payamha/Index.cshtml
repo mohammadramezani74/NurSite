@@ -1,0 +1,227 @@
+﻿@page
+@model NurSite.Web.Areas.Admin.Pages.Payamha.IndexModel
+@inject NurSite.Application.Interfaces.IPersianDateService Dates
+@{
+    ViewData["Title"] = "پیام‌های تماس";
+    ViewData["Subtitle"] = "پیام‌های دریافتی از فرم تماس با ما";
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash @(Model.FlashKind == "ok" ? "flash-ok" : "flash-warn")" role="status">@Model.Flash</div>
+}
+
+<section class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+    <article class="stat @(Model.UnreadCount > 0 ? "alert" : "")">
+        <span class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+        </span>
+        <b><fa-num>@Model.UnreadCount</fa-num></b>
+        <span class="stat-label">خوانده‌نشده</span>
+    </article>
+
+    <article class="stat">
+        <span class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+        </span>
+        <b><fa-num>@Model.TodayCount</fa-num></b>
+        <span class="stat-label">در ۲۴ ساعت گذشته</span>
+    </article>
+
+    <article class="stat">
+        <span class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V6a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" /></svg>
+        </span>
+        <b><fa-num>@Model.TotalCount</fa-num></b>
+        <span class="stat-label">در این نما</span>
+    </article>
+</section>
+
+<div class="edit-cols">
+    <div class="edit-main">
+        <section class="panel">
+            <header class="panel-head">
+                <h2>پیام‌ها</h2>
+                @if (Model.UnreadCount > 0)
+                {
+                    <form method="post" asp-page-handler="MarkAllRead"
+                          data-confirm="همه پیام‌ها خوانده‌شده علامت بخورند؟">
+                        <button type="submit" class="btn btn-ghost btn-sm">علامت‌گذاری همه</button>
+                    </form>
+                }
+            </header>
+
+            <form method="get" class="filter-bar">
+                <div class="filter-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                    <label class="sr" for="q">جستجو</label>
+                    <input id="q" name="q" value="@Model.Q" placeholder="جستجو در نام، موضوع، متن یا شماره…" />
+                </div>
+
+                <label class="checkbox">
+                    <input type="checkbox" name="unread" value="true" checked="@(Model.UnreadOnly == true)" />
+                    <span>فقط خوانده‌نشده‌ها</span>
+                </label>
+
+                <button type="submit" class="btn btn-ghost btn-sm">اعمال</button>
+                @if (!string.IsNullOrWhiteSpace(Model.Q) || Model.UnreadOnly == true)
+                {
+                    <a asp-page="./Index" class="link-quiet">حذف فیلترها</a>
+                }
+            </form>
+
+            @if (Model.Messages.Count == 0)
+            {
+                <p class="empty">
+                    @if (!string.IsNullOrWhiteSpace(Model.Q))
+                    {
+                        <span>نتیجه‌ای برای «@Model.Q» پیدا نشد.</span>
+                    }
+                    else
+                    {
+                        <span>پیامی دریافت نشده است.</span>
+                    }
+                </p>
+            }
+            else
+            {
+                <ul class="row-list">
+                    @foreach (var m in Model.Messages)
+                    {
+                        <li class="row msg-row @(m.IsRead ? "" : "unread") @(Model.Selected?.Id == m.Id ? "is-open" : "")">
+                            <div class="row-main">
+                                <p class="row-title">
+                                    <a asp-page="./Index" asp-route-open="@m.Id"
+                                       asp-route-q="@Model.Q" asp-route-unread="@Model.UnreadOnly"
+                                       asp-route-page="@Model.PageNumber">
+                                        @(string.IsNullOrWhiteSpace(m.Subject) ? "بدون موضوع" : m.Subject)
+                                    </a>
+                                </p>
+                                <p class="row-meta">
+                                    <span>@m.SenderName</span>
+                                    @if (!string.IsNullOrWhiteSpace(m.SenderMobile))
+                                    {
+                                        <span dir="ltr">@m.SenderMobile</span>
+                                    }
+                                    <span><persian-date value="@m.CreatedAtUtc" /></span>
+                                </p>
+                                <p class="msg-excerpt">
+                                    @(m.Body.Length > 110 ? m.Body[..110] + "…" : m.Body)
+                                </p>
+                            </div>
+
+                            <div class="actions">
+                                @if (!m.IsRead)
+                                {
+                                    <span class="badge badge-new">تازه</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(m.AdminNote))
+                                {
+                                    <span class="badge badge-wait" title="@m.AdminNote">یادداشت</span>
+                                }
+
+                                <form method="post" asp-page-handler="ToggleRead" asp-route-id="@m.Id"
+                                      asp-route-q="@Model.Q" asp-route-page="@Model.PageNumber">
+                                    <button type="submit" class="icon-btn"
+                                            title="@(m.IsRead ? "برگرداندن به خوانده‌نشده" : "علامت خوانده‌شده")">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5" /></svg>
+                                    </button>
+                                </form>
+
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@m.Id"
+                                      asp-route-q="@Model.Q" asp-route-page="@Model.PageNumber"
+                                      data-confirm="این پیام حذف شود؟">
+                                    <button type="submit" class="icon-btn danger" title="حذف">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" /></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                    }
+                </ul>
+
+                @if (Model.TotalPages > 1)
+                {
+                    <nav class="pager" aria-label="صفحه‌بندی">
+                        @for (var p = 1; p <= Model.TotalPages; p++)
+                        {
+                            <a asp-page="./Index" asp-route-q="@Model.Q" asp-route-unread="@Model.UnreadOnly"
+                               asp-route-page="@p"
+                               class="pager-item @(p == Model.PageNumber ? "on" : "")">
+                                <fa-num>@p</fa-num>
+                            </a>
+                        }
+                    </nav>
+                }
+            }
+        </section>
+    </div>
+
+    @* ---------- پیام باز ---------- *@
+    <aside class="edit-side">
+        @if (Model.Selected is { } sel)
+        {
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>@(string.IsNullOrWhiteSpace(sel.Subject) ? "بدون موضوع" : sel.Subject)</h2>
+                </header>
+                <div class="panel-body">
+                    <dl class="track-meta">
+                        <dt>فرستنده</dt>
+                        <dd>@sel.SenderName</dd>
+
+                        @if (!string.IsNullOrWhiteSpace(sel.SenderMobile))
+                        {
+                            <dt>موبایل</dt>
+                            <dd><a href="tel:@sel.SenderMobile" dir="ltr" class="link-quiet">@sel.SenderMobile</a></dd>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(sel.SenderEmail))
+                        {
+                            <dt>رایانامه</dt>
+                            <dd><a href="mailto:@sel.SenderEmail" dir="ltr" class="link-quiet">@sel.SenderEmail</a></dd>
+                        }
+
+                        <dt>تاریخ</dt>
+                        <dd><persian-date value="@sel.CreatedAtUtc" weekday="true" time="true" /></dd>
+                    </dl>
+
+                    <div class="msg-body">@sel.Body</div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>یادداشت داخلی</h2></header>
+                <div class="panel-body">
+                    <form method="post" asp-page-handler="Note" asp-route-id="@sel.Id">
+                        <div class="field">
+                            <label for="note" class="label">
+                                یادداشت
+                                <span class="label-hint">فقط برای مدیران، به فرستنده نمایش داده نمی‌شود</span>
+                            </label>
+                            <textarea id="note" name="note" class="input input-plain" rows="4"
+                                  maxlength="2000">@sel.AdminNote</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-gold auth-submit">ذخیره یادداشت</button>
+                    </form>
+                </div>
+            </section>
+
+            @if (!string.IsNullOrWhiteSpace(sel.SenderMobile))
+            {
+                <a href="tel:@sel.SenderMobile" class="btn btn-ghost auth-submit">تماس با فرستنده</a>
+            }
+        }
+        else
+        {
+            <section class="panel">
+                <div class="panel-body">
+                    <p class="field-note">
+                        روی موضوع هر پیام بزنید تا متن کاملش اینجا باز شود.
+                        پیام با باز شدن، خوانده‌شده علامت می‌خورد.
+                    </p>
+                </div>
+            </section>
+        }
+    </aside>
+</div>

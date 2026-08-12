@@ -3610,3 +3610,103 @@ mark {
         width: 100%
     }
 }
+
+/* ============================================================
+   تماس با ما
+   ============================================================ */
+.contact-cols {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    gap: clamp(30px,5vw,60px);
+    align-items: start
+}
+
+.contact-info {
+    display: grid;
+    gap: 24px
+}
+
+.info-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start
+}
+
+.info-icon {
+    width: 42px;
+    height: 42px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    background: rgba(42,167,155,.12);
+    color: var(--firouze-2);
+}
+
+    .info-icon svg {
+        width: 20px;
+        height: 20px
+    }
+
+.info-item h2 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--matn-2);
+    margin-bottom: 5px
+}
+
+.info-item p {
+    font-size: 15.5px;
+    color: var(--matn);
+    line-height: 2
+}
+
+.info-item a {
+    color: var(--matn)
+}
+
+    .info-item a:hover {
+        color: var(--firouze-2)
+    }
+
+.social-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap
+}
+
+    .social-row a {
+        color: var(--firouze-2);
+        font-weight: 600;
+        font-size: 14.5px
+    }
+
+.contact-hint {
+    padding: 18px 20px;
+    background: rgba(200,162,74,.08);
+    border: 1px solid rgba(200,162,74,.28);
+}
+
+    .contact-hint p {
+        font-size: 14.5px;
+        color: var(--matn);
+        line-height: 2.1
+    }
+
+    .contact-hint strong {
+        color: var(--tala-2)
+    }
+
+    .contact-hint a {
+        color: var(--firouze-2);
+        font-weight: 600
+    }
+
+@media(max-width:900px) {
+    .contact-cols {
+        grid-template-columns: 1fr
+    }
+
+    .contact-info {
+        order: 2
+    }
+}

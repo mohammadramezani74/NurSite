@@ -1273,3 +1273,43 @@ a.badge {
     background: rgba(42,167,155,.15);
     color: var(--firouze-2)
 }
+
+/* پیام‌های تماس */
+.msg-row {
+    align-items: flex-start
+}
+
+    .msg-row.unread {
+        background: rgba(200,162,74,.06);
+        border-inline-start: 2px solid var(--tala)
+    }
+
+    .msg-row.is-open {
+        background: rgba(42,167,155,.09)
+    }
+
+    .msg-row .row-title a {
+        color: #fff
+    }
+
+        .msg-row .row-title a:hover {
+            color: var(--firouze-2)
+        }
+
+.msg-excerpt {
+    font-size: 13.5px;
+    color: var(--matn-2);
+    font-weight: 300;
+    margin-top: 6px;
+    line-height: 1.9
+}
+
+.msg-body {
+    font-size: 15px;
+    line-height: 2.2;
+    color: var(--matn);
+    white-space: pre-wrap;
+    padding: 16px;
+    background: rgba(0,0,0,.2);
+    border: 1px solid var(--khat-2);
+}
