@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -21,7 +21,7 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
     public bool IsNew => Input.Id == 0;
     public string CanonicalBase { get; private set; } = "";
 
-    /// <summary>??? ??? ??? ?? ?? ???? ????? ????? ??????? ??? ???? ????.</summary>
+    /// <summary>اگر این حکم از یک پرسش کاربر ساخته می‌شود، متن اصلی پرسش.</summary>
     public UserQuestion? SourceQuestion { get; private set; }
 
     [TempData] public string? Flash { get; set; }
@@ -31,53 +31,59 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
     {
         public int Id { get; set; }
 
-        /// <summary>????? ???? ?????? ?? ??? ??? ?? ?? ????? ??????.</summary>
+        /// <summary>شناسه پرسش کاربری که این حکم از آن ساخته می‌شود.</summary>
         public int? FromQuestionId { get; set; }
 
-        [Required(ErrorMessage = "??? ???? ?? ???????")]
-        [StringLength(400, ErrorMessage = "???? ????? ??? ?? ??? ??????? ????")]
-        [Display(Name = "????")]
+        [Required(ErrorMessage = "متن پرسش را بنویسید")]
+        [StringLength(400, ErrorMessage = "پرسش نباید بیش از ۴۰۰ کاراکتر باشد")]
+        [Display(Name = "پرسش")]
         public string Question { get; set; } = default!;
 
-        [Required(ErrorMessage = "??? ???? ?? ???????")]
-        [Display(Name = "????")]
-        public string Answer { get; set; } = default!;
+        /// <summary>
+        /// در احکام نموداری خالی می‌ماند و محتوا در نمودار است،
+        /// پس اجباری بودنش در کد بررسی می‌شود نه با صفت.
+        /// </summary>
+        [Display(Name = "پاسخ")]
+        public string? Answer { get; set; }
+
+        /// <summary>این حکم نمودار دارد؟ برای اعتبارسنجی لازم است.</summary>
+        public bool HasDiagram { get; set; }
 
         [StringLength(250)]
-        [Display(Name = "????? ????")]
+        [Display(Name = "نشانی صفحه")]
         public string? Slug { get; set; }
 
-        [Required(ErrorMessage = "??? ????? ?? ?????? ????")]
-        [Display(Name = "???")]
+        [Required(ErrorMessage = "باب احکام را انتخاب کنید")]
+        [Display(Name = "باب")]
         public int? RulingCategoryId { get; set; }
 
-        [Display(Name = "???? ?????")]
+        [Display(Name = "مرجع تقلید")]
         public int? MarjaId { get; set; }
 
-        [StringLength(250, ErrorMessage = "??? ????? ????? ??? ?? ??? ??????? ????")]
-        [Display(Name = "????? ?????? ????")]
+        [StringLength(250, ErrorMessage = "این عبارت نباید بیش از ۲۵۰ کاراکتر باشد")]
+        [Display(Name = "عبارت استناد فتوا")]
         public string? FatwaNote { get; set; }
 
         [StringLength(400)]
-        [Display(Name = "????")]
+        [Display(Name = "منبع")]
         public string? SourceReference { get; set; }
 
-        [Display(Name = "?????")]
+        [Display(Name = "وضعیت")]
         public PublishStatus Status { get; set; } = PublishStatus.Draft;
 
-        [Display(Name = "????? ?? ????? ???????")]
+        [Display(Name = "نمایش در احکام پرتکرار")]
         public bool IsFrequentlyAsked { get; set; }
 
         [Range(0, 999)]
-        [Display(Name = "????? ?? ???")]
+        [Display(Name = "ترتیب در باب")]
         public int SortOrder { get; set; }
 
-        [StringLength(70, ErrorMessage = "????? ??? ????? ??? ?? ?? ??????? ????")]
-        [Display(Name = "????? ???")]
+        [StringLength(70, ErrorMessage = "عنوان متا نباید بیش از ۷۰ کاراکتر باشد")]
+        [Display(Name = "عنوان متا")]
         public string? MetaTitle { get; set; }
 
-        [StringLength(170, ErrorMessage = "????? ??? ????? ??? ?? ??? ??????? ????")]
-        [Display(Name = "????? ???")]
+        [StringLength(170, ErrorMessage = "توضیح متا نباید بیش از ۱۷۰ کاراکتر باشد")]
+        [Display(Name = "توضیح متا")]
         public string? MetaDescription { get; set; }
     }
 
@@ -85,7 +91,7 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
     {
         await LoadOptionsAsync(ct);
 
-        // ???? ??? ?? ??? ?? ???? ?????
+        // ساخت حکم از روی یک پرسش کاربر
         if (id is null or 0 && fromQuestion is not null)
         {
             SourceQuestion = await db.UserQuestions.AsNoTracking()
@@ -116,6 +122,7 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
             FatwaNote = ruling.FatwaNote,
             SourceReference = ruling.SourceReference,
             Status = ruling.Status,
+            HasDiagram = ruling.HasDiagram,
             IsFrequentlyAsked = ruling.IsFrequentlyAsked,
             SortOrder = ruling.SortOrder,
             MetaTitle = ruling.MetaTitle,
@@ -129,14 +136,21 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
     {
         await LoadOptionsAsync(ct);
 
-        // ???? ???? ?? ????? ????? ????. ???? ?? ?? ??? ????? ???? ????
-        // ???? ????? ????? ???? ??? ??????? ???? ????.
+        // پاسخ متنی فقط وقتی اجباری است که حکم نمودار نداشته باشد
+        if (!Input.HasDiagram && string.IsNullOrWhiteSpace(Input.Answer))
+            ModelState.AddModelError("Input.Answer", "متن پاسخ را بنویسید یا برای این حکم نمودار بسازید.");
+
+        // فتوا باید به منبعی مستند باشد. حکمی که به هیچ مرجعی نسبت داده
+        // نشده نباید منتشر شود، چون مسئولیت شرعی دارد.
+        // در احکام نموداری، مراجع در سطح شاخه‌ها مشخص می‌شوند، پس
+        // منبع کتابی هم استناد کافی محسوب می‌شود
         if (Input.Status == PublishStatus.Published &&
             Input.MarjaId is null &&
-            string.IsNullOrWhiteSpace(Input.FatwaNote))
+            string.IsNullOrWhiteSpace(Input.FatwaNote) &&
+            !Input.HasDiagram)
         {
             ModelState.AddModelError("Input.MarjaId",
-                "???? ??????? ???? ????? ?? ????? ?????? ???? ?? ???? ????.");
+                "برای انتشار، مرجع تقلید یا عبارت استناد فتوا را مشخص کنید.");
         }
 
         if (!ModelState.IsValid) return Page();
@@ -155,21 +169,25 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
             desiredSlug, isNew ? null : ruling.Id, ct);
 
         ruling.Question = Input.Question.Trim();
-        ruling.Answer = Input.Answer.Trim();
+        ruling.Answer = Input.Answer?.Trim() ?? string.Empty;
         ruling.RulingCategoryId = Input.RulingCategoryId!.Value;
         ruling.MarjaId = Input.MarjaId;
         ruling.FatwaNote = Input.FatwaNote?.Trim();
         ruling.SourceReference = Input.SourceReference?.Trim();
         ruling.Status = Input.Status;
+        ruling.HasDiagram = Input.HasDiagram;
         ruling.IsFrequentlyAsked = Input.IsFrequentlyAsked;
         ruling.SortOrder = Input.SortOrder;
 
-        // ???? ?? ??? ?????? ??? ????? ??????? ????? ???? ?? ????? ??????
+        // پرسش دو بار می‌آید چون کاربر معمولاً عبارت پرسش را جستجو می‌کند.
+        // در احکام نموداری، متن شرط‌ها و حکم‌ها هم باید بیاید وگرنه
+        // حکم اصلاً در جستجو پیدا نمی‌شود چون Answer خالی است.
+        var diagramText = await BuildDiagramTextAsync(ruling.Id, ct);
         ruling.SearchText = PersianText.Normalize(
-            $"{ruling.Question} {ruling.Question} {ruling.Answer} {ruling.FatwaNote}");
+            $"{ruling.Question} {ruling.Question} {ruling.Answer} {ruling.FatwaNote} {diagramText}");
 
-        // ??? ???? ???? ?????? ????? ??? ???? ??? ????? ??????
-        // ???? ?? ?? ???? ????? ??????
+        // متن پرسش خودش بهترین عنوان متا است، چون کاربر دقیقاً
+        // همان را در گوگل جستجو می‌کند
         ruling.MetaTitle = string.IsNullOrWhiteSpace(Input.MetaTitle)
             ? Truncate(ruling.Question, 70)
             : Input.MetaTitle.Trim();
@@ -191,7 +209,7 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
 
         await db.SaveChangesAsync(ct);
 
-        // ????? ???? ????? ?? ??? ????????
+        // اتصال پرسش کاربر به حکم منتشرشده
         if (Input.FromQuestionId is not null)
         {
             var question = await db.UserQuestions
@@ -208,12 +226,28 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
         if (!isNew && !string.IsNullOrEmpty(previousSlug) && previousSlug != ruling.Slug)
         {
             await AddRedirectAsync(previousSlug, ruling.Slug, ct);
-            logger.LogInformation("???????? ??? ?? {Old} ?? {New}", previousSlug, ruling.Slug);
+            logger.LogInformation("ریدایرکت حکم از {Old} به {New}", previousSlug, ruling.Slug);
         }
 
-        Flash = isNew ? "??? ??? ??." : "??????? ????? ??.";
+        Flash = isNew ? "حکم ثبت شد." : "تغییرات ذخیره شد.";
         FlashKind = "ok";
         return RedirectToPage("./Edit", new { id = ruling.Id });
+    }
+
+    /// <summary>متن همه شرط‌ها و حکم‌های نمودار، برای جستجو.</summary>
+    private async Task<string> BuildDiagramTextAsync(int rulingId, CancellationToken ct)
+    {
+        var nodes = await db.RulingNodes.AsNoTracking()
+            .Where(n => n.RulingId == rulingId)
+            .Select(n => n.Text)
+            .ToListAsync(ct);
+
+        var verdicts = await db.RulingVerdicts.AsNoTracking()
+            .Where(v => v.RulingNode.RulingId == rulingId)
+            .Select(v => v.Text)
+            .ToListAsync(ct);
+
+        return string.Join(' ', nodes.Concat(verdicts));
     }
 
     private async Task AddRedirectAsync(string oldSlug, string newSlug, CancellationToken ct)
@@ -270,6 +304,6 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
         var lastSpace = cut.LastIndexOf(' ');
         if (lastSpace > max / 2) cut = cut[..lastSpace];
 
-        return cut + "�";
+        return cut + "…";
     }
 }

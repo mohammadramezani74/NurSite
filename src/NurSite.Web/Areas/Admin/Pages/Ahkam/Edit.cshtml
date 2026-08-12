@@ -20,6 +20,7 @@
 <form method="post" class="edit-form">
     <input type="hidden" asp-for="Input.Id" />
     <input type="hidden" asp-for="Input.FromQuestionId" />
+    <input type="hidden" asp-for="Input.HasDiagram" />
     <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
 
     <div class="edit-cols">
@@ -40,10 +41,24 @@
                     </div>
 
                     <div class="field">
-                        <label asp-for="Input.Answer" class="label">پاسخ</label>
+                        <label asp-for="Input.Answer" class="label">
+                            پاسخ
+                            @if (Model.Input.HasDiagram)
+                            {
+                                <span class="label-hint">این حکم نمودار دارد؛ این متن اگر پر شود، بالای نمودار می‌آید</span>
+                            }
+                        </label>
                         <textarea asp-for="Input.Answer" id="bodyEditor" rows="12" class="input input-plain"></textarea>
                         <span asp-validation-for="Input.Answer" class="field-error"></span>
                     </div>
+
+                    @if (Model.Input.HasDiagram)
+                    {
+                        <div class="flash flash-ok" style="margin:0">
+                            محتوای این حکم در نمودار شرطی است.
+                            <a asp-page="./Nemodar" asp-route-id="@Model.Input.Id">ویرایش نمودار</a>
+                        </div>
+                    }
 
                     <div class="field">
                         <label asp-for="Input.Slug" class="label">

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Application.Interfaces;
 using NurSite.Application.Services;
+using Microsoft.EntityFrameworkCore;
 using NurSite.Domain.Entities;
 using NurSite.Infrastructure.Persistence;
 
@@ -62,6 +63,18 @@ public class NemodarModel(
         // وضعیت نموداری بودن حکم را با محتوای واقعی هماهنگ کن
         var ruling = await db.Rulings.FirstAsync(r => r.Id == id, ct);
         ruling.HasDiagram = result.NodeCount > 0;
+
+        // متن جستجو باید با نمودار تازه هماهنگ شود، وگرنه حکم
+        // با عبارتی که داخل نمودار است پیدا نمی‌شود
+        var nodes = await db.RulingNodes.AsNoTracking()
+            .Where(n => n.RulingId == id).Select(n => n.Text).ToListAsync(ct);
+        var verdicts = await db.RulingVerdicts.AsNoTracking()
+            .Where(v => v.RulingNode.RulingId == id).Select(v => v.Text).ToListAsync(ct);
+
+        ruling.SearchText = PersianText.Normalize(string.Join(' ',
+            new[] { ruling.Question, ruling.Question, ruling.Answer, ruling.FatwaNote }
+                .Concat(nodes).Concat(verdicts)));
+
         await db.SaveChangesAsync(ct);
 
         var message = $"نمودار ذخیره شد: {result.NodeCount} شرط و {result.VerdictCount} حکم.";

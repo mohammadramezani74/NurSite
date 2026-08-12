@@ -24,6 +24,10 @@ public class IndexModel(
     public IReadOnlyList<Lecture> LatestLectures { get; private set; } = [];
     public IReadOnlyList<Ruling> FaqRulings { get; private set; } = [];
 
+    /// <summary>درخت نمودار هر حکم نموداری، بر اساس شناسه حکم.</summary>
+    public IReadOnlyDictionary<int, IReadOnlyList<RulingNode>> FaqDiagrams { get; private set; }
+        = new Dictionary<int, IReadOnlyList<RulingNode>>();
+
     /// <summary>آدرس مبنای سایت — برای ساخت لینک‌های مطلق در نشانه‌گذاری ساختاریافته.</summary>
     public string BaseUrl { get; private set; } = string.Empty;
 
@@ -85,6 +89,28 @@ public class IndexModel(
             .OrderBy(r => r.SortOrder)
             .Take(4)
             .ToListAsync(ct);
+
+        // احکام نموداری متن پاسخ ندارند، پس درختشان جدا خوانده می‌شود
+        var diagramIds = FaqRulings.Where(r => r.HasDiagram).Select(r => r.Id).ToList();
+        if (diagramIds.Count > 0)
+        {
+            var nodes = await db.RulingNodes.AsNoTracking()
+                .Where(n => diagramIds.Contains(n.RulingId))
+                .Include(n => n.Verdicts).ThenInclude(v => v.Marjas).ThenInclude(m => m.Marja)
+                .OrderBy(n => n.Depth).ThenBy(n => n.SortOrder)
+                .ToListAsync(ct);
+
+            var byId = nodes.ToDictionary(n => n.Id);
+            foreach (var node in nodes)
+            {
+                if (node.ParentId is not null && byId.TryGetValue(node.ParentId.Value, out var parent))
+                    parent.Children.Add(node);
+            }
+
+            FaqDiagrams = nodes
+                .GroupBy(n => n.RulingId)
+                .ToDictionary(g => g.Key, g => (IReadOnlyList<RulingNode>)g.ToList());
+        }
     }
 
     /// <summary>
@@ -103,10 +129,43 @@ public class IndexModel(
             ["acceptedAnswer"] = new Dictionary<string, object>
             {
                 ["@type"] = "Answer",
-                ["text"] = r.Answer
+                ["text"] = AnswerTextOf(r)
             }
         }).ToList()
     };
+
+    /// <summary>
+    /// متن پاسخ برای نشانه‌گذاری. در احکام نموداری، درخت به متن خطی
+    /// تبدیل می‌شود چون پاسخ خالی کل نشانه‌گذاری را بی‌اثر می‌کند.
+    /// </summary>
+    private string AnswerTextOf(Ruling r)
+    {
+        if (!r.HasDiagram || !FaqDiagrams.TryGetValue(r.Id, out var nodes))
+            return StripHtml(r.Answer);
+
+        var sb = new System.Text.StringBuilder();
+
+        void Walk(IEnumerable<RulingNode> items)
+        {
+            foreach (var n in items.OrderBy(x => x.SortOrder))
+            {
+                sb.Append(n.Text);
+                foreach (var v in n.Verdicts.OrderBy(x => x.SortOrder))
+                    sb.Append(' ').Append(v.Text);
+                sb.Append(". ");
+                Walk(n.Children);
+            }
+        }
+
+        Walk(nodes.Where(n => n.ParentId is null));
+        return sb.ToString().Trim();
+    }
+
+    internal static string StripHtml(string? html) =>
+        string.IsNullOrWhiteSpace(html)
+            ? string.Empty
+            : System.Net.WebUtility.HtmlDecode(
+                System.Text.RegularExpressions.Regex.Replace(html, "<[^>]+>", " ")).Trim();
 
     public object BuildOrganizationSchema() => new Dictionary<string, object>
     {

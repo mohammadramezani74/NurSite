@@ -254,11 +254,27 @@
                         </summary>
                         <div class="acc-a">
                             @* پاسخ از ویرایشگر می‌آید و HTML دارد، پس باید خام رندر شود *@
-                            @Html.Raw(ruling.Answer)
+                            @if (!string.IsNullOrWhiteSpace(ruling.Answer))
+                            {
+                                @Html.Raw(ruling.Answer)
+                            }
+
+                            @if (ruling.HasDiagram && Model.FaqDiagrams.TryGetValue(ruling.Id, out var diagram))
+                            {
+                                <partial name="_RulingDiagram" model="diagram" />
+                            }
+
                             @if (!string.IsNullOrWhiteSpace(ruling.FatwaNote))
                             {
                                 <span class="marja">@ruling.FatwaNote</span>
                             }
+
+                            <p style="margin-top:14px">
+                                <a asp-page="/Ahkam/Details" asp-route-slug="@ruling.Slug" class="link-more">
+                                    مشاهده کامل
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6 6 6" /></svg>
+                                </a>
+                            </p>
                         </div>
                     </details>
                 }
