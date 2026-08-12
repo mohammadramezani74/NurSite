@@ -29,10 +29,53 @@
 
         <div class="answer-box">
             <span class="answer-label">پاسخ</span>
-            <div class="article-body">
-                @Html.Raw(Model.Ruling.Answer)
-            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Ruling.Answer))
+            {
+                <div class="article-body">
+                    @Html.Raw(Model.Ruling.Answer)
+                </div>
+            }
+
+            @if (Model.Ruling.HasDiagram && Model.DiagramNodes.Count > 0)
+            {
+                <partial name="_RulingDiagram" model="Model.DiagramNodes" />
+            }
         </div>
+
+        @if (Model.Ruling.RulingSource is { } source)
+        {
+            <aside class="source-box">
+                <h2>برگرفته از</h2>
+                <div class="source-book">
+                    <div>
+                        <b>@source.Title</b>
+                        <span>
+                            @if (!string.IsNullOrWhiteSpace(source.Author))
+                            {
+                                <text>@source.Author</text>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(source.Publisher))
+                            {
+                                <text> · نشر @source.Publisher</text>
+                            }
+                            @if (source.PublishedYear is not null)
+                            {
+                                <text> · <fa-num>@source.PublishedYear</fa-num></text>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(Model.Ruling.SourcePage))
+                            {
+                                <text> · صفحه @Model.Ruling.SourcePage</text>
+                            }
+                        </span>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(source.Url))
+                    {
+                        <a href="@source.Url" target="_blank" rel="noopener noreferrer">معرفی کتاب</a>
+                    }
+                </div>
+            </aside>
+        }
 
         @if (Model.Ruling.Marja is not null
                 || !string.IsNullOrWhiteSpace(Model.Ruling.FatwaNote)

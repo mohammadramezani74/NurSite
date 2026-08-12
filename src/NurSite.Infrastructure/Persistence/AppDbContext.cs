@@ -18,6 +18,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Ruling> Rulings => Set<Ruling>();
     public DbSet<RulingCategory> RulingCategories => Set<RulingCategory>();
     public DbSet<Marja> Marjas => Set<Marja>();
+    public DbSet<RulingSource> RulingSources => Set<RulingSource>();
+    public DbSet<RulingNode> RulingNodes => Set<RulingNode>();
+    public DbSet<RulingVerdict> RulingVerdicts => Set<RulingVerdict>();
+    public DbSet<RulingVerdictMarja> RulingVerdictMarjas => Set<RulingVerdictMarja>();
     public DbSet<UserQuestion> UserQuestions => Set<UserQuestion>();
 
     public DbSet<Lecture> Lectures => Set<Lecture>();

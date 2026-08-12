@@ -28,6 +28,14 @@ public class RulingConfiguration : IEntityTypeConfiguration<Ruling>
          .HasForeignKey(x => x.MarjaId)
          .OnDelete(DeleteBehavior.SetNull);
 
+        b.Property(x => x.SourcePage).HasMaxLength(100);
+        b.HasOne(x => x.RulingSource)
+         .WithMany(s => s.Rulings)
+         .HasForeignKey(x => x.RulingSourceId)
+         .OnDelete(DeleteBehavior.SetNull);
+
+        b.Property(x => x.SearchText).HasColumnType("nvarchar(max)");
+
         b.HasQueryFilter(x => !x.IsDeleted);
     }
 }

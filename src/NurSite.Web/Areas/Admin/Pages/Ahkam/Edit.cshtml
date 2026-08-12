@@ -152,6 +152,12 @@
 
                     <div class="side-actions">
                         <button type="submit" class="btn btn-gold auth-submit">ذخیره</button>
+                        @if (!Model.IsNew)
+                        {
+                            <a asp-page="./Nemodar" asp-route-id="@Model.Input.Id" class="btn btn-ghost auth-submit">
+                                ویرایش نمودار شرطی
+                            </a>
+                        }
                         <a asp-page="./Index" class="btn btn-ghost auth-submit">بازگشت به فهرست</a>
                     </div>
                 </div>

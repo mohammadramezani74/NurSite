@@ -1,0 +1,177 @@
+﻿@page "{id:int}"
+@model NurSite.Web.Areas.Admin.Pages.Ahkam.NemodarModel
+@using NurSite.Application.Services
+@{
+    ViewData["Title"] = "نمودار حکم";
+    ViewData["Subtitle"] = Model.Ruling.Question;
+}
+
+@functions {
+    void RenderPreview(IEnumerable<OutlineNode> nodes, int depth)
+    {
+        foreach (var node in nodes)
+        {
+            <li class="tree-node" style="--d:@depth">
+                <span class="tree-text">@node.Text</span>
+                @if (!string.IsNullOrWhiteSpace(node.Note))
+                {
+                    <span class="tree-note">@node.Note</span>
+                }
+
+                @foreach (var verdict in node.Verdicts)
+                {
+                    <span class="tree-verdict">
+                        @if (verdict.IsOthers || verdict.MarjaNames.Count > 0)
+                        {
+                            var names = new List<string>(verdict.MarjaNames);
+                            if (verdict.IsOthers) { names.Add("دیگر مراجع"); }
+                            <b class="tree-marja">@string.Join("، ", names):</b>
+                        }
+                        @verdict.Text
+                    </span>
+                }
+
+                @if (node.Children.Count > 0)
+                {
+                    <ul class="tree-children">
+                        @{
+                            RenderPreview(node.Children, depth + 1);
+                        }
+                    </ul>
+                }
+            </li>
+        }
+    }
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash @(Model.FlashKind == "ok" ? "flash-ok" : "flash-warn")" role="status">@Model.Flash</div>
+}
+
+<form method="post" class="edit-form">
+    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+    <div class="edit-cols">
+        <div class="edit-main">
+
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>متن نمودار</h2>
+                    <span class="panel-hint">هر تورفتگی دو فاصله</span>
+                </header>
+                <div class="panel-body">
+                    <textarea asp-for="Outline" class="input input-plain outline-editor" rows="20"
+                              spellcheck="false" dir="rtl"
+                              placeholder="- شرط اول => حکم&#10;- شرط دوم&#10;  - شرط تودرتو => حکم"></textarea>
+
+                    <div class="outline-actions">
+                        <button type="submit" asp-page-handler="Preview" asp-route-id="@Model.Ruling.Id"
+                                class="btn btn-ghost">
+                            بررسی بدون ذخیره
+                        </button>
+                        <button type="submit" asp-page-handler="Save" asp-route-id="@Model.Ruling.Id"
+                                class="btn btn-gold">
+                            ذخیره نمودار
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            @if (Model.Preview is { } preview)
+            {
+                <section class="panel">
+                    <header class="panel-head">
+                        <h2>پیش‌نمایش</h2>
+                        <span class="panel-hint">
+                            <fa-num>@preview.NodeCount</fa-num> شرط ·
+                            <fa-num>@preview.VerdictCount</fa-num> حکم
+                        </span>
+                    </header>
+
+                    @if (preview.Errors.Count > 0)
+                    {
+                        <div class="panel-body">
+                            <div class="auth-alert">
+                                <ul>
+                                    @foreach (var error in preview.Errors)
+                                    {
+                                        <li>@error</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.UnknownMarjas.Count > 0)
+                    {
+                        <div class="panel-body">
+                            <div class="flash flash-warn">
+                                این نام‌ها با هیچ مرجعی تطبیق نخوردند و ثبت نمی‌شوند:
+                                <b>@string.Join("، ", Model.UnknownMarjas)</b>
+                                <br />
+                                اول آنها را در <a asp-area="Admin" asp-page="/Maraje/Index">مراجع تقلید</a> اضافه کنید.
+                            </div>
+                        </div>
+                    }
+
+                    @if (preview.Roots.Count > 0)
+                    {
+                        <div class="panel-body">
+                            <ul class="tree-preview">
+                                @{
+                                    RenderPreview(preview.Roots, 0);
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else if (preview.Errors.Count == 0)
+                    {
+                        <p class="empty">هنوز نموداری وارد نشده است.</p>
+                    }
+                </section>
+            }
+        </div>
+
+        <aside class="edit-side">
+            <section class="panel">
+                <header class="panel-head"><h2>راهنمای قالب</h2></header>
+                <div class="panel-body">
+                    <pre class="outline-help" dir="rtl">- شرط اول => حکم
+- شرط دوم
+  - شرط تودرتو
+    => [سیستانی، مکارم] پاک است
+    => [دیگر مراجع] نجس است
+  - شرط دیگر => حکم # پانویس</pre>
+
+                    <ul class="help-list">
+                        <li><code>-</code> شروع هر شرط</li>
+                        <li><code>=&gt;</code> حکم آن شاخه</li>
+                        <li><code>[ ]</code> مراجعی که این نظر را دارند</li>
+                        <li><code>#</code> پانویس یا شماره مسئله</li>
+                        <li>دو فاصله تورفتگی یعنی یک سطح عمیق‌تر</li>
+                        <li>اگر مرجعی مشخص نشود، نظر همه یکسان فرض می‌شود</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>مراجع ثبت‌شده</h2></header>
+                <div class="panel-body">
+                    <p class="field-note">نام کوتاه هرکدام در کروشه قابل استفاده است.</p>
+                    <ul class="help-list">
+                        @foreach (var m in Model.Marjas)
+                        {
+                            <li>@m.FullName</li>
+                        }
+                    </ul>
+                    <a asp-area="Admin" asp-page="/Maraje/Index" class="btn btn-ghost auth-submit">مدیریت مراجع</a>
+                </div>
+            </section>
+
+            <a asp-page="./Edit" asp-route-id="@Model.Ruling.Id" class="btn btn-ghost auth-submit">
+                بازگشت به ویرایش حکم
+            </a>
+        </aside>
+    </div>
+</form>

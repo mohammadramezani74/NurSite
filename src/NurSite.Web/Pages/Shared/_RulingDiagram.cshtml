@@ -1,0 +1,74 @@
+﻿@using NurSite.Domain.Entities
+@using NurSite.Domain.Enums
+@model IReadOnlyList<RulingNode>
+
+@functions {
+    void RenderNodes(IReadOnlyList<RulingNode> nodes, int depth)
+    {
+        var ordered = nodes.OrderBy(n => n.SortOrder).ToList();
+
+        <ol class="diagram-level" style="--depth:@depth">
+            @foreach (var node in ordered)
+            {
+                <li class="diagram-node">
+                    <p class="diagram-condition">@node.Text</p>
+
+                    @if (!string.IsNullOrWhiteSpace(node.Note))
+                    {
+                        <p class="diagram-note">@node.Note</p>
+                    }
+
+                    @if (node.Verdicts.Count > 0)
+                    {
+                        <ul class="verdict-list">
+                            @foreach (var verdict in node.Verdicts.OrderBy(v => v.SortOrder))
+                            {
+                                <li class="verdict verdict-@verdict.Scope.ToString().ToLowerInvariant()">
+                                    @switch (verdict.Scope)
+                                    {
+                                        case VerdictScope.SpecificMarjas:
+                                            <b class="verdict-marja">
+                                                @string.Join("، ", verdict.Marjas.Select(m => m.Marja.FullName))
+                                            </b>
+                                            break;
+                                        case VerdictScope.OtherMarjas:
+                                            <b class="verdict-marja">دیگر مراجع</b>
+                                            break;
+                                    }
+
+                                    <span class="verdict-text">@verdict.Text</span>
+
+                                    @if (!string.IsNullOrWhiteSpace(verdict.SourceNote))
+                                    {
+                                        <span class="verdict-source">@verdict.SourceNote</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+
+                    @{
+                        var children = node.Children.OrderBy(c => c.SortOrder).ToList();
+                    }
+                    @if (children.Count > 0)
+                    {
+                        RenderNodes(children, depth + 1);
+                    }
+                </li>
+            }
+        </ol>
+    }
+}
+
+@{
+    var roots = Model.Where(n => n.ParentId is null).OrderBy(n => n.SortOrder).ToList();
+}
+
+@if (roots.Count > 0)
+{
+    <div class="ruling-diagram">
+        @{
+            RenderNodes(roots, 0);
+        }
+    </div>
+}

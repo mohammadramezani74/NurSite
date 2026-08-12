@@ -1172,3 +1172,98 @@ a.badge {
     color: var(--tala-2);
     font-size: 12.5px
 }
+
+/* ویرایشگر نمودار */
+.outline-editor {
+    font-family: 'Vazirmatn',monospace;
+    font-size: 14.5px;
+    line-height: 2.1;
+    min-height: 340px;
+    white-space: pre;
+    overflow-x: auto;
+    tab-size: 2;
+}
+
+.outline-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap
+}
+
+.outline-help {
+    background: rgba(0,0,0,.3);
+    border: 1px solid var(--khat);
+    padding: 14px;
+    font-size: 13px;
+    line-height: 2;
+    color: var(--matn-2);
+    white-space: pre;
+    overflow-x: auto;
+}
+
+.help-list {
+    list-style: none;
+    display: grid;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--matn-2);
+    font-weight: 300
+}
+
+    .help-list li::before {
+        content: '—';
+        color: var(--tala);
+        margin-inline-end: 8px
+    }
+
+    .help-list code {
+        background: rgba(0,0,0,.3);
+        padding: 2px 7px;
+        color: var(--tala-2);
+        font-size: 12.5px
+    }
+
+/* پیش‌نمایش درخت */
+.tree-preview, .tree-children {
+    list-style: none
+}
+
+.tree-children {
+    padding-inline-start: 22px;
+    border-inline-start: 1px dashed var(--khat);
+    margin-top: 6px
+}
+
+.tree-node {
+    padding-block: 6px
+}
+
+.tree-text {
+    display: block;
+    font-size: 14.5px;
+    color: #fff;
+    line-height: 1.9
+}
+
+.tree-note {
+    display: block;
+    font-size: 12px;
+    color: var(--matn-2);
+    margin-top: 2px
+}
+
+.tree-verdict {
+    display: block;
+    font-size: 14px;
+    color: var(--matn);
+    margin-top: 5px;
+    padding: 5px 12px;
+    border-inline-start: 2px solid var(--firouze);
+    background: rgba(42,167,155,.07);
+}
+
+.tree-marja {
+    color: var(--tala-2);
+    font-weight: 700;
+    margin-inline-end: 6px
+}
