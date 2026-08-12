@@ -1267,3 +1267,9 @@ a.badge {
     font-weight: 700;
     margin-inline-end: 6px
 }
+
+/* نشان احکام نموداری */
+.badge-diagram {
+    background: rgba(42,167,155,.15);
+    color: var(--firouze-2)
+}

@@ -20,6 +20,7 @@ public class IndexModel(AppDbContext db) : PageModel
     [BindProperty(SupportsGet = true)] public int? CategoryId { get; set; }
     [BindProperty(SupportsGet = true)] public int? MarjaId { get; set; }
     [BindProperty(SupportsGet = true)] public bool? Faq { get; set; }
+    [BindProperty(SupportsGet = true)] public bool? Diagram { get; set; }
     [BindProperty(SupportsGet = true, Name = "page")] public int PageNumber { get; set; } = 1;
 
     public int TotalCount { get; private set; }
@@ -52,6 +53,7 @@ public class IndexModel(AppDbContext db) : PageModel
         if (CategoryId is not null) query = query.Where(r => r.RulingCategoryId == CategoryId);
         if (MarjaId is not null) query = query.Where(r => r.MarjaId == MarjaId);
         if (Faq == true) query = query.Where(r => r.IsFrequentlyAsked);
+        if (Diagram == true) query = query.Where(r => r.HasDiagram);
 
         TotalCount = await query.CountAsync(ct);
 
@@ -79,7 +81,7 @@ public class IndexModel(AppDbContext db) : PageModel
 
         Flash = ruling.Status == PublishStatus.Published ? "حکم منتشر شد." : "حکم به پیش‌نویس برگشت.";
         FlashKind = "ok";
-        return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, page = PageNumber });
+        return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, Diagram, page = PageNumber });
     }
 
     /// <summary>نشان دادن یا برداشتن از بخش «احکام پرتکرار» صفحه اصلی.</summary>
@@ -95,7 +97,7 @@ public class IndexModel(AppDbContext db) : PageModel
             ? "به احکام پرتکرار صفحه اصلی اضافه شد."
             : "از احکام پرتکرار برداشته شد.";
         FlashKind = "ok";
-        return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, page = PageNumber });
+        return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, Diagram, page = PageNumber });
     }
 
     public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
@@ -108,6 +110,6 @@ public class IndexModel(AppDbContext db) : PageModel
 
         Flash = "حکم حذف شد.";
         FlashKind = "ok";
-        return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, page = PageNumber });
+        return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, Diagram, page = PageNumber });
     }
 }

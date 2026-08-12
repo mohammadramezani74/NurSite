@@ -64,8 +64,13 @@
             <span>فقط پرتکرارها</span>
         </label>
 
+        <label class="checkbox">
+            <input type="checkbox" name="diagram" value="true" checked="@(Model.Diagram == true)" />
+            <span>فقط نموداری‌ها</span>
+        </label>
+
         <button type="submit" class="btn btn-ghost btn-sm">اعمال</button>
-        @if (!string.IsNullOrWhiteSpace(Model.Q) || Model.Status is not null || Model.CategoryId is not null || Model.MarjaId is not null || Model.Faq == true)
+        @if (!string.IsNullOrWhiteSpace(Model.Q) || Model.Status is not null || Model.CategoryId is not null || Model.MarjaId is not null || Model.Faq == true || Model.Diagram == true)
         {
             <a asp-page="./Index" class="link-quiet">حذف فیلترها</a>
         }
@@ -133,11 +138,21 @@
                                 {
                                     <span class="badge badge-wait">پرتکرار</span>
                                 }
+                                @if (r.HasDiagram)
+                                {
+                                    <span class="badge badge-diagram">نموداری</span>
+                                }
                             </td>
                             <td class="cell-actions">
                                 <div class="actions">
                                     <a asp-page="./Edit" asp-route-id="@r.Id" class="icon-btn" title="ویرایش">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                                    </a>
+
+                                    <a asp-page="./Nemodar" asp-route-id="@r.Id"
+                                       class="icon-btn @(r.HasDiagram ? "on" : "")"
+                                       title="@(r.HasDiagram ? "ویرایش نمودار شرطی" : "افزودن نمودار شرطی")">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v4M12 7H6v4M12 7h6v4M6 11v0M18 11v0" /><rect x="9" y="1" width="6" height="4" rx="1" /><rect x="3" y="11" width="6" height="4" rx="1" /><rect x="15" y="11" width="6" height="4" rx="1" /></svg>
                                     </a>
 
                                     <form method="post" asp-page-handler="Faq" asp-route-id="@r.Id" asp-route-q="@Model.Q" asp-route-page="@Model.PageNumber">
@@ -182,7 +197,7 @@
                 {
                     <a asp-page="./Index" asp-route-q="@Model.Q" asp-route-status="@Model.Status"
                        asp-route-categoryId="@Model.CategoryId" asp-route-marjaId="@Model.MarjaId"
-                       asp-route-faq="@Model.Faq" asp-route-page="@p"
+                       asp-route-faq="@Model.Faq" asp-route-diagram="@Model.Diagram" asp-route-page="@p"
                        class="pager-item @(p == Model.PageNumber ? "on" : "")"
                        aria-current="@(p == Model.PageNumber ? "page" : null)">
                         <fa-num>@p</fa-num>
