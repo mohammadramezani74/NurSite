@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Net.Http.Headers;
 using NurSite.Infrastructure;
 using NurSite.Infrastructure.Identity;
@@ -22,6 +23,15 @@ builder.Services.AddSiteIdentity();
 builder.Services.AddScoped<ThemeResolver>();
 builder.Services.Configure<UploadOptions>(builder.Configuration.GetSection("Upload"));
 builder.Services.AddScoped<FileUploadService>();
+
+// سقف پیش‌فرض فرم چندبخشی حدود ۱۲۸ مگابایت است، ولی سقف واقعی را
+// همان تنظیمات آپلود تعیین می‌کند تا در یک جا نگه‌داری شود. بدون این،
+// فایل صوتی بزرگ‌تر از سقف فرم با خطای مبهم رد می‌شد نه با پیام فارسی ما.
+builder.Services.Configure<FormOptions>(options =>
+{
+    var audioLimit = builder.Configuration.GetValue<long?>("Upload:Audio:MaxBytes") ?? 60 * 1024 * 1024;
+    options.MultipartBodyLengthLimit = audioLimit + 1024 * 1024; // کمی جا برای بقیه فیلدهای فرم
+});
 
 builder.Services.AddRazorPages(options =>
 {

@@ -10,7 +10,24 @@ public class Lecture : BaseEntity, IAuditable, ISoftDelete, ISeoAware
     public string Slug { get; set; } = default!;
     public string? Description { get; set; }
 
-    public string AudioPath { get; set; } = default!;
+    /// <summary>
+    /// نشانی فایل صوتی روی همین سرور، مثل /uploads/lectures/2026/08/….mp3
+    /// اگر صوت جای دیگری میزبانی شود این خالی می‌ماند.
+    /// </summary>
+    public string? AudioPath { get; set; }
+
+    /// <summary>
+    /// نشانی کامل فایل صوتی روی سرور دیگر. برای آرشیوهایی که از قبل
+    /// جای دیگری بوده‌اند یا فایل‌هایی که نمی‌خواهیم روی این سرور بنشینند.
+    /// </summary>
+    public string? ExternalAudioUrl { get; set; }
+
+    /// <summary>نشانی نهایی پخش، هر کدام که پر باشد. در دیتابیس ستون ندارد.</summary>
+    public string? AudioUrl => string.IsNullOrWhiteSpace(ExternalAudioUrl) ? AudioPath : ExternalAudioUrl;
+
+    /// <summary>صوت روی سرور خودمان نیست، پس نه شمارش دانلود دارد نه کنترل دسترسی.</summary>
+    public bool IsExternal => !string.IsNullOrWhiteSpace(ExternalAudioUrl);
+
     /// <summary>مدت به ثانیه — برای نمایش و برای AudioObject در نشانه‌گذاری ساختاریافته.</summary>
     public int DurationSeconds { get; set; }
     public long FileSizeBytes { get; set; }
@@ -28,6 +45,9 @@ public class Lecture : BaseEntity, IAuditable, ISoftDelete, ISeoAware
     public int PlayCount { get; set; }
     public int DownloadCount { get; set; }
     public bool AllowDownload { get; set; } = true;
+
+    /// <summary>متن یکسان‌شده عنوان و توضیح و نام سخنران، فقط برای جستجو.</summary>
+    public string? SearchText { get; set; }
 
     public string? MetaTitle { get; set; }
     public string? MetaDescription { get; set; }
