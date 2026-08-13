@@ -14,7 +14,7 @@ public class IndexModel(AppDbContext db) : PageModel
 
     [BindProperty(SupportsGet = true)] public string? Q { get; set; }
     [BindProperty(SupportsGet = true, Name = "unread")] public bool? UnreadOnly { get; set; }
-    [BindProperty(SupportsGet = true, Name = "page")] public int PageNumber { get; set; } = 1;
+    [BindProperty(SupportsGet = true, Name = "safhe")] public int PageNumber { get; set; } = 1;
 
     public int TotalCount { get; private set; }
     public int UnreadCount { get; private set; }
@@ -86,7 +86,7 @@ public class IndexModel(AppDbContext db) : PageModel
 
         Flash = message.IsRead ? "خوانده‌شده علامت خورد." : "به خوانده‌نشده برگشت.";
         FlashKind = "ok";
-        return RedirectToPage(new { Q, unread = UnreadOnly, page = PageNumber });
+        return RedirectToPage(new { Q, unread = UnreadOnly, safhe = PageNumber });
     }
 
     public async Task<IActionResult> OnPostNoteAsync(int id, string? note, CancellationToken ct)
@@ -99,7 +99,7 @@ public class IndexModel(AppDbContext db) : PageModel
 
         Flash = "یادداشت ذخیره شد.";
         FlashKind = "ok";
-        return RedirectToPage(new { open = id, Q, unread = UnreadOnly, page = PageNumber });
+        return RedirectToPage(new { open = id, Q, unread = UnreadOnly, safhe = PageNumber });
     }
 
     public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
@@ -112,7 +112,7 @@ public class IndexModel(AppDbContext db) : PageModel
 
         Flash = "پیام حذف شد.";
         FlashKind = "ok";
-        return RedirectToPage(new { Q, unread = UnreadOnly, page = PageNumber });
+        return RedirectToPage(new { Q, unread = UnreadOnly, safhe = PageNumber });
     }
 
     /// <summary>همه پیام‌های خوانده‌نشده را یکجا علامت می‌زند.</summary>

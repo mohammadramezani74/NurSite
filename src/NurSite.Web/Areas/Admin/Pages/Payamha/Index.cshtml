@@ -93,7 +93,7 @@
                                 <p class="row-title">
                                     <a asp-page="./Index" asp-route-open="@m.Id"
                                        asp-route-q="@Model.Q" asp-route-unread="@Model.UnreadOnly"
-                                       asp-route-page="@Model.PageNumber">
+                                       asp-route-safhe="@Model.PageNumber">
                                         @(string.IsNullOrWhiteSpace(m.Subject) ? "بدون موضوع" : m.Subject)
                                     </a>
                                 </p>
@@ -121,7 +121,7 @@
                                 }
 
                                 <form method="post" asp-page-handler="ToggleRead" asp-route-id="@m.Id"
-                                      asp-route-q="@Model.Q" asp-route-page="@Model.PageNumber">
+                                      asp-route-q="@Model.Q" asp-route-safhe="@Model.PageNumber">
                                     <button type="submit" class="icon-btn"
                                             title="@(m.IsRead ? "برگرداندن به خوانده‌نشده" : "علامت خوانده‌شده")">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5" /></svg>
@@ -129,7 +129,7 @@
                                 </form>
 
                                 <form method="post" asp-page-handler="Delete" asp-route-id="@m.Id"
-                                      asp-route-q="@Model.Q" asp-route-page="@Model.PageNumber"
+                                      asp-route-q="@Model.Q" asp-route-safhe="@Model.PageNumber"
                                       data-confirm="این پیام حذف شود؟">
                                     <button type="submit" class="icon-btn danger" title="حذف">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" /></svg>
@@ -146,7 +146,7 @@
                         @for (var p = 1; p <= Model.TotalPages; p++)
                         {
                             <a asp-page="./Index" asp-route-q="@Model.Q" asp-route-unread="@Model.UnreadOnly"
-                               asp-route-page="@p"
+                               asp-route-safhe="@p"
                                class="pager-item @(p == Model.PageNumber ? "on" : "")">
                                 <fa-num>@p</fa-num>
                             </a>

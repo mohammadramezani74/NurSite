@@ -155,14 +155,20 @@
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v4M12 7H6v4M12 7h6v4M6 11v0M18 11v0" /><rect x="9" y="1" width="6" height="4" rx="1" /><rect x="3" y="11" width="6" height="4" rx="1" /><rect x="15" y="11" width="6" height="4" rx="1" /></svg>
                                     </a>
 
-                                    <form method="post" asp-page-handler="Faq" asp-route-id="@r.Id" asp-route-q="@Model.Q" asp-route-page="@Model.PageNumber">
+                                    <form method="post" asp-page-handler="Faq" asp-route-id="@r.Id" asp-route-q="@Model.Q"
+                                          asp-route-status="@Model.Status" asp-route-categoryId="@Model.CategoryId"
+                                          asp-route-marjaId="@Model.MarjaId" asp-route-faq="@Model.Faq"
+                                          asp-route-diagram="@Model.Diagram" asp-route-safhe="@Model.PageNumber">
                                         <button type="submit" class="icon-btn @(r.IsFrequentlyAsked ? "on" : "")"
                                                 title="@(r.IsFrequentlyAsked ? "برداشتن از احکام پرتکرار" : "افزودن به احکام پرتکرار")">
                                             <svg viewBox="0 0 24 24" fill="@(r.IsFrequentlyAsked ? "currentColor" : "none")" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.7 5.8 6.3.8-4.6 4.4 1.2 6.3L12 17.3 6.4 20.3l1.2-6.3L3 9.6l6.3-.8Z" /></svg>
                                         </button>
                                     </form>
 
-                                    <form method="post" asp-page-handler="Toggle" asp-route-id="@r.Id" asp-route-q="@Model.Q" asp-route-page="@Model.PageNumber">
+                                    <form method="post" asp-page-handler="Toggle" asp-route-id="@r.Id" asp-route-q="@Model.Q"
+                                          asp-route-status="@Model.Status" asp-route-categoryId="@Model.CategoryId"
+                                          asp-route-marjaId="@Model.MarjaId" asp-route-faq="@Model.Faq"
+                                          asp-route-diagram="@Model.Diagram" asp-route-safhe="@Model.PageNumber">
                                         <button type="submit" class="icon-btn"
                                                 title="@(r.Status == PublishStatus.Published ? "برگرداندن به پیش‌نویس" : "انتشار")">
                                             @if (r.Status == PublishStatus.Published)
@@ -176,7 +182,10 @@
                                         </button>
                                     </form>
 
-                                    <form method="post" asp-page-handler="Delete" asp-route-id="@r.Id" asp-route-q="@Model.Q" asp-route-page="@Model.PageNumber"
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@r.Id" asp-route-q="@Model.Q"
+                                          asp-route-status="@Model.Status" asp-route-categoryId="@Model.CategoryId"
+                                          asp-route-marjaId="@Model.MarjaId" asp-route-faq="@Model.Faq"
+                                          asp-route-diagram="@Model.Diagram" asp-route-safhe="@Model.PageNumber"
                                           data-confirm="این حکم حذف شود؟">
                                         <button type="submit" class="icon-btn danger" title="حذف">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" /></svg>
@@ -197,7 +206,7 @@
                 {
                     <a asp-page="./Index" asp-route-q="@Model.Q" asp-route-status="@Model.Status"
                        asp-route-categoryId="@Model.CategoryId" asp-route-marjaId="@Model.MarjaId"
-                       asp-route-faq="@Model.Faq" asp-route-diagram="@Model.Diagram" asp-route-page="@p"
+                       asp-route-faq="@Model.Faq" asp-route-diagram="@Model.Diagram" asp-route-safhe="@p"
                        class="pager-item @(p == Model.PageNumber ? "on" : "")"
                        aria-current="@(p == Model.PageNumber ? "page" : null)">
                         <fa-num>@p</fa-num>

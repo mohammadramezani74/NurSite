@@ -16,7 +16,7 @@ public class IndexModel(AppDbContext db) : PageModel
     public Category? ActiveCategory { get; private set; }
 
     [BindProperty(SupportsGet = true, Name = "dasteh")] public string? CategorySlug { get; set; }
-    [BindProperty(SupportsGet = true, Name = "page")] public int PageNumber { get; set; } = 1;
+    [BindProperty(SupportsGet = true, Name = "safhe")] public int PageNumber { get; set; } = 1;
 
     public int TotalCount { get; private set; }
     public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);

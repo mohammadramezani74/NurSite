@@ -122,7 +122,7 @@
                                     </a>
 
                                     <form method="post" asp-page-handler="Toggle" asp-route-id="@a.Id"
-                                          asp-route-q="@Model.Q" asp-route-page="@Model.PageNumber">
+                                          asp-route-q="@Model.Q" asp-route-safhe="@Model.PageNumber">
                                         <button type="submit" class="icon-btn"
                                                 title="@(a.Status == PublishStatus.Published ? "برگرداندن به پیش‌نویس" : "انتشار")">
                                             @if (a.Status == PublishStatus.Published)
@@ -137,7 +137,7 @@
                                     </form>
 
                                     <form method="post" asp-page-handler="Delete" asp-route-id="@a.Id"
-                                          asp-route-q="@Model.Q" asp-route-page="@Model.PageNumber"
+                                          asp-route-q="@Model.Q" asp-route-safhe="@Model.PageNumber"
                                           data-confirm="مقاله «@a.Title» حذف شود؟">
                                         <button type="submit" class="icon-btn danger" title="حذف">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" /></svg>
@@ -160,7 +160,7 @@
                        asp-route-q="@Model.Q"
                        asp-route-status="@Model.Status"
                        asp-route-categoryId="@Model.CategoryId"
-                       asp-route-page="@p"
+                       asp-route-safhe="@p"
                        class="pager-item @(p == Model.PageNumber ? "on" : "")"
                        aria-current="@(p == Model.PageNumber ? "page" : null)">
                         <fa-num>@p</fa-num>

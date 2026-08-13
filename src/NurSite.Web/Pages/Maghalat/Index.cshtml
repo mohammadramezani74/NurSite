@@ -93,7 +93,7 @@
                 <nav class="pager pager-public" aria-label="صفحه‌بندی">
                     @for (var p = 1; p <= Model.TotalPages; p++)
                     {
-                        <a asp-page="/Maghalat/Index" asp-route-dasteh="@Model.CategorySlug" asp-route-page="@p"
+                        <a asp-page="/Maghalat/Index" asp-route-dasteh="@Model.CategorySlug" asp-route-safhe="@p"
                            class="pager-item @(p == Model.PageNumber ? "on" : "")"
                            aria-current="@(p == Model.PageNumber ? "page" : null)">
                             <fa-num>@p</fa-num>

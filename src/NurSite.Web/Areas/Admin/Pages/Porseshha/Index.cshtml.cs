@@ -16,7 +16,7 @@ public class IndexModel(AppDbContext db) : PageModel
 
     [BindProperty(SupportsGet = true)] public QuestionStatus? Status { get; set; } = QuestionStatus.New;
     [BindProperty(SupportsGet = true)] public string? Q { get; set; }
-    [BindProperty(SupportsGet = true, Name = "page")] public int PageNumber { get; set; } = 1;
+    [BindProperty(SupportsGet = true, Name = "safhe")] public int PageNumber { get; set; } = 1;
 
     public int TotalCount { get; private set; }
     public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
@@ -72,6 +72,6 @@ public class IndexModel(AppDbContext db) : PageModel
 
         Flash = "پرسش به عنوان بررسی‌شده بدون پاسخ علامت خورد.";
         FlashKind = "ok";
-        return RedirectToPage(new { Status, Q, page = PageNumber });
+        return RedirectToPage(new { Status, Q, safhe = PageNumber });
     }
 }

@@ -82,7 +82,7 @@ builder.Services.AddOutputCache(options =>
     // صفحاتی که محتوایشان کم عوض می‌شود
     options.AddPolicy("Content", p => p
         .Expire(TimeSpan.FromMinutes(30))
-        .SetVaryByQuery("page")
+        .SetVaryByQuery("safhe")
         .VaryByValue(ctx => new KeyValuePair<string, string>(
             "theme", ctx.Request.Cookies[ThemeResolver.CookieName] ?? "default")));
 });

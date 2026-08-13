@@ -9,7 +9,7 @@ public class JostojooModel(ISearchService search) : PageModel
 {
     [BindProperty(SupportsGet = true, Name = "q")] public string? Query { get; set; }
     [BindProperty(SupportsGet = true, Name = "type")] public SearchKind Kind { get; set; } = SearchKind.All;
-    [BindProperty(SupportsGet = true, Name = "page")] public int PageNumber { get; set; } = 1;
+    [BindProperty(SupportsGet = true, Name = "safhe")] public int PageNumber { get; set; } = 1;
 
     public SearchResponse? Result { get; private set; }
     public bool HasQuery => !string.IsNullOrWhiteSpace(Query);

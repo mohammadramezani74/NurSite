@@ -100,7 +100,7 @@
                 <nav class="pager pager-public" aria-label="صفحه‌بندی">
                     @for (var p = 1; p <= Model.Result.TotalPages; p++)
                     {
-                        <a asp-page="/Jostojoo" asp-route-q="@Model.Query" asp-route-type="@Model.Kind" asp-route-page="@p"
+                        <a asp-page="/Jostojoo" asp-route-q="@Model.Query" asp-route-type="@Model.Kind" asp-route-safhe="@p"
                            class="pager-item @(p == Model.Result.PageNumber ? "on" : "")"
                            aria-current="@(p == Model.Result.PageNumber ? "page" : null)">
                             <fa-num>@p</fa-num>

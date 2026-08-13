@@ -21,7 +21,10 @@ public class IndexModel(AppDbContext db) : PageModel
     [BindProperty(SupportsGet = true)] public int? MarjaId { get; set; }
     [BindProperty(SupportsGet = true)] public bool? Faq { get; set; }
     [BindProperty(SupportsGet = true)] public bool? Diagram { get; set; }
-    [BindProperty(SupportsGet = true, Name = "page")] public int PageNumber { get; set; } = 1;
+    // نام این پارامتر عمداً «page» نیست. در Razor Pages نام page رزرو شده
+    // و خودِ مسیر صفحه را نگه می‌دارد؛ اگر به عنوان route value بفرستیمش،
+    // ساخت نشانی به هم می‌ریزد و لینک صفحه‌بندی و اکشن فرم‌ها از کار می‌افتند.
+    [BindProperty(SupportsGet = true, Name = "safhe")] public int PageNumber { get; set; } = 1;
 
     public int TotalCount { get; private set; }
     public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
@@ -81,7 +84,7 @@ public class IndexModel(AppDbContext db) : PageModel
 
         Flash = ruling.Status == PublishStatus.Published ? "حکم منتشر شد." : "حکم به پیش‌نویس برگشت.";
         FlashKind = "ok";
-        return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, Diagram, page = PageNumber });
+        return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, Diagram, safhe = PageNumber });
     }
 
     /// <summary>نشان دادن یا برداشتن از بخش «احکام پرتکرار» صفحه اصلی.</summary>
@@ -97,7 +100,7 @@ public class IndexModel(AppDbContext db) : PageModel
             ? "به احکام پرتکرار صفحه اصلی اضافه شد."
             : "از احکام پرتکرار برداشته شد.";
         FlashKind = "ok";
-        return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, Diagram, page = PageNumber });
+        return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, Diagram, safhe = PageNumber });
     }
 
     public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
@@ -110,6 +113,6 @@ public class IndexModel(AppDbContext db) : PageModel
 
         Flash = "حکم حذف شد.";
         FlashKind = "ok";
-        return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, Diagram, page = PageNumber });
+        return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, Diagram, safhe = PageNumber });
     }
 }

@@ -118,7 +118,7 @@
                                     @if (q.Status is QuestionStatus.New or QuestionStatus.Assigned)
                                     {
                                         <form method="post" asp-page-handler="Reject" asp-route-id="@q.Id"
-                                              asp-route-status="@Model.Status" asp-route-page="@Model.PageNumber"
+                                              asp-route-status="@Model.Status" asp-route-safhe="@Model.PageNumber"
                                               data-confirm="این پرسش بدون پاسخ بسته شود؟">
                                             <button type="submit" class="icon-btn danger" title="بستن بدون پاسخ">
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18M6 6l12 12" /></svg>
@@ -138,7 +138,7 @@
             <nav class="pager" aria-label="صفحه‌بندی">
                 @for (var p = 1; p <= Model.TotalPages; p++)
                 {
-                    <a asp-page="./Index" asp-route-status="@Model.Status" asp-route-q="@Model.Q" asp-route-page="@p"
+                    <a asp-page="./Index" asp-route-status="@Model.Status" asp-route-q="@Model.Q" asp-route-safhe="@p"
                        class="pager-item @(p == Model.PageNumber ? "on" : "")">
                         <fa-num>@p</fa-num>
                     </a>

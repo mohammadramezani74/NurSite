@@ -20,7 +20,6 @@
 <form method="post" class="edit-form">
     <input type="hidden" asp-for="Input.Id" />
     <input type="hidden" asp-for="Input.FromQuestionId" />
-    <input type="hidden" asp-for="Input.HasDiagram" />
     <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
 
     <div class="edit-cols">
@@ -40,25 +39,38 @@
                         <span asp-validation-for="Input.Question" class="field-error"></span>
                     </div>
 
+                    @* تا وقتی گره‌ای ساخته نشده، کاربر آزاد است تیک را بردارد.
+                       بعد از آن قفل می‌شود تا محتوای نمودار بی‌صاحب نماند. *@
+                    @if (Model.HasDiagramNodes)
+                    {
+                        <input type="hidden" asp-for="Input.HasDiagram" value="true" />
+                        <div class="flash flash-ok" style="margin:0 0 1rem">
+                            محتوای این حکم در نمودار شرطی است.
+                            <a asp-page="./Nemodar" asp-route-id="@Model.Input.Id">ویرایش نمودار</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <label class="checkbox" style="margin-bottom:1rem">
+                            <input asp-for="Input.HasDiagram" type="checkbox" />
+                            <span>
+                                حکم نموداری است
+                                <span class="label-hint">پاسخ به‌جای متن، درخت شرط و حکم دارد و بعد از ذخیره ساخته می‌شود</span>
+                            </span>
+                        </label>
+                    }
+
                     <div class="field">
                         <label asp-for="Input.Answer" class="label">
                             پاسخ
                             @if (Model.Input.HasDiagram)
                             {
-                                <span class="label-hint">این حکم نمودار دارد؛ این متن اگر پر شود، بالای نمودار می‌آید</span>
+                                <span class="label-hint">اختیاری؛ اگر پر شود، بالای نمودار می‌آید</span>
                             }
                         </label>
                         <textarea asp-for="Input.Answer" id="bodyEditor" rows="12" class="input input-plain"></textarea>
                         <span asp-validation-for="Input.Answer" class="field-error"></span>
                     </div>
-
-                    @if (Model.Input.HasDiagram)
-                    {
-                        <div class="flash flash-ok" style="margin:0">
-                            محتوای این حکم در نمودار شرطی است.
-                            <a asp-page="./Nemodar" asp-route-id="@Model.Input.Id">ویرایش نمودار</a>
-                        </div>
-                    }
 
                     <div class="field">
                         <label asp-for="Input.Slug" class="label">
@@ -170,7 +182,7 @@
                         @if (!Model.IsNew)
                         {
                             <a asp-page="./Nemodar" asp-route-id="@Model.Input.Id" class="btn btn-ghost auth-submit">
-                                ویرایش نمودار شرطی
+                                @(Model.HasDiagramNodes ? "ویرایش نمودار شرطی" : "ساخت نمودار شرطی")
                             </a>
                         }
                         <a asp-page="./Index" class="btn btn-ghost auth-submit">بازگشت به فهرست</a>

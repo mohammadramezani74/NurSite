@@ -21,6 +21,13 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
     public bool IsNew => Input.Id == 0;
     public string CanonicalBase { get; private set; } = "";
 
+    /// <summary>
+    /// این حکم واقعاً گره نمودار دارد؟ فرق دارد با Input.HasDiagram که
+    /// فقط «قصد» کاربر است. تا وقتی گره ساخته نشده، کاربر باید بتواند
+    /// تیک نموداری بودن را بردارد؛ بعد از آن نه.
+    /// </summary>
+    public bool HasDiagramNodes { get; private set; }
+
     /// <summary>اگر این حکم از یک پرسش کاربر ساخته می‌شود، متن اصلی پرسش.</summary>
     public UserQuestion? SourceQuestion { get; private set; }
 
@@ -46,7 +53,12 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
         [Display(Name = "پاسخ")]
         public string? Answer { get; set; }
 
-        /// <summary>این حکم نمودار دارد؟ برای اعتبارسنجی لازم است.</summary>
+        /// <summary>
+        /// محتوای این حکم نموداری است. در فرم یک تیک است، نه فیلد پنهان —
+        /// وگرنه در «حکم تازه» هیچ راهی نبود که کاربر بگوید پاسخ متنی ندارد
+        /// و می‌خواهد نمودار بسازد، و ذخیره همیشه شکست می‌خورد.
+        /// </summary>
+        [Display(Name = "حکم نموداری")]
         public bool HasDiagram { get; set; }
 
         [StringLength(250)]
@@ -111,6 +123,8 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
         var ruling = await db.Rulings.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id, ct);
         if (ruling is null) return NotFound();
 
+        HasDiagramNodes = await db.RulingNodes.AnyAsync(n => n.RulingId == ruling.Id, ct);
+
         Input = new InputModel
         {
             Id = ruling.Id,
@@ -136,9 +150,19 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
     {
         await LoadOptionsAsync(ct);
 
-        // پاسخ متنی فقط وقتی اجباری است که حکم نمودار نداشته باشد
+        // اگر گره‌ای در دیتابیس هست، حکم نموداری است — هرچه در فرم آمده باشد.
+        // بدون این، برداشتن تیک باعث می‌شد صفحه عمومی به‌جای نمودار،
+        // پاسخِ خالی را نشان بدهد در حالی که محتوا سر جایش است.
+        if (Input.Id != 0)
+        {
+            HasDiagramNodes = await db.RulingNodes.AnyAsync(n => n.RulingId == Input.Id, ct);
+            if (HasDiagramNodes) Input.HasDiagram = true;
+        }
+
+        // پاسخ متنی فقط وقتی اجباری است که حکم نموداری نباشد
         if (!Input.HasDiagram && string.IsNullOrWhiteSpace(Input.Answer))
-            ModelState.AddModelError("Input.Answer", "متن پاسخ را بنویسید یا برای این حکم نمودار بسازید.");
+            ModelState.AddModelError("Input.Answer",
+                "متن پاسخ را بنویسید، یا اگر محتوای این حکم نموداری است تیک «حکم نموداری» را بزنید.");
 
         // فتوا باید به منبعی مستند باشد. حکمی که به هیچ مرجعی نسبت داده
         // نشده نباید منتشر شود، چون مسئولیت شرعی دارد.
@@ -192,8 +216,12 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
             ? Truncate(ruling.Question, 70)
             : Input.MetaTitle.Trim();
 
+        // در حکم نموداری پاسخ خالی است، پس متن پرسش تنها چیزی است که
+        // می‌شود در نتیجه گوگل نشان داد. بدون این، توضیح متا خالی می‌ماند.
         ruling.MetaDescription = string.IsNullOrWhiteSpace(Input.MetaDescription)
-            ? Truncate(ReadingTime.Excerpt(ruling.Answer, 170), 170)
+            ? Truncate(string.IsNullOrWhiteSpace(ruling.Answer)
+                ? ruling.Question
+                : ReadingTime.Excerpt(ruling.Answer, 170), 170)
             : Input.MetaDescription.Trim();
 
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -229,8 +257,19 @@ public class EditModel(AppDbContext db, ISlugService slugs, ILogger<EditModel> l
             logger.LogInformation("ریدایرکت حکم از {Old} به {New}", previousSlug, ruling.Slug);
         }
 
-        Flash = isNew ? "حکم ثبت شد." : "تغییرات ذخیره شد.";
         FlashKind = "ok";
+
+        // حکم نموداریِ بدون گره، قدم بعدی‌اش ساختن نمودار است.
+        // کاربر را همان‌جا می‌بریم تا دوباره دنبال دکمه‌اش نگردد.
+        if (ruling.HasDiagram && !HasDiagramNodes)
+        {
+            Flash = isNew
+                ? "حکم ثبت شد. حالا نمودار شرطی آن را بنویسید."
+                : "تغییرات ذخیره شد. حالا نمودار شرطی را بنویسید.";
+            return RedirectToPage("./Nemodar", new { id = ruling.Id });
+        }
+
+        Flash = isNew ? "حکم ثبت شد." : "تغییرات ذخیره شد.";
         return RedirectToPage("./Edit", new { id = ruling.Id });
     }
 

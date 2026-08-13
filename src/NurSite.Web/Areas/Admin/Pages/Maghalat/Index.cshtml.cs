@@ -18,7 +18,7 @@ public class IndexModel(AppDbContext db, FileUploadService uploads) : PageModel
     [BindProperty(SupportsGet = true)] public string? Q { get; set; }
     [BindProperty(SupportsGet = true)] public PublishStatus? Status { get; set; }
     [BindProperty(SupportsGet = true)] public int? CategoryId { get; set; }
-    [BindProperty(SupportsGet = true, Name = "page")] public int PageNumber { get; set; } = 1;
+    [BindProperty(SupportsGet = true, Name = "safhe")] public int PageNumber { get; set; } = 1;
 
     public int TotalCount { get; private set; }
     public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
@@ -75,7 +75,7 @@ public class IndexModel(AppDbContext db, FileUploadService uploads) : PageModel
 
         FlashKind = "ok";
         await db.SaveChangesAsync(ct);
-        return RedirectToPage(new { Q, Status, CategoryId, page = PageNumber });
+        return RedirectToPage(new { Q, Status, CategoryId, safhe = PageNumber });
     }
 
     public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
@@ -89,6 +89,6 @@ public class IndexModel(AppDbContext db, FileUploadService uploads) : PageModel
 
         Flash = $"«{article.Title}» حذف شد.";
         FlashKind = "ok";
-        return RedirectToPage(new { Q, Status, CategoryId, page = PageNumber });
+        return RedirectToPage(new { Q, Status, CategoryId, safhe = PageNumber });
     }
 }
