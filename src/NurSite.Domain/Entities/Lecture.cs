@@ -3,9 +3,14 @@ using NurSite.Domain.Enums;
 
 namespace NurSite.Domain.Entities;
 
-/// <summary>یک فایل صوتی سخنرانی.</summary>
+/// <summary>
+/// یک فایل صوتی — سخنرانی، مداحی یا سرود مذهبی. نوعش را Kind تعیین می‌کند.
+/// نام کلاس به احترام کدی که از قبل بوده «Lecture» مانده است.
+/// </summary>
 public class Lecture : BaseEntity, IAuditable, ISoftDelete, ISeoAware
 {
+    public AudioKind Kind { get; set; } = AudioKind.Lecture;
+
     public string Title { get; set; } = default!;
     public string Slug { get; set; } = default!;
     public string? Description { get; set; }
@@ -32,6 +37,7 @@ public class Lecture : BaseEntity, IAuditable, ISoftDelete, ISeoAware
     public int DurationSeconds { get; set; }
     public long FileSizeBytes { get; set; }
 
+    /// <summary>گوینده — سخنران، مداح یا خواننده، بسته به نوع.</summary>
     public int? SpeakerId { get; set; }
     public Speaker? Speaker { get; set; }
 
@@ -44,7 +50,12 @@ public class Lecture : BaseEntity, IAuditable, ISoftDelete, ISeoAware
     public DateTime? PublishedAtUtc { get; set; }
     public int PlayCount { get; set; }
     public int DownloadCount { get; set; }
-    public bool AllowDownload { get; set; } = true;
+
+    /// <summary>
+    /// دسترسی دانلود. بعضی آثار اجازه انتشار فایل ندارند و فقط
+    /// می‌شود آنلاین پخششان کرد.
+    /// </summary>
+    public DownloadAccess DownloadAccess { get; set; } = DownloadAccess.Everyone;
 
     /// <summary>متن یکسان‌شده عنوان و توضیح و نام سخنران، فقط برای جستجو.</summary>
     public string? SearchText { get; set; }

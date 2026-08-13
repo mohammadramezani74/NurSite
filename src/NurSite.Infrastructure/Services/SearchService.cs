@@ -177,6 +177,7 @@ public sealed class SearchService(AppDbContext db) : ISearchService
                 l.Title,
                 l.Description,
                 l.Slug,
+                l.Kind,
                 Speaker = l.Speaker != null ? l.Speaker.FullName : null,
                 Series = l.LectureSeries != null ? l.LectureSeries.Title : null,
                 l.PublishedAtUtc
@@ -192,12 +193,13 @@ public sealed class SearchService(AppDbContext db) : ISearchService
             var normalizedBody = PersianText.Normalize(l.Description);
             var score = Score(terms, normalizedTitle, normalizedBody);
 
+            // هر نوع صوت بخش خودش را دارد، پس نشانی از روی نوع ساخته می‌شود
             return new SearchHit(
                 SearchKind.Lecture,
                 l.Title,
                 Snippet(l.Description, terms),
-                $"/sokhanraniha/{l.Slug}",
-                l.Series ?? l.Speaker,
+                AudioKinds.Url(l.Kind, l.Slug),
+                l.Series ?? l.Speaker ?? AudioKinds.PluralLabel(l.Kind),
                 l.PublishedAtUtc,
                 score);
         }).ToList();

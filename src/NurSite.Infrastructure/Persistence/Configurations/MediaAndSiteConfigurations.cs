@@ -29,6 +29,10 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
         b.HasIndex(x => x.Slug).IsUnique().HasFilter("[IsDeleted] = 0");
         b.HasIndex(x => new { x.Status, x.PublishedAtUtc });
 
+        // فهرست هر بخش عمومی همیشه بر اساس نوع فیلتر می‌شود، پس نوع
+        // باید ستون اول ایندکس باشد وگرنه ایندکس بالا به کارش نمی‌آید
+        b.HasIndex(x => new { x.Kind, x.Status, x.PublishedAtUtc });
+
         // فهرست هر مجموعه به ترتیب جلسه خوانده می‌شود
         b.HasIndex(x => new { x.LectureSeriesId, x.EpisodeNumber });
 

@@ -1,0 +1,254 @@
+﻿@page "{id:int?}"
+@using NurSite.Application.Services
+@model NurSite.Web.Areas.Admin.Pages.Southa.EditModel
+@{
+    var kindLabel = AudioKinds.Label(Model.Input.Kind);
+    ViewData["Title"] = Model.IsNew ? "صوت تازه" : "ویرایش صوت";
+    ViewData["Subtitle"] = Model.IsNew ? "افزودن سخنرانی، مداحی یا سرود" : Model.Input.Title;
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash flash-ok" role="status">@Model.Flash</div>
+}
+
+<form method="post" class="edit-form" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Input.Id" />
+    <input type="hidden" asp-for="Input.AudioPath" />
+    <input type="hidden" asp-for="Input.OgImagePath" />
+    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+    <div class="edit-cols">
+        <div class="edit-main">
+
+            <section class="panel">
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.Title" class="label">
+                            عنوان
+                            <span class="label-hint">همان‌طور بنویسید که کاربر جستجو می‌کند</span>
+                        </label>
+                        <input asp-for="Input.Title" class="input input-plain" id="titleInput"
+                               placeholder="مثلاً: شب هفتم محرم — روضه حضرت قاسم" />
+                        <span asp-validation-for="Input.Title" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Description" class="label">
+                            توضیح
+                            <span class="label-hint">چند خط درباره محتوا؛ در نتیجه گوگل هم استفاده می‌شود</span>
+                        </label>
+                        <textarea asp-for="Input.Description" id="bodyEditor" rows="8" class="input input-plain"></textarea>
+                        <span asp-validation-for="Input.Description" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Slug" class="label">
+                            نشانی صفحه
+                            <span class="label-hint">خالی بماند از عنوان ساخته می‌شود</span>
+                        </label>
+                        <div class="slug-row">
+                            <span class="slug-prefix" dir="ltr">@Model.CanonicalBase/@AudioKinds.SectionSlug(Model.Input.Kind)/</span>
+                            <input asp-for="Input.Slug" class="input input-plain" id="slugInput" />
+                        </div>
+                        <span asp-validation-for="Input.Slug" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>فایل صوتی</h2>
+                    <span class="panel-hint">بدون فایل، صوت منتشر نمی‌شود</span>
+                </header>
+                <div class="panel-body">
+
+                    <div class="field">
+                        <label class="checkbox">
+                            <input asp-for="Input.Source" type="radio" value="Upload" />
+                            <span>
+                                آپلود روی این سرور
+                                <span class="label-hint">دانلود و شمارش پخش فقط در این حالت کار می‌کند</span>
+                            </span>
+                        </label>
+                        <label class="checkbox">
+                            <input asp-for="Input.Source" type="radio" value="External" />
+                            <span>
+                                لینک بیرونی
+                                <span class="label-hint">فایل روی سرور دیگری است و کنترلش دست ما نیست</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="AudioFile" class="label">
+                            فایل mp3
+                            <span class="label-hint">سقف ۶۰ مگابایت</span>
+                        </label>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Input.AudioPath))
+                        {
+                            <audio controls preload="none" src="@Model.Input.AudioPath"
+                                   style="width:100%;margin-bottom:.5rem"></audio>
+                            <p class="label-hint" dir="ltr">@Model.Input.AudioPath</p>
+                        }
+
+                        <input asp-for="AudioFile" type="file" accept="audio/mpeg,.mp3" class="input input-plain" />
+                        <span asp-validation-for="AudioFile" class="field-error"></span>
+                        @if (!string.IsNullOrWhiteSpace(Model.Input.AudioPath))
+                        {
+                            <span class="label-hint">اگر فایل تازه‌ای انتخاب کنید، جایگزین فایل بالا می‌شود.</span>
+                        }
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.ExternalAudioUrl" class="label">نشانی فایل بیرونی</label>
+                        <input asp-for="Input.ExternalAudioUrl" class="input input-plain" dir="ltr"
+                               placeholder="https://" />
+                        <span asp-validation-for="Input.ExternalAudioUrl" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Duration" class="label">
+                            مدت
+                            <span class="label-hint">خالی بماند از خود فایل خوانده می‌شود</span>
+                        </label>
+                        <input asp-for="Input.Duration" class="input input-plain input-date" dir="ltr"
+                               placeholder="۴:۱۲" autocomplete="off" data-persian-digits />
+                        <span asp-validation-for="Input.Duration" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>تنظیمات جستجو</h2>
+                </header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.MetaTitle" class="label">
+                            عنوان متا
+                            <span class="label-hint">خالی بماند از عنوان ساخته می‌شود</span>
+                        </label>
+                        <input asp-for="Input.MetaTitle" class="input input-plain" id="metaTitleInput"
+                               maxlength="70" data-counter="metaTitleCount" />
+                        <span class="counter"><span id="metaTitleCount">۰</span> از ۷۰</span>
+                        <span asp-validation-for="Input.MetaTitle" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.MetaDescription" class="label">
+                            توضیح متا
+                            <span class="label-hint">خالی بماند از ابتدای توضیح ساخته می‌شود</span>
+                        </label>
+                        <textarea asp-for="Input.MetaDescription" class="input input-plain" rows="3"
+                                  id="metaDescInput" maxlength="170" data-counter="metaDescCount"></textarea>
+                        <span class="counter"><span id="metaDescCount">۰</span> از ۱۷۰</span>
+                        <span asp-validation-for="Input.MetaDescription" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="CoverFile" class="label">
+                            تصویر
+                            <span class="label-hint">در اشتراک‌گذاری و در فهرست نمایش داده می‌شود</span>
+                        </label>
+                        @if (!string.IsNullOrWhiteSpace(Model.Input.OgImagePath))
+                        {
+                            <img src="@Model.Input.OgImagePath" alt="تصویر @Model.Input.Title"
+                                 style="width:100%;max-height:140px;object-fit:cover;border-radius:.5rem;margin-bottom:.5rem" />
+                        }
+                        <input asp-for="CoverFile" type="file" accept="image/*" class="input input-plain" />
+                        <span asp-validation-for="CoverFile" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <aside class="edit-side">
+            <section class="panel">
+                <header class="panel-head"><h2>انتشار</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.Kind" class="label">نوع</label>
+                        <select asp-for="Input.Kind" class="input input-plain">
+                            @foreach (var k in AudioKinds.All)
+                            {
+                                <option value="@((int)k)">@AudioKinds.Label(k)</option>
+                            }
+                        </select>
+                        <span class="label-hint">نوع، بخش نشانی صفحه را تعیین می‌کند</span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Status" class="label">وضعیت</label>
+                        <select asp-for="Input.Status" class="input input-plain">
+                            <option value="@((int)PublishStatus.Draft)">پیش‌نویس</option>
+                            <option value="@((int)PublishStatus.Published)">منتشرشده</option>
+                            <option value="@((int)PublishStatus.Archived)">بایگانی</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.DownloadAccess" class="label">دسترسی دانلود</label>
+                        <select asp-for="Input.DownloadAccess" class="input input-plain">
+                            <option value="@((int)DownloadAccess.Everyone)">همه بتوانند دانلود کنند</option>
+                            <option value="@((int)DownloadAccess.SignedIn)">فقط کاربران واردشده</option>
+                            <option value="@((int)DownloadAccess.Disabled)">فقط پخش آنلاین</option>
+                        </select>
+                        <span class="label-hint">
+                            برای فایل بیرونی اثری ندارد؛ نشانی‌اش در دسترس همه است.
+                        </span>
+                    </div>
+
+                    <div class="side-actions">
+                        <button type="submit" class="btn btn-gold auth-submit">ذخیره</button>
+                        <a asp-page="./Index" class="btn btn-ghost auth-submit">بازگشت به فهرست</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head"><h2>@kindLabel</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label asp-for="Input.SpeakerId" class="label">
+                            گوینده
+                            <span class="label-hint">@AudioKinds.SpeakerLabel(Model.Input.Kind)</span>
+                        </label>
+                        <select asp-for="Input.SpeakerId" asp-items="Model.SpeakerOptions" class="input input-plain">
+                            <option value="">— انتخاب نشده —</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.LectureSeriesId" class="label">مجموعه</label>
+                        <select asp-for="Input.LectureSeriesId" asp-items="Model.SeriesOptions" class="input input-plain">
+                            <option value="">— بدون مجموعه —</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.EpisodeNumber" class="label">
+                            شماره جلسه
+                            <span class="label-hint">فقط وقتی مجموعه دارد</span>
+                        </label>
+                        <input asp-for="Input.EpisodeNumber" class="input input-plain" type="number" min="1" max="999" />
+                        <span asp-validation-for="Input.EpisodeNumber" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.RecordedOn" class="label">تاریخ ضبط</label>
+                        <input asp-for="Input.RecordedOn" class="input input-plain input-date" dir="ltr"
+                               placeholder="۱۴۰۵/۰۰/۰۰" autocomplete="off" data-persian-digits />
+                        <span asp-validation-for="Input.RecordedOn" class="field-error"></span>
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/lib/tinymce/tinymce.min.js" asp-append-version="true"></script>
+    <script src="~/js/article-editor.js" asp-append-version="true"></script>
+}
