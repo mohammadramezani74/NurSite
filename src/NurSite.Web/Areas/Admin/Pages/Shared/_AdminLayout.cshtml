@@ -75,6 +75,10 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 3 8v2h18V8Z" /><path d="M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18" /></svg>
                     مراجع تقلید
                 </a>
+                <a asp-area="Admin" asp-page="/Manabe/Index" class="nav-item @(current.StartsWith("/Manabe", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V6a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" /><path d="M9 8h5M9 12h5" /></svg>
+                    منابع احکام
+                </a>
                 <a href="#" class="nav-item soon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
                     سخنرانی‌ها
@@ -106,6 +110,10 @@
                 <a href="#" class="nav-item soon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9.5" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /></svg>
                     کاربران
+                </a>
+                <a asp-area="Admin" asp-page="/Ayat/Index" class="nav-item @(current.StartsWith("/Ayat", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v18M5 7h14M7 11h10M9 15h6" /></svg>
+                    آیات صفحه اصلی
                 </a>
                 <a asp-area="Admin" asp-page="/TaghvimGhamari/Index" class="nav-item @(current.StartsWith("/TaghvimGhamari", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /><circle cx="12" cy="15" r="2" /></svg>
