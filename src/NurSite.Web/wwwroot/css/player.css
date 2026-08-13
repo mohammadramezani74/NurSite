@@ -1,0 +1,323 @@
+﻿/* پخش‌کننده صوت و فهرست صوت‌ها.
+   جدا از site.css است چون فقط در صفحات صوتی لازم می‌شود. */
+
+/* ---------- پخش‌کننده ---------- */
+.player {
+    margin: 22px 0;
+}
+
+    /* تا وقتی جاوااسکریپت رابط را نساخته، کنترل خود مرورگر دیده می‌شود */
+    .player audio {
+        width: 100%;
+    }
+
+.p-shell {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--panel);
+    border: 1px solid var(--khat);
+    border-radius: var(--r);
+}
+
+/* وقتی رابط ساخته شد، تگ صوت پنهان می‌شود ولی همچنان پخش می‌کند */
+.player.ready audio {
+    display: none;
+}
+
+.p-play {
+    flex: none;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--tala);
+    background: linear-gradient(160deg, var(--lajvard-2), var(--ink));
+    color: var(--tala-2);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+    .p-play svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .p-play:hover {
+        transform: scale(1.04);
+        box-shadow: 0 0 0 4px rgba(200,162,74,.14);
+    }
+
+.p-mid {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ---------- نوار موج ---------- */
+.p-wave {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 44px;
+    cursor: pointer;
+    /* خط زمان در همه پخش‌کننده‌ها از چپ شروع می‌شود، حتی در صفحه راست‌به‌چپ */
+    direction: ltr;
+    touch-action: none;
+}
+
+    .p-wave:focus-visible {
+        outline: 2px solid var(--tala);
+        outline-offset: 3px;
+    }
+
+.p-bar {
+    flex: 1;
+    min-width: 2px;
+    background: var(--matn-2);
+    opacity: .38;
+    border-radius: 1px;
+    transition: opacity .12s ease, background-color .12s ease;
+}
+
+    .p-bar.on {
+        background: var(--tala);
+        opacity: 1;
+    }
+
+    /* میله‌ای که همین حالا روی آن هستیم، روشن‌تر است */
+    .p-bar.head {
+        background: var(--tala-2);
+        opacity: 1;
+    }
+
+.p-times {
+    display: flex;
+    justify-content: space-between;
+    direction: ltr;
+    margin-top: 6px;
+    font-size: .8rem;
+    color: var(--matn-2);
+}
+
+/* ---------- ابزارها ---------- */
+.p-tools {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: none;
+}
+
+    .p-tools button {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border: 1px solid transparent;
+        border-radius: var(--r);
+        background: transparent;
+        color: var(--matn-2);
+        cursor: pointer;
+        font-family: var(--f-matn);
+        font-size: .82rem;
+    }
+
+        .p-tools button:hover {
+            color: var(--matn);
+            border-color: var(--khat);
+        }
+
+        .p-tools button svg {
+            width: 18px;
+            height: 18px;
+        }
+
+.p-rate {
+    min-width: 42px;
+}
+
+/* ---------- بلندی صدا ---------- */
+.p-volume {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.p-vol {
+    /* بلند و کوتاه شدن نوار از چپ شروع می‌شود، مثل خط زمان */
+    direction: ltr;
+    width: 72px;
+    height: 4px;
+    margin-inline-end: 6px;
+    border-radius: 2px;
+    appearance: none;
+    -webkit-appearance: none;
+    /* پرشدگی با یک گرادیان روی خود ورودی ساخته می‌شود تا در هر دو
+       موتور مرورگر یک شکل دیده شود */
+    background: linear-gradient(to right, var(--tala) 0 var(--fill, 100%), var(--khat) var(--fill, 100%) 100%);
+    cursor: pointer;
+}
+
+/* روی صفحه‌های باریک، لغزنده جا نمی‌گیرد و دکمه بی‌صدا کافی است */
+@media (max-width: 420px) {
+    .p-vol {
+        display: none;
+    }
+}
+
+.p-vol::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+    background: transparent;
+}
+
+.p-vol::-moz-range-track {
+    height: 4px;
+    border-radius: 2px;
+    background: transparent;
+}
+
+.p-vol::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    margin-top: -4px;
+    border-radius: 50%;
+    border: none;
+    background: var(--tala-2);
+}
+
+.p-vol::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    background: var(--tala-2);
+}
+
+.p-vol:focus-visible {
+    outline: 2px solid var(--tala);
+    outline-offset: 4px;
+}
+
+@media (max-width: 640px) {
+    .p-shell {
+        flex-wrap: wrap;
+        padding: 14px;
+    }
+
+    .p-mid {
+        order: 3;
+        flex-basis: 100%;
+    }
+
+    .p-tools {
+        margin-inline-start: auto;
+    }
+}
+
+/* ---------- صفحه صوت ---------- */
+.audio-wrap {
+    max-width: 820px;
+}
+
+.audio-head h1 {
+    margin: 10px 0 12px;
+    line-height: 1.7;
+}
+
+.audio-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--khat-2);
+}
+
+    .audio-actions .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .audio-actions .size {
+        color: var(--matn-2);
+        font-size: .82rem;
+    }
+
+.audio-note {
+    color: var(--matn-2);
+    font-size: .9rem;
+}
+
+.audio-desc {
+    margin-top: 24px;
+}
+
+/* ---------- فهرست صوت‌ها ---------- */
+.audio-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.audio-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 1px solid var(--khat-2);
+    border-radius: var(--r);
+    transition: border-color .15s ease, background-color .15s ease;
+}
+
+    .audio-row:hover {
+        border-color: var(--khat);
+        background: var(--panel-2);
+    }
+
+.audio-row-play {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--khat);
+    color: var(--tala-2);
+    display: grid;
+    place-items: center;
+}
+
+    .audio-row-play svg {
+        width: 16px;
+        height: 16px;
+    }
+
+.audio-row:hover .audio-row-play {
+    border-color: var(--tala);
+}
+
+.audio-row-body {
+    min-width: 0;
+}
+
+    .audio-row-body h2,
+    .audio-row-body h3 {
+        margin: 0 0 4px;
+        font-size: 1rem;
+        line-height: 1.8;
+    }
+
+    .audio-row-body .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 14px;
+        font-size: .82rem;
+        color: var(--matn-2);
+    }

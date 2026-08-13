@@ -1,0 +1,138 @@
+﻿@page "/{section:regex(^(sokhanraniha|madahiha|sorudha)$)}"
+@using NurSite.Application.Services
+@model NurSite.Web.Pages.Southa.IndexModel
+@{
+    ViewData["Title"] = Model.PageTitle;
+    ViewData["MetaDescription"] = Model.PageDescription;
+}
+
+@section Head {
+    @* کلاس‌های فهرست صوت هم در همین فایل‌اند، نه فقط پخش‌کننده *@
+    <link rel="stylesheet" href="~/css/player.css" asp-append-version="true">
+    <json-ld data="@Model.BuildItemListSchema()" />
+}
+
+<section class="tone-2 girih page-head">
+    <div class="wrap">
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            @if (Model.ActiveSpeaker is null && Model.ActiveSeries is null)
+            {
+                <span aria-current="page">@AudioKinds.PluralLabel(Model.Kind)</span>
+            }
+            else
+            {
+                <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug">@AudioKinds.PluralLabel(Model.Kind)</a>
+                <span aria-hidden="true">›</span>
+                <span aria-current="page">@(Model.ActiveSeries?.Title ?? Model.ActiveSpeaker!.FullName)</span>
+            }
+        </nav>
+
+        <h1>@Model.PageTitle</h1>
+        <p>@Model.PageDescription</p>
+    </div>
+</section>
+
+<section class="tone-1">
+    <div class="wrap">
+
+        @* پیوند میان سه بخش صوتی، تا کاربر بداند بقیه هم هست *@
+        <nav class="chips" aria-label="بخش‌های صوتی">
+            @foreach (var k in AudioKinds.All)
+            {
+                <a asp-page="/Southa/Index" asp-route-section="@AudioKinds.SectionSlug(k)"
+                   class="chip @(k == Model.Kind ? "on" : "")">@AudioKinds.PluralLabel(k)</a>
+            }
+        </nav>
+
+        @if (Model.SeriesList.Count > 0)
+        {
+            <nav class="chips" aria-label="مجموعه‌ها">
+                <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug"
+                   class="chip @(Model.ActiveSeries is null && Model.ActiveSpeaker is null ? "on" : "")">همه</a>
+                @foreach (var s in Model.SeriesList)
+                {
+                    <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug" asp-route-majmooe="@s.Slug"
+                       class="chip @(Model.ActiveSeries?.Id == s.Id ? "on" : "")">@s.Title</a>
+                }
+            </nav>
+        }
+
+        @if (Model.Speakers.Count > 1)
+        {
+            <nav class="chips" aria-label="گویندگان">
+                @foreach (var s in Model.Speakers)
+                {
+                    <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug" asp-route-goyande="@s.Slug"
+                       class="chip @(Model.ActiveSpeaker?.Id == s.Id ? "on" : "")">@s.FullName</a>
+                }
+            </nav>
+        }
+
+        @if (Model.Items.Count == 0)
+        {
+            <p class="empty-public">هنوز در این بخش چیزی منتشر نشده است.</p>
+        }
+        else
+        {
+            <ul class="audio-list">
+                @foreach (var item in Model.Items)
+                {
+                    <li class="audio-row">
+                        <a class="audio-row-play" asp-page="/Southa/Details"
+                           asp-route-section="@Model.SectionSlug" asp-route-slug="@item.Slug"
+                           aria-label="شنیدن @item.Title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5Z" /></svg>
+                        </a>
+
+                        <div class="audio-row-body">
+                            <h2>
+                                <a asp-page="/Southa/Details" asp-route-section="@Model.SectionSlug"
+                                   asp-route-slug="@item.Slug">@item.Title</a>
+                            </h2>
+
+                            <div class="meta">
+                                @if (item.Speaker is not null)
+                                {
+                                    <span>@item.Speaker.FullName</span>
+                                }
+                                @if (item.LectureSeries is not null)
+                                {
+                                    <span>
+                                        @item.LectureSeries.Title
+                                        @if (item.EpisodeNumber is not null)
+                                        {
+                                            <text>— جلسه <fa-num>@item.EpisodeNumber</fa-num></text>
+                                        }
+                                    </span>
+                                }
+                                @if (item.DurationSeconds > 0)
+                                {
+                                    <span><fa-num>@AudioKinds.FormatDuration(item.DurationSeconds)</fa-num></span>
+                                }
+                                <span><persian-date value="@item.PublishedAtUtc" /></span>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="pager pager-public" aria-label="صفحه‌بندی">
+                    @for (var p = 1; p <= Model.TotalPages; p++)
+                    {
+                        <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug"
+                           asp-route-goyande="@Model.SpeakerSlug" asp-route-majmooe="@Model.SeriesSlug"
+                           asp-route-safhe="@p"
+                           class="pager-item @(p == Model.PageNumber ? "on" : "")"
+                           aria-current="@(p == Model.PageNumber ? "page" : null)">
+                            <fa-num>@p</fa-num>
+                        </a>
+                    }
+                </nav>
+            }
+        }
+    </div>
+</section>

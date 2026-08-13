@@ -3,6 +3,7 @@ using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using NurSite.Application.Services;
 using NurSite.Domain.Enums;
 using NurSite.Infrastructure.Persistence;
 
@@ -34,6 +35,10 @@ public class SitemapModel(AppDbContext db) : PageModel
             Url($"{baseUrl}/monasebat", DateTime.UtcNow, "weekly", "0.7"),
             Url($"{baseUrl}/tamas", DateTime.UtcNow, "monthly", "0.5")
         };
+
+        // فهرست هر بخش صوتی
+        urls.AddRange(AudioKinds.All.Select(kind =>
+            Url($"{baseUrl}/{AudioKinds.SectionSlug(kind)}", DateTime.UtcNow, "weekly", "0.8")));
 
         // دسته‌بندی‌ها
         var categorySlugs = await db.Categories.AsNoTracking()
@@ -78,6 +83,30 @@ public class SitemapModel(AppDbContext db) : PageModel
             Url($"{baseUrl}/ahkam/{Uri.EscapeDataString(r.Slug)}",
                 r.UpdatedAtUtc ?? r.CreatedAtUtc,
                 "monthly", "0.8")));
+
+        // صوت‌های منتشرشده
+        var audios = await db.Lectures.AsNoTracking()
+            .Where(l => l.Status == PublishStatus.Published)
+            .OrderByDescending(l => l.PublishedAtUtc)
+            .Select(l => new { l.Kind, l.Slug, l.PublishedAtUtc, l.UpdatedAtUtc })
+            .ToListAsync(ct);
+
+        urls.AddRange(audios.Select(a =>
+            Url($"{baseUrl}/{AudioKinds.SectionSlug(a.Kind)}/{Uri.EscapeDataString(a.Slug)}",
+                a.UpdatedAtUtc ?? a.PublishedAtUtc ?? DateTime.UtcNow,
+                "monthly", "0.8")));
+
+        // مجموعه‌ها — هر مجموعه یک فهرست جدا دارد و ارزش ایندکس شدن دارد،
+        // ولی چون فهرستش زیر بخش خودش می‌آید، نشانی‌اش با پرسمان ساخته می‌شود
+        var seriesRows = await db.Lectures.AsNoTracking()
+            .Where(l => l.Status == PublishStatus.Published && l.LectureSeries != null)
+            .Select(l => new { l.Kind, Slug = l.LectureSeries!.Slug })
+            .Distinct()
+            .ToListAsync(ct);
+
+        urls.AddRange(seriesRows.Select(s =>
+            Url($"{baseUrl}/{AudioKinds.SectionSlug(s.Kind)}?majmooe={Uri.EscapeDataString(s.Slug)}",
+                DateTime.UtcNow, "weekly", "0.7")));
 
         var document = new XDocument(
             new XDeclaration("1.0", "utf-8", null),

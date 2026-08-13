@@ -75,10 +75,10 @@
             <nav class="nav" aria-label="فهرست اصلی">
                 <a asp-page="/Index">خانه</a>
                 <a asp-page="/Monasebat/Index">مناسبت‌ها</a>
-                <a asp-page="/Barnameh/Index">برنامه‌ها</a>
                 <a asp-page="/Maghalat/Index">مقالات</a>
                 <a asp-page="/Ahkam/Index">احکام</a>
-                <a asp-page="/Gallery/Index">گالری</a>
+                <a asp-page="/Southa/Index" asp-route-section="sokhanraniha">سخنرانی‌ها</a>
+                <a asp-page="/Southa/Index" asp-route-section="madahiha">مداحی‌ها</a>
                 <a asp-page="/Tamas">تماس با ما</a>
             </nav>
 
@@ -135,17 +135,17 @@
                     <h4>دسترسی سریع</h4>
                     <ul>
                         <li><a asp-page="/Monasebat/Index">تقویم مناسبت‌ها</a></li>
-                        <li><a asp-page="/Barnameh/Index">برنامه‌های هفتگی</a></li>
                         <li><a asp-page="/Maghalat/Index">مقالات</a></li>
                         <li><a asp-page="/Ahkam/Index">احکام</a></li>
-                        <li><a asp-page="/Gallery/Index">گالری تصاویر</a></li>
+                        <li><a asp-page="/Southa/Index" asp-route-section="sokhanraniha">سخنرانی‌ها</a></li>
+                        <li><a asp-page="/Southa/Index" asp-route-section="madahiha">مداحی‌ها</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4>خدمات</h4>
                     <ul>
                         <li><a asp-page="/Porsesh">پرسش شرعی</a></li>
-                        <li><a asp-page="/Sokhanrani/Index">آرشیو صوتی</a></li>
+                        <li><a asp-page="/Southa/Index" asp-route-section="sorudha">سرودهای مذهبی</a></li>
                         <li><a asp-page="/Owqat">اوقات شرعی شهرها</a></li>
                         <li><a asp-page="/Vorood">ورود اعضا</a></li>
                     </ul>

@@ -158,6 +158,9 @@ app.UseOutputCache();
 
 app.MapRazorPages();
 
+// دانلود و شمارش پخش
+app.MapAudioEndpoints();
+
 // سرویس‌ورکر باید از ریشه سرو شود وگرنه دامنه کنترلش محدود می‌شود
 app.MapGet("/sw.js", async (HttpContext ctx, IWebHostEnvironment env) =>
 {

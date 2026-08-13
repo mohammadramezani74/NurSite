@@ -1,0 +1,185 @@
+﻿@page "/{section:regex(^(sokhanraniha|madahiha|sorudha)$)}/{slug}"
+@using NurSite.Application.Services
+@model NurSite.Web.Pages.Southa.DetailsModel
+@{
+    ViewData["Title"] = Model.Item.MetaTitle ?? Model.Item.Title;
+    ViewData["MetaDescription"] = Model.Item.MetaDescription;
+    ViewData["OgType"] = "music.song";
+    ViewData["OgImage"] = string.IsNullOrWhiteSpace(Model.Item.OgImagePath)
+        ? null
+        : $"{Model.BaseUrl}{Model.Item.OgImagePath}";
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/css/player.css" asp-append-version="true">
+    <json-ld data="@Model.BuildAudioSchema()" />
+    <json-ld data="@Model.BuildBreadcrumbSchema()" />
+}
+
+<article class="tone-1 audio-page">
+    <div class="wrap audio-wrap">
+
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug">@Model.SectionTitle</a>
+            @if (Model.Item.LectureSeries is not null)
+            {
+                <span aria-hidden="true">›</span>
+                <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug"
+                   asp-route-majmooe="@Model.Item.LectureSeries.Slug">@Model.Item.LectureSeries.Title</a>
+            }
+        </nav>
+
+        <header class="audio-head">
+            <h1>@Model.Item.Title</h1>
+
+            <div class="article-meta">
+                @if (Model.Item.Speaker is not null)
+                {
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                        <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug"
+                           asp-route-goyande="@Model.Item.Speaker.Slug">@Model.Item.Speaker.FullName</a>
+                    </span>
+                }
+                @if (Model.Item.PublishedAtUtc is not null)
+                {
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
+                        <persian-date value="@Model.Item.PublishedAtUtc" />
+                    </span>
+                }
+                @if (Model.Item.DurationSeconds > 0)
+                {
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+                        <fa-num>@AudioKinds.FormatDuration(Model.Item.DurationSeconds)</fa-num>
+                    </span>
+                }
+            </div>
+        </header>
+
+        @* پخش‌کننده دست‌ساز روی همین تگ صوت ساخته می‌شود.
+           اگر جاوااسکریپت اجرا نشود، همان کنترل‌های خود مرورگر می‌ماند و
+           کاربر باز هم می‌تواند گوش بدهد. *@
+        <div class="player" data-player
+             data-id="@Model.Item.Id"
+             data-seed="@Model.Item.Slug"
+             data-duration="@Model.Item.DurationSeconds">
+
+            <audio controls preload="metadata" src="@Model.Item.AudioUrl"
+                   aria-label="پخش @Model.Item.Title"></audio>
+        </div>
+
+        <div class="audio-actions">
+            @if (Model.CanDownload && Model.Item.IsExternal)
+            {
+                @* فایل روی سرور دیگری است، پس نه دانلود مستقیم می‌دهیم نه می‌شماریمش *@
+                <a class="btn btn-fill" href="@Model.DownloadUrl" target="_blank" rel="noopener noreferrer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:17px;height:17px"><path d="M12 3v12M7 11l5 5 5-5M4 21h16" /></svg>
+                    دانلود
+                </a>
+            }
+            else if (Model.CanDownload)
+            {
+                <a class="btn btn-fill" href="@Model.DownloadUrl" download>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:17px;height:17px"><path d="M12 3v12M7 11l5 5 5-5M4 21h16" /></svg>
+                    دانلود
+                    @if (!string.IsNullOrEmpty(Model.FileSizeLabel))
+                    {
+                        <span class="size"><fa-num>@Model.FileSizeLabel</fa-num></span>
+                    }
+                </a>
+            }
+            else if (Model.DownloadNeedsLogin)
+            {
+                @* نشانی بازگشت باید نسبی باشد؛ صفحه ورود نشانی بیرونی را نمی‌پذیرد *@
+                <a class="btn btn-ghost" asp-page="/Vorood" asp-route-returnUrl="@Model.ReturnPath">
+                    برای دانلود وارد شوید
+                </a>
+            }
+            else
+            {
+                <span class="audio-note">
+                    این اثر فقط برای شنیدن آنلاین منتشر شده است.
+                </span>
+            }
+
+            <div class="share">
+                <span>اشتراک‌گذاری:</span>
+                <a href="https://t.me/share/url?url=@Uri.EscapeDataString(Model.CanonicalUrl)&text=@Uri.EscapeDataString(Model.Item.Title)"
+                   target="_blank" rel="noopener noreferrer">تلگرام</a>
+                <a href="https://wa.me/?text=@Uri.EscapeDataString(Model.Item.Title + " " + Model.CanonicalUrl)"
+                   target="_blank" rel="noopener noreferrer">واتساپ</a>
+                <button type="button" class="copy-link" data-copy="@Model.CanonicalUrl">کپی نشانی</button>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Item.Description))
+        {
+            <div class="article-body audio-desc">
+                @Html.Raw(Model.Item.Description)
+            </div>
+        }
+    </div>
+</article>
+
+@if (Model.Related.Count > 0)
+{
+    <section class="tone-2 girih">
+        <div class="wrap">
+            <div class="sec-head center">
+                <span class="kicker">شنیدن بیشتر</span>
+                <h2>
+                    @if (Model.Item.LectureSeries is not null)
+                    {
+                        <text>جلسات دیگر @Model.Item.LectureSeries.Title</text>
+                    }
+                    else
+                    {
+                        <text>آثار مرتبط</text>
+                    }
+                </h2>
+            </div>
+
+            <ul class="audio-list">
+                @foreach (var item in Model.Related)
+                {
+                    <li class="audio-row">
+                        <a class="audio-row-play" asp-page="/Southa/Details"
+                           asp-route-section="@AudioKinds.SectionSlug(item.Kind)" asp-route-slug="@item.Slug"
+                           aria-label="شنیدن @item.Title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5Z" /></svg>
+                        </a>
+                        <div class="audio-row-body">
+                            <h3>
+                                <a asp-page="/Southa/Details"
+                                   asp-route-section="@AudioKinds.SectionSlug(item.Kind)"
+                                   asp-route-slug="@item.Slug">@item.Title</a>
+                            </h3>
+                            <div class="meta">
+                                @if (item.EpisodeNumber is not null)
+                                {
+                                    <span>جلسه <fa-num>@item.EpisodeNumber</fa-num></span>
+                                }
+                                @if (item.Speaker is not null)
+                                {
+                                    <span>@item.Speaker.FullName</span>
+                                }
+                                @if (item.DurationSeconds > 0)
+                                {
+                                    <span><fa-num>@AudioKinds.FormatDuration(item.DurationSeconds)</fa-num></span>
+                                }
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <script src="~/js/audio-player.js" asp-append-version="true" defer></script>
+}

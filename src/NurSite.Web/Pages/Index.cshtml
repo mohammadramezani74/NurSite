@@ -1,9 +1,10 @@
 @page
+@using NurSite.Application.Services
 @model IndexModel
 @inject NurSite.Application.Interfaces.IPersianDateService Dates
 @{
     ViewData["Title"] = "خانه";
-    ViewData["MetaDescription"] = "اوقات شرعی، برنامه‌های هفتگی، احکام، مقالات و آرشیو سخنرانی‌های صوتی مؤسسه فرهنگی نورالثقلین.";
+    ViewData["MetaDescription"] = "اوقات شرعی، احکام، مقالات و آرشیو صوتی سخنرانی، مداحی و سرودهای مذهبی مؤسسه فرهنگی نورالثقلین.";
 }
 
 @section Head {
@@ -38,7 +39,7 @@
         }
 
         <h1>خانه‌ای برای آموختن، اندیشیدن و با هم بودن</h1>
-        <p>درس‌های تفسیر و اخلاق، پاسخ به پرسش‌های شرعی، آرشیو سخنرانی‌ها و برنامه‌های هفتگی — همه در یک جا.</p>
+        <p>درس‌های تفسیر و اخلاق، پاسخ به پرسش‌های شرعی، و آرشیو صوتی سخنرانی و مداحی — همه در یک جا.</p>
         <form method="get" asp-page="/Jostojoo" class="search-form hero-search" role="search">
             <div class="search-input-wrap">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
@@ -57,7 +58,7 @@
         </p>
 
         <div class="hero-btns">
-            <a asp-page="/Barnameh/Index" class="btn btn-gold">برنامه‌های این هفته</a>
+            <a asp-page="/Southa/Index" asp-route-section="sokhanraniha" class="btn btn-gold">شنیدن سخنرانی‌ها</a>
             <a asp-page="/Maghalat/Index" class="btn btn-ghost">خواندن مقالات</a>
         </div>
     </div>
@@ -210,26 +211,47 @@
         </div>
 
         <aside class="sound-box girih">
-            <h3>آرشیو سخنرانی‌ها</h3>
-            <p>سخنرانی‌های تازه منتشرشده</p>
+            <h3>آرشیو صوتی</h3>
+            <p>تازه‌ترین سخنرانی‌ها، مداحی‌ها و سرودها</p>
 
-            @foreach (var lecture in Model.LatestLectures)
+            @if (Model.LatestAudio.Count == 0)
+            {
+                <p class="empty-public">هنوز صوتی منتشر نشده است.</p>
+            }
+
+            @foreach (var audio in Model.LatestAudio)
             {
                 <div class="track">
-                    <a class="play" asp-page="/Sokhanrani/Details" asp-route-slug="@lecture.Slug" aria-label="پخش @lecture.Title">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 12 6 20V4z" /></svg>
+                    <a class="play" asp-page="/Southa/Details"
+                       asp-route-section="@AudioKinds.SectionSlug(audio.Kind)" asp-route-slug="@audio.Slug"
+                       aria-label="شنیدن @audio.Title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 12 6 20V4z" /></svg>
                     </a>
                     <span class="track-info">
-                        <b>@lecture.Title</b>
-                        <span>@(lecture.Speaker?.FullName ?? "")</span>
+                        <b>@audio.Title</b>
+                        <span>
+                            @AudioKinds.Label(audio.Kind)
+                            @if (audio.Speaker is not null)
+                            {
+                                <text>· @audio.Speaker.FullName</text>
+                            }
+                        </span>
                     </span>
-                    <time datetime="PT@(lecture.DurationSeconds)S">
-                        @Dates.ToPersianDigits(TimeSpan.FromSeconds(lecture.DurationSeconds).ToString(@"mm\:ss"))
+                    @* مدت را از روی ساعت هم می‌شمارد؛ سخنرانی یک‌ساعته با
+                       قالب دقیقه‌ای، صفر دقیقه نمایش داده می‌شد *@
+                    <time datetime="PT@(audio.DurationSeconds)S">
+                        <fa-num>@AudioKinds.FormatDuration(audio.DurationSeconds)</fa-num>
                     </time>
                 </div>
             }
 
-            <a asp-page="/Sokhanrani/Index" class="btn btn-ghost" style="width:100%;margin-top:24px">همه سخنرانی‌ها</a>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:24px">
+                @foreach (var kind in AudioKinds.All)
+                {
+                    <a asp-page="/Southa/Index" asp-route-section="@AudioKinds.SectionSlug(kind)"
+                       class="chip">@AudioKinds.PluralLabel(kind)</a>
+                }
+            </div>
         </aside>
     </div>
 </section>

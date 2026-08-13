@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Application.DTOs;
 using NurSite.Application.Interfaces;
+using NurSite.Application.Services;
 using NurSite.Domain.Entities;
 using NurSite.Domain.Enums;
 using NurSite.Infrastructure.Persistence;
@@ -21,7 +22,8 @@ public class IndexModel(
     public int SelectedCityId { get; private set; }
     public IReadOnlyList<Event> UpcomingEvents { get; private set; } = [];
     public IReadOnlyList<Article> LatestArticles { get; private set; } = [];
-    public IReadOnlyList<Lecture> LatestLectures { get; private set; } = [];
+    /// <summary>تازه‌ترین صوت‌ها برای جعبه کنار صفحه اصلی.</summary>
+    public IReadOnlyList<Lecture> LatestAudio { get; private set; } = [];
     public IReadOnlyList<Ruling> FaqRulings { get; private set; } = [];
 
     /// <summary>درخت نمودار هر حکم نموداری، بر اساس شناسه حکم.</summary>
@@ -77,12 +79,20 @@ public class IndexModel(
             .Take(3)
             .ToListAsync(ct);
 
-        LatestLectures = await db.Lectures.AsNoTracking()
-            .Include(l => l.Speaker)
-            .Where(l => l.Status == PublishStatus.Published)
-            .OrderByDescending(l => l.PublishedAtUtc)
-            .Take(4)
-            .ToListAsync(ct);
+        // از هر نوع دو تای تازه، نه چهار تای آخر بدون توجه به نوع.
+        // وگرنه یک شب محرم که ده مداحی منتشر می‌شود، سخنرانی‌ها کلاً
+        // از صفحه اصلی محو می‌شوند.
+        var latestAudio = new List<Lecture>();
+        foreach (var kind in AudioKinds.All)
+        {
+            latestAudio.AddRange(await db.Lectures.AsNoTracking()
+                .Include(l => l.Speaker)
+                .Where(l => l.Kind == kind && l.Status == PublishStatus.Published)
+                .OrderByDescending(l => l.PublishedAtUtc)
+                .Take(2)
+                .ToListAsync(ct));
+        }
+        LatestAudio = latestAudio;
 
         FaqRulings = await db.Rulings.AsNoTracking()
             .Where(r => r.Status == PublishStatus.Published && r.IsFrequentlyAsked)
