@@ -82,39 +82,7 @@ public class IndexModel(
             .Take(3)
             .ToListAsync(ct);
 
-        // اول آنچه مدیر دستی برای صفحه اصلی علامت زده است
-        var featured = await db.Lectures.AsNoTracking()
-            .Include(l => l.Speaker)
-            .Where(l => l.IsFeatured && l.Status == PublishStatus.Published)
-            .OrderByDescending(l => l.PublishedAtUtc)
-            .Take(AudioBoxSize)
-            .ToListAsync(ct);
-
-        var audio = new List<Lecture>(featured);
-
-        // اگر جای خالی ماند، از هر نوع تازه‌ترین‌ها پر می‌شود — نه چند تای
-        // آخر بدون توجه به نوع، وگرنه یک شب محرم که ده مداحی منتشر می‌شود
-        // سخنرانی‌ها کلاً از صفحه اصلی محو می‌شوند.
-        if (audio.Count < AudioBoxSize)
-        {
-            var chosen = audio.Select(l => l.Id).ToList();
-
-            foreach (var kind in AudioKinds.All)
-            {
-                if (audio.Count >= AudioBoxSize) break;
-
-                audio.AddRange(await db.Lectures.AsNoTracking()
-                    .Include(l => l.Speaker)
-                    .Where(l => l.Kind == kind
-                             && l.Status == PublishStatus.Published
-                             && !chosen.Contains(l.Id))
-                    .OrderByDescending(l => l.PublishedAtUtc)
-                    .Take(2)
-                    .ToListAsync(ct));
-            }
-        }
-
-        LatestAudio = audio.Take(AudioBoxSize).ToList();
+        LatestAudio = await LoadAudioBoxAsync(ct);
 
         FaqRulings = await db.Rulings.AsNoTracking()
             .Where(r => r.Status == PublishStatus.Published && r.IsFrequentlyAsked)
@@ -198,6 +166,41 @@ public class IndexModel(
             ? string.Empty
             : System.Net.WebUtility.HtmlDecode(
                 System.Text.RegularExpressions.Regex.Replace(html, "<[^>]+>", " ")).Trim();
+
+    /// <summary>
+    /// محتوای جعبه آرشیو صوتی صفحه اصلی.
+    ///
+    /// اگر مدیر چیزی را ستاره زده باشد، فقط همان‌ها — حتی اگر یکی باشد.
+    /// پر کردن جای خالی با تازه‌ترین‌ها یعنی مدیر ستاره را بزند و هیچ
+    /// تغییری در صفحه نبیند، که یعنی آن دکمه از نظر او کار نمی‌کند.
+    /// </summary>
+    private async Task<IReadOnlyList<Lecture>> LoadAudioBoxAsync(CancellationToken ct)
+    {
+        var featured = await db.Lectures.AsNoTracking()
+            .Include(l => l.Speaker)
+            .Where(l => l.IsFeatured && l.Status == PublishStatus.Published)
+            .OrderByDescending(l => l.PublishedAtUtc)
+            .Take(AudioBoxSize)
+            .ToListAsync(ct);
+
+        if (featured.Count > 0) return featured;
+
+        // هیچ ستاره‌ای نخورده: از هر نوع تازه‌ترین‌ها. نه چند تای آخر
+        // بدون توجه به نوع، وگرنه یک شب محرم که ده مداحی منتشر می‌شود
+        // سخنرانی‌ها کلاً از صفحه اصلی محو می‌شوند.
+        var audio = new List<Lecture>();
+        foreach (var kind in AudioKinds.All)
+        {
+            audio.AddRange(await db.Lectures.AsNoTracking()
+                .Include(l => l.Speaker)
+                .Where(l => l.Kind == kind && l.Status == PublishStatus.Published)
+                .OrderByDescending(l => l.PublishedAtUtc)
+                .Take(2)
+                .ToListAsync(ct));
+        }
+
+        return audio.Take(AudioBoxSize).ToList();
+    }
 
     public object BuildOrganizationSchema() => new Dictionary<string, object>
     {
