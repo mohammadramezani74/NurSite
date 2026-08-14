@@ -10,6 +10,9 @@ public sealed class UploadOptions
 
     /// <summary>سقف و پسوندهای صوت جدا از تصویرند چون اندازه‌شان اصلاً قابل مقایسه نیست.</summary>
     public AudioOptions Audio { get; set; } = new();
+
+    /// <summary>ویدیو از همه سنگین‌تر است و سقف خودش را دارد.</summary>
+    public VideoOptions Video { get; set; } = new();
 }
 
 public sealed class AudioOptions
@@ -18,7 +21,25 @@ public sealed class AudioOptions
     public string[] AllowedExtensions { get; set; } = [".mp3"];
 }
 
-public sealed record UploadResult(bool Ok, string? Path, string? Error);
+public sealed class VideoOptions
+{
+    public long MaxBytes { get; set; } = 100 * 1024 * 1024; // ۱۰۰ مگابایت
+    public string[] AllowedExtensions { get; set; } = [".mp4", ".webm"];
+}
+
+/// <summary>
+/// نتیجه آپلود تصویر. ابعاد اختیاری‌اند و اگر خوانده نشوند صفر می‌مانند —
+/// فراخوان‌های قدیمی که فقط Ok و Path را می‌خواهند دست‌نخورده کار می‌کنند.
+/// </summary>
+public sealed record UploadResult(
+    bool Ok,
+    string? Path,
+    string? Error,
+    int Width = 0,
+    int Height = 0,
+    long SizeBytes = 0);
+
+public sealed record VideoUploadResult(bool Ok, string? Path, long SizeBytes, string? Error);
 
 /// <summary>نتیجه آپلود صوت. مدت و حجم برای نمایش و برای نشانه‌گذاری ساختاریافته لازم‌اند.</summary>
 public sealed record AudioUploadResult(
@@ -54,7 +75,49 @@ public sealed class FileUploadService(IWebHostEnvironment env, IOptions<UploadOp
             return new UploadResult(false, null, "محتوای فایل تصویر معتبر نیست.");
 
         var saved = await SaveAsync(file, folder, ext, ct);
-        return new UploadResult(true, saved.WebPath, null);
+
+        // ابعاد از خود فایل ذخیره‌شده خوانده می‌شود، نه از استریم آپلود،
+        // چون استریم آپلود همیشه قابل جابه‌جایی نیست و خواندن هدر تصویر
+        // نیاز به عقب و جلو رفتن دارد
+        var size = ReadImageSize(saved.AbsolutePath);
+
+        return new UploadResult(
+            true, saved.WebPath, null,
+            size?.Width ?? 0, size?.Height ?? 0, file.Length);
+    }
+
+    /// <summary>
+    /// ذخیره ویدیوی کوتاه. سقفش از صوت هم بالاتر است، پس پیش از هر چیز
+    /// باید مطمئن شد سقف بدنه درخواست در Program.cs همین اندازه هست.
+    /// </summary>
+    public async Task<VideoUploadResult> SaveVideoAsync(IFormFile? file, string folder, CancellationToken ct = default)
+    {
+        if (file is null || file.Length == 0)
+            return new VideoUploadResult(false, null, 0, "فایلی انتخاب نشده است.");
+
+        var limit = _opt.Video.MaxBytes;
+        if (file.Length > limit)
+            return new VideoUploadResult(false, null, 0,
+                $"حجم ویدیو نباید بیشتر از {limit / 1024 / 1024} مگابایت باشد.");
+
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!_opt.Video.AllowedExtensions.Contains(ext))
+        {
+            var allowed = string.Join("، ", _opt.Video.AllowedExtensions.Select(e => e.TrimStart('.')));
+            return new VideoUploadResult(false, null, 0, $"فقط ویدیو با پسوند {allowed} پذیرفته می‌شود.");
+        }
+
+        if (!await LooksLikeVideoAsync(file, ct))
+            return new VideoUploadResult(false, null, 0, "محتوای فایل ویدیو معتبر نیست.");
+
+        var saved = await SaveAsync(file, folder, ext, ct);
+        return new VideoUploadResult(true, saved.WebPath, file.Length, null);
+    }
+
+    private static ImageSize.Size? ReadImageSize(string absolutePath)
+    {
+        using var stream = File.OpenRead(absolutePath);
+        return ImageSize.Read(stream);
     }
 
     /// <summary>
@@ -158,6 +221,19 @@ public sealed class FileUploadService(IWebHostEnvironment env, IOptions<UploadOp
         // WAV  →  RIFF....WAVE
         if (header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46 &&
             header[8] == 0x57 && header[9] == 0x41 && header[10] == 0x56 && header[11] == 0x45) return true;
+
+        return false;
+    }
+
+    private static async Task<bool> LooksLikeVideoAsync(IFormFile file, CancellationToken ct)
+    {
+        var header = await ReadHeaderAsync(file, 12, ct);
+        if (header is null) return false;
+
+        // MP4 / MOV  →  ....ftyp
+        if (header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p') return true;
+        // WEBM / MKV  →  امضای ماتروسکا
+        if (header[0] == 0x1A && header[1] == 0x45 && header[2] == 0xDF && header[3] == 0xA3) return true;
 
         return false;
     }

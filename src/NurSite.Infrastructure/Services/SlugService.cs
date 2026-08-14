@@ -90,6 +90,8 @@ public sealed partial class SlugService(AppDbContext db) : ISlugService
                 await db.Categories.AnyAsync(x => x.Slug == slug && (excludeId == null || x.Id != excludeId), ct),
             nameof(Domain.Entities.Album) =>
                 await db.Albums.AnyAsync(x => x.Slug == slug && (excludeId == null || x.Id != excludeId), ct),
+            nameof(Domain.Entities.Photo) =>
+                await db.Photos.AnyAsync(x => x.Slug == slug && (excludeId == null || x.Id != excludeId), ct),
             nameof(Domain.Entities.Marja) =>
                 await db.Marjas.AnyAsync(x => x.Slug == slug && (excludeId == null || x.Id != excludeId), ct),
             nameof(Domain.Entities.RulingCategory) =>

@@ -29,8 +29,13 @@ builder.Services.AddScoped<FileUploadService>();
 // فایل صوتی بزرگ‌تر از سقف فرم با خطای مبهم رد می‌شد نه با پیام فارسی ما.
 builder.Services.Configure<FormOptions>(options =>
 {
+    // سقف بدنه باید به اندازه سنگین‌ترین چیزی باشد که آپلود می‌شود،
+    // یعنی ویدیو. اگر کمتر باشد، فایل بزرگ با خطای مبهم رد می‌شود نه
+    // با پیام فارسی خودمان.
     var audioLimit = builder.Configuration.GetValue<long?>("Upload:Audio:MaxBytes") ?? 60 * 1024 * 1024;
-    options.MultipartBodyLengthLimit = audioLimit + 1024 * 1024; // کمی جا برای بقیه فیلدهای فرم
+    var videoLimit = builder.Configuration.GetValue<long?>("Upload:Video:MaxBytes") ?? 100 * 1024 * 1024;
+
+    options.MultipartBodyLengthLimit = Math.Max(audioLimit, videoLimit) + 1024 * 1024;
 });
 
 builder.Services.AddRazorPages(options =>
