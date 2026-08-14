@@ -25,6 +25,9 @@ public class IndexModel(
     /// <summary>چند صوت در جعبه کنار صفحه اصلی جا می‌شود.</summary>
     private const int AudioBoxSize = 6;
 
+    /// <summary>چند حکم پرتکرار در صفحه اصلی جا می‌شود.</summary>
+    private const int FaqBoxSize = 4;
+
     /// <summary>صوت‌های جعبه صفحه اصلی — دستچین مدیر، و بعد تازه‌ترین‌ها.</summary>
     public IReadOnlyList<Lecture> LatestAudio { get; private set; } = [];
     public IReadOnlyList<Ruling> FaqRulings { get; private set; } = [];
@@ -84,11 +87,7 @@ public class IndexModel(
 
         LatestAudio = await LoadAudioBoxAsync(ct);
 
-        FaqRulings = await db.Rulings.AsNoTracking()
-            .Where(r => r.Status == PublishStatus.Published && r.IsFrequentlyAsked)
-            .OrderBy(r => r.SortOrder)
-            .Take(4)
-            .ToListAsync(ct);
+        FaqRulings = await LoadFaqRulingsAsync(ct);
 
         // احکام نموداری متن پاسخ ندارند، پس درختشان جدا خوانده می‌شود
         var diagramIds = FaqRulings.Where(r => r.HasDiagram).Select(r => r.Id).ToList();
@@ -168,22 +167,64 @@ public class IndexModel(
                 System.Text.RegularExpressions.Regex.Replace(html, "<[^>]+>", " ")).Trim();
 
     /// <summary>
+    /// احکام پرتکرار صفحه اصلی.
+    ///
+    /// مدیر هر تعداد که خواست ستاره می‌زند و هر بازدید، چهارتای تصادفی
+    /// از میانشان بالا می‌آید. بدون چرخش، ستاره پنجم به بعد هیچ‌وقت دیده
+    /// نمی‌شد — و چون ترتیبشان هم در پنل قابل تنظیم نیست، مدیر حتی
+    /// نمی‌توانست تعیین کند کدام چهار تا بمانند.
+    ///
+    /// انتخاب تصادفی است ولی ترتیب نمایش نه: همان SortOrder می‌ماند تا
+    /// چیدمان بخش هر بار به هم نریزد.
+    /// </summary>
+    private async Task<IReadOnlyList<Ruling>> LoadFaqRulingsAsync(CancellationToken ct)
+    {
+        // فقط شناسه‌ها خوانده می‌شوند، نه متن کامل همه احکام ستاره‌دار
+        var ids = await db.Rulings.AsNoTracking()
+            .Where(r => r.Status == PublishStatus.Published && r.IsFrequentlyAsked)
+            .Select(r => r.Id)
+            .ToListAsync(ct);
+
+        if (ids.Count == 0) return [];
+
+        var picked = ids.Count <= FaqBoxSize
+            ? ids
+            : ids.OrderBy(_ => Random.Shared.Next()).Take(FaqBoxSize).ToList();
+
+        return await db.Rulings.AsNoTracking()
+            .Where(r => picked.Contains(r.Id))
+            .OrderBy(r => r.SortOrder)
+            .ToListAsync(ct);
+    }
+
+    /// <summary>
     /// محتوای جعبه آرشیو صوتی صفحه اصلی.
     ///
-    /// اگر مدیر چیزی را ستاره زده باشد، فقط همان‌ها — حتی اگر یکی باشد.
+    /// اگر مدیر چیزی را ستاره زده باشد، فقط از میان همان‌ها — حتی اگر یکی باشد.
     /// پر کردن جای خالی با تازه‌ترین‌ها یعنی مدیر ستاره را بزند و هیچ
     /// تغییری در صفحه نبیند، که یعنی آن دکمه از نظر او کار نمی‌کند.
     /// </summary>
     private async Task<IReadOnlyList<Lecture>> LoadAudioBoxAsync(CancellationToken ct)
     {
-        var featured = await db.Lectures.AsNoTracking()
-            .Include(l => l.Speaker)
+        var featuredIds = await db.Lectures.AsNoTracking()
             .Where(l => l.IsFeatured && l.Status == PublishStatus.Published)
-            .OrderByDescending(l => l.PublishedAtUtc)
-            .Take(AudioBoxSize)
+            .Select(l => l.Id)
             .ToListAsync(ct);
 
-        if (featured.Count > 0) return featured;
+        if (featuredIds.Count > 0)
+        {
+            // مثل احکام پرتکرار: هر تعداد ستاره بخورد، هر بازدید شش‌تای
+            // تصادفی از میانشان می‌آید
+            var picked = featuredIds.Count <= AudioBoxSize
+                ? featuredIds
+                : featuredIds.OrderBy(_ => Random.Shared.Next()).Take(AudioBoxSize).ToList();
+
+            return await db.Lectures.AsNoTracking()
+                .Include(l => l.Speaker)
+                .Where(l => picked.Contains(l.Id))
+                .OrderByDescending(l => l.PublishedAtUtc)
+                .ToListAsync(ct);
+        }
 
         // هیچ ستاره‌ای نخورده: از هر نوع تازه‌ترین‌ها. نه چند تای آخر
         // بدون توجه به نوع، وگرنه یک شب محرم که ده مداحی منتشر می‌شود

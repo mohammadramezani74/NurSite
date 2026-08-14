@@ -96,8 +96,15 @@ public class IndexModel(AppDbContext db) : PageModel
         ruling.IsFrequentlyAsked = !ruling.IsFrequentlyAsked;
         await db.SaveChangesAsync(ct);
 
+        // ظرفیت صفحه اصلی چهار تاست ولی ستاره پنجم به بعد هدر نمی‌رود؛
+        // هر بازدید چهارتای تصادفی از میان همه ستاره‌دارها می‌آید
+        var faqCount = await db.Rulings
+            .CountAsync(r => r.IsFrequentlyAsked && r.Status == PublishStatus.Published, ct);
+
         Flash = ruling.IsFrequentlyAsked
-            ? "به احکام پرتکرار صفحه اصلی اضافه شد."
+            ? faqCount > 4
+                ? $"به احکام پرتکرار اضافه شد. الان {faqCount} حکم پرتکرار دارید و صفحه اصلی هر بار چهارتای تصادفی را نشان می‌دهد."
+                : "به احکام پرتکرار صفحه اصلی اضافه شد."
             : "از احکام پرتکرار برداشته شد.";
         FlashKind = "ok";
         return RedirectToPage(new { Q, Status, CategoryId, MarjaId, Faq, Diagram, safhe = PageNumber });

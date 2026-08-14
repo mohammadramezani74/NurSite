@@ -84,7 +84,11 @@ builder.Services.AddOutputCache(options =>
     // OutputCachePolicyBuilder متدی برای کوکی ندارد، پس با VaryByValue
     // یک کلید دستی می‌سازیم. توجه: نام این متد بر خلاف SetVaryByQuery
     // و SetVaryByHeader پیشوند Set ندارد.
+    // صفحه اصلی از این سیاست بیرون است. دو چیز با کش نمی‌سازند:
+    // احکام پرتکرار و آرشیو صوتی که باید با هر بازدید بچرخند، و شمارش
+    // معکوس اذان بعدی که روی صفحه کش‌شده تا پنج دقیقه عقب می‌ماند.
     options.AddBasePolicy(p => p
+        .With(ctx => ctx.HttpContext.Request.Path != "/")
         .Expire(TimeSpan.FromMinutes(5))
         .VaryByValue(ctx => new KeyValuePair<string, string>(
             "theme", ctx.Request.Cookies[ThemeResolver.CookieName] ?? "default")));
