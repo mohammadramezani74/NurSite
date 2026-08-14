@@ -17,6 +17,10 @@ public class SitemapModel(AppDbContext db) : PageModel
 {
     private static readonly XNamespace Ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
+    // فضای‌نام نقشه تصاویر. برای گالری مهم است: مسیر اصلی ورود به آن
+    // بخش، تب تصاویر گوگل است نه جستجوی معمولی.
+    private static readonly XNamespace ImageNs = "http://www.google.com/schemas/sitemap-image/1.1";
+
     public async Task<IActionResult> OnGetAsync(CancellationToken ct)
     {
         // نشانی مبنا از تنظیمات سایت خوانده می‌شود، نه از هدر درخواست.
@@ -33,7 +37,8 @@ public class SitemapModel(AppDbContext db) : PageModel
             Url($"{baseUrl}/ahkam", DateTime.UtcNow, "daily", "0.9"),
             Url($"{baseUrl}/owqat", DateTime.UtcNow, "daily", "0.8"),
             Url($"{baseUrl}/monasebat", DateTime.UtcNow, "weekly", "0.7"),
-            Url($"{baseUrl}/tamas", DateTime.UtcNow, "monthly", "0.5")
+            Url($"{baseUrl}/tamas", DateTime.UtcNow, "monthly", "0.5"),
+            Url($"{baseUrl}/galeri", DateTime.UtcNow, "weekly", "0.8")
         };
 
         // فهرست هر بخش صوتی
@@ -108,9 +113,61 @@ public class SitemapModel(AppDbContext db) : PageModel
             Url($"{baseUrl}/{AudioKinds.SectionSlug(s.Kind)}?majmooe={Uri.EscapeDataString(s.Slug)}",
                 DateTime.UtcNow, "weekly", "0.7")));
 
+        // آلبوم‌های گالری، هر کدام با تصاویرش
+        var albums = await db.Albums.AsNoTracking()
+            .Where(a => a.Status == PublishStatus.Published)
+            .Select(a => new
+            {
+                a.Slug,
+                a.Title,
+                a.UpdatedAtUtc,
+                a.CreatedAtUtc,
+                Photos = a.Photos
+                    .OrderBy(p => p.SortOrder)
+                    .Select(p => new { p.Slug, p.Title, p.FilePath, p.AltText })
+                    .ToList()
+            })
+            .ToListAsync(ct);
+
+        foreach (var album in albums.Where(a => a.Photos.Count > 0))
+        {
+            var albumUrl = Url(
+                $"{baseUrl}/galeri/{Uri.EscapeDataString(album.Slug)}",
+                album.UpdatedAtUtc ?? album.CreatedAtUtc, "monthly", "0.7");
+
+            // تا هزار تصویر در یک نشانی مجاز است؛ آلبوم‌های ما خیلی
+            // کوچک‌ترند ولی سقف را رعایت می‌کنیم
+            foreach (var photo in album.Photos.Take(1000))
+            {
+                albumUrl.Add(new XElement(ImageNs + "image",
+                    new XElement(ImageNs + "loc", $"{baseUrl}{photo.FilePath}"),
+                    new XElement(ImageNs + "title", photo.Title),
+                    new XElement(ImageNs + "caption", photo.AltText)));
+            }
+
+            urls.Add(albumUrl);
+
+            // صفحه هر قلم هم نشانی مستقل دارد و باید ایندکس شود
+            urls.AddRange(album.Photos.Select(photo =>
+            {
+                var itemUrl = Url(
+                    $"{baseUrl}/galeri/{Uri.EscapeDataString(album.Slug)}/{Uri.EscapeDataString(photo.Slug)}",
+                    album.UpdatedAtUtc ?? album.CreatedAtUtc, "monthly", "0.6");
+
+                itemUrl.Add(new XElement(ImageNs + "image",
+                    new XElement(ImageNs + "loc", $"{baseUrl}{photo.FilePath}"),
+                    new XElement(ImageNs + "title", photo.Title),
+                    new XElement(ImageNs + "caption", photo.AltText)));
+
+                return itemUrl;
+            }));
+        }
+
         var document = new XDocument(
             new XDeclaration("1.0", "utf-8", null),
-            new XElement(Ns + "urlset", urls));
+            new XElement(Ns + "urlset",
+                new XAttribute(XNamespace.Xmlns + "image", ImageNs),
+                urls));
 
         return Content(document.Declaration + Environment.NewLine + document,
             "application/xml", Encoding.UTF8);

@@ -1,0 +1,129 @@
+﻿@page "/galeri/{album}/{slug}"
+@using NurSite.Application.Services
+@model NurSite.Web.Pages.Galeri.ItemModel
+@{
+    ViewData["Title"] = Model.Item.Title;
+    ViewData["MetaDescription"] = Model.Item.Caption ?? Model.Item.AltText;
+    ViewData["OgType"] = Model.Item.HasVideo ? "video.other" : "article";
+    ViewData["OgImage"] = $"{Model.BaseUrl}{Model.Item.FilePath}";
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/css/gallery.css" asp-append-version="true">
+    <json-ld data="@Model.BuildSchema()" />
+    <json-ld data="@Model.BuildBreadcrumbSchema()" />
+}
+
+<article class="tone-1 media-page">
+    <div class="wrap">
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            <a asp-page="/Galeri/Index">گالری</a>
+            <span aria-hidden="true">›</span>
+            <a asp-page="/Galeri/Album" asp-route-slug="@Model.Item.Album.Slug">@Model.Item.Album.Title</a>
+        </nav>
+
+        <div class="media-view">
+            <div class="media-stage">
+                @if (Model.Item.HasVideo && !Model.Item.IsExternalVideo)
+                {
+                    @* کاور تا وقتی کاربر پخش نزده نشان داده می‌شود، تا
+                       ویدیو بی‌دلیل دانلود نشود *@
+                    <video controls preload="none" poster="@Model.Item.FilePath"
+                           src="@Model.Item.VideoPath" playsinline></video>
+                }
+                else
+                {
+                    <img src="@Model.Item.FilePath" alt="@Model.Item.AltText"
+                         width="@(Model.Item.Width > 0 ? Model.Item.Width : 800)"
+                         height="@(Model.Item.Height > 0 ? Model.Item.Height : 800)"
+                         decoding="async">
+                }
+            </div>
+
+            <aside class="media-side">
+                <span class="kicker">@Model.KindLabel</span>
+                <h1>@Model.Item.Title</h1>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Item.Caption))
+                {
+                    <p>@Model.Item.Caption</p>
+                }
+
+                <dl class="media-facts">
+                    @if (Model.Item.Width > 0)
+                    {
+                        <dt>ابعاد</dt>
+                        <dd><fa-num>@Model.Item.Width</fa-num> × <fa-num>@Model.Item.Height</fa-num></dd>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.SizeLabel))
+                    {
+                        <dt>حجم</dt>
+                        <dd><fa-num>@Model.SizeLabel</fa-num></dd>
+                    }
+                    <dt>آلبوم</dt>
+                    <dd>
+                        <a asp-page="/Galeri/Album" asp-route-slug="@Model.Item.Album.Slug">@Model.Item.Album.Title</a>
+                    </dd>
+                </dl>
+
+                <div class="media-buttons">
+                    <a class="btn btn-fill" href="@Model.DownloadUrl" download>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:17px;height:17px"><path d="M12 3v12M7 11l5 5 5-5M4 21h16" /></svg>
+                        دانلود @(Model.Item.HasVideo ? "کاور" : "تصویر")
+                    </a>
+
+                    @if (Model.Item.IsExternalVideo)
+                    {
+                        <a class="btn btn-ghost" href="@Model.Item.ExternalVideoUrl"
+                           target="_blank" rel="noopener noreferrer">تماشای کلیپ</a>
+                    }
+                </div>
+
+                <div class="share">
+                    <span>اشتراک‌گذاری:</span>
+                    <a href="https://t.me/share/url?url=@Uri.EscapeDataString(Model.CanonicalUrl)&text=@Uri.EscapeDataString(Model.Item.Title)"
+                       target="_blank" rel="noopener noreferrer">تلگرام</a>
+                    <a href="https://wa.me/?text=@Uri.EscapeDataString(Model.Item.Title + " " + Model.CanonicalUrl)"
+                       target="_blank" rel="noopener noreferrer">واتساپ</a>
+                    <button type="button" class="copy-link" data-copy="@Model.CanonicalUrl">کپی نشانی</button>
+                </div>
+            </aside>
+        </div>
+    </div>
+</article>
+
+@if (Model.Siblings.Count > 0)
+{
+    <section class="tone-2 girih">
+        <div class="wrap">
+            <div class="sec-head center">
+                <span class="kicker">از همین آلبوم</span>
+                <h2>@Model.Item.Album.Title</h2>
+            </div>
+
+            <div class="media-wall">
+                @foreach (var item in Model.Siblings)
+                {
+                    <a class="media-tile" asp-page="/Galeri/Item"
+                       asp-route-album="@Model.Item.Album.Slug" asp-route-slug="@item.Slug">
+                        <img src="@item.FilePath" alt="@item.AltText"
+                             width="@(item.Width > 0 ? item.Width : 400)"
+                             height="@(item.Height > 0 ? item.Height : 400)"
+                             loading="lazy" decoding="async">
+
+                        @if (item.HasVideo)
+                        {
+                            <span class="media-play" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5Z" /></svg>
+                            </span>
+                        }
+
+                        <span class="media-title">@item.Title</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}

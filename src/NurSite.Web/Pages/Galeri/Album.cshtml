@@ -1,0 +1,70 @@
+﻿@page "/galeri/{slug}"
+@using NurSite.Application.Services
+@model NurSite.Web.Pages.Galeri.AlbumModel
+@{
+    ViewData["Title"] = Model.Album.MetaTitle ?? Model.Album.Title;
+    ViewData["MetaDescription"] = Model.Album.MetaDescription;
+    ViewData["OgImage"] = string.IsNullOrWhiteSpace(Model.Album.OgImagePath)
+        ? null
+        : $"{Model.BaseUrl}{Model.Album.OgImagePath}";
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/css/gallery.css" asp-append-version="true">
+    <json-ld data="@Model.BuildSchema()" />
+    <json-ld data="@Model.BuildBreadcrumbSchema()" />
+}
+
+<section class="tone-2 girih page-head">
+    <div class="wrap">
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            <a asp-page="/Galeri/Index">گالری</a>
+            <span aria-hidden="true">›</span>
+            <span aria-current="page">@Model.Album.Title</span>
+        </nav>
+
+        <h1>@Model.Album.Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Model.Album.Description))
+        {
+            <p>@Model.Album.Description</p>
+        }
+    </div>
+</section>
+
+<section class="tone-1">
+    <div class="wrap">
+        @if (Model.Items.Count == 0)
+        {
+            <p class="empty-public">این آلبوم هنوز خالی است.</p>
+        }
+        else
+        {
+            <div class="media-wall">
+                @foreach (var item in Model.Items)
+                {
+                    <a class="media-tile" asp-page="/Galeri/Item"
+                       asp-route-album="@Model.Album.Slug" asp-route-slug="@item.Slug">
+                        <img src="@item.FilePath" alt="@item.AltText"
+                             width="@(item.Width > 0 ? item.Width : 400)"
+                             height="@(item.Height > 0 ? item.Height : 400)"
+                             loading="lazy" decoding="async">
+
+                        @if (item.HasVideo)
+                        {
+                            <span class="media-play" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5Z" /></svg>
+                            </span>
+                        }
+
+                        <span class="media-title">
+                            @item.Title
+                            <span class="media-kind">@MediaKinds.Label(item.Kind)</span>
+                        </span>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</section>

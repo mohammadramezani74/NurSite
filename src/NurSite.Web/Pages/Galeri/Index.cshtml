@@ -1,0 +1,111 @@
+﻿@page "/galeri"
+@using NurSite.Application.Services
+@model NurSite.Web.Pages.Galeri.IndexModel
+@{
+    ViewData["Title"] = Model.PageTitle;
+    ViewData["MetaDescription"] = Model.PageDescription;
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/css/gallery.css" asp-append-version="true">
+}
+
+<section class="tone-2 girih page-head">
+    <div class="wrap">
+        <nav class="crumbs" aria-label="مسیر صفحه">
+            <a asp-page="/Index">خانه</a>
+            <span aria-hidden="true">›</span>
+            @if (Model.Kind is null)
+            {
+                <span aria-current="page">گالری</span>
+            }
+            else
+            {
+                <a asp-page="/Galeri/Index">گالری</a>
+                <span aria-hidden="true">›</span>
+                <span aria-current="page">@MediaKinds.PluralLabel(Model.Kind.Value)</span>
+            }
+        </nav>
+
+        <h1>@Model.PageTitle</h1>
+        <p>@Model.PageDescription</p>
+    </div>
+</section>
+
+<section class="tone-1">
+    <div class="wrap">
+
+        <nav class="chips" aria-label="نوع محتوا">
+            <a asp-page="/Galeri/Index" class="chip @(Model.Kind is null ? "on" : "")">همه آلبوم‌ها</a>
+            @foreach (var k in MediaKinds.All)
+            {
+                <a asp-page="/Galeri/Index" asp-route-no="@MediaKinds.SectionSlug(k)"
+                   class="chip @(Model.Kind == k ? "on" : "")">@MediaKinds.PluralLabel(k)</a>
+            }
+        </nav>
+
+        @if (Model.Kind is null)
+        {
+            @if (Model.Albums.Count == 0)
+            {
+                <p class="empty-public">هنوز آلبومی منتشر نشده است.</p>
+            }
+            else
+            {
+                <div class="album-grid">
+                    @foreach (var card in Model.Albums)
+                    {
+                        var thumb = NurSite.Web.Pages.Galeri.IndexModel.Thumbnail(card);
+                        <a class="album-card" asp-page="/Galeri/Album" asp-route-slug="@card.Album.Slug">
+                            @if (!string.IsNullOrWhiteSpace(thumb))
+                            {
+                                <img src="@thumb" alt="@card.Album.Title"
+                                     width="400" height="400" loading="lazy" decoding="async">
+                            }
+                            else
+                            {
+                                <span class="album-blank girih" aria-hidden="true"></span>
+                            }
+
+                            <span class="album-body">
+                                <b>@card.Album.Title</b>
+                                <span class="meta"><fa-num>@card.ItemCount</fa-num> قلم</span>
+                            </span>
+                        </a>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            @if (Model.Items.Count == 0)
+            {
+                <p class="empty-public">در این بخش هنوز چیزی منتشر نشده است.</p>
+            }
+            else
+            {
+                <div class="media-wall">
+                    @foreach (var item in Model.Items)
+                    {
+                        <a class="media-tile" asp-page="/Galeri/Item"
+                           asp-route-album="@item.Album.Slug" asp-route-slug="@item.Slug">
+                            <img src="@item.FilePath" alt="@item.AltText"
+                                 width="@(item.Width > 0 ? item.Width : 400)"
+                                 height="@(item.Height > 0 ? item.Height : 400)"
+                                 loading="lazy" decoding="async">
+
+                            @if (item.HasVideo)
+                            {
+                                <span class="media-play" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5Z" /></svg>
+                                </span>
+                            }
+
+                            <span class="media-title">@item.Title</span>
+                        </a>
+                    }
+                </div>
+            }
+        }
+    </div>
+</section>

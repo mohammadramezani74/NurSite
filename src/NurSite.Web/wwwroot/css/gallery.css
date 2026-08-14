@@ -1,0 +1,182 @@
+﻿/* گالری — شبکه آلبوم‌ها، دیوار تصاویر و صفحه هر قلم.
+   جدا از site.css است چون فقط در صفحات گالری لازم می‌شود. */
+
+/* ---------- شبکه آلبوم‌ها ---------- */
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 18px;
+}
+
+.album-card {
+    display: block;
+    border: 1px solid var(--khat-2);
+    border-radius: var(--r);
+    overflow: hidden;
+    background: var(--panel);
+    transition: border-color .18s ease, transform .18s ease;
+}
+
+    .album-card:hover {
+        border-color: var(--tala);
+        transform: translateY(-2px);
+    }
+
+    .album-card img,
+    .album-blank {
+        display: block;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        background: var(--ink);
+    }
+
+.album-body {
+    display: block;
+    padding: 12px 14px;
+}
+
+    .album-body b {
+        display: block;
+        font-size: .98rem;
+        line-height: 1.8;
+    }
+
+    .album-body .meta {
+        color: var(--matn-2);
+        font-size: .82rem;
+    }
+
+/* ---------- دیوار تصاویر ---------- */
+.media-wall {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+}
+
+.media-tile {
+    position: relative;
+    display: block;
+    border-radius: var(--r);
+    overflow: hidden;
+    background: var(--ink);
+    border: 1px solid var(--khat-2);
+}
+
+    .media-tile img {
+        display: block;
+        width: 100%;
+        /* پوستر و استوری هر دو عمودی‌اند؛ نسبت یکسان جلوی پله‌شدن شبکه
+           را می‌گیرد بدون اینکه ابعاد واقعی از دست برود */
+        aspect-ratio: 3 / 4;
+        object-fit: cover;
+        transition: transform .3s ease;
+    }
+
+    .media-tile:hover img {
+        transform: scale(1.03);
+    }
+
+.media-play {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    transform: translate(50%, -50%);
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(0,0,0,.55);
+    color: #fff;
+}
+
+    .media-play svg {
+        width: 20px;
+        height: 20px;
+    }
+
+.media-title {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    padding: 22px 12px 10px;
+    font-size: .85rem;
+    color: #fff;
+    background: linear-gradient(to top, rgba(0,0,0,.82), transparent);
+}
+
+.media-kind {
+    display: block;
+    font-size: .74rem;
+    opacity: .8;
+}
+
+/* ---------- صفحه یک قلم ---------- */
+.media-page .wrap {
+    padding-block: 28px 40px;
+}
+
+.media-view {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+    margin-top: 14px;
+}
+
+.media-stage {
+    border: 1px solid var(--khat-2);
+    border-radius: var(--r);
+    overflow: hidden;
+    background: var(--ink);
+}
+
+    .media-stage img,
+    .media-stage video {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 76vh;
+        object-fit: contain;
+    }
+
+.media-side h1 {
+    margin: 6px 0 12px;
+    line-height: 1.7;
+}
+
+.media-facts {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 14px;
+    margin: 18px 0;
+    font-size: .9rem;
+}
+
+    .media-facts dt {
+        color: var(--matn-2);
+    }
+
+    .media-facts dd {
+        margin: 0;
+    }
+
+.media-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+    .media-buttons .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+@media (max-width: 820px) {
+    .media-view {
+        grid-template-columns: 1fr;
+    }
+}
