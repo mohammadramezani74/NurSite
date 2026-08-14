@@ -2106,6 +2106,50 @@ footer a:hover {
     font-weight: 300
 }
 
+/* ---------- صفحه‌بندی ----------
+   این کلاس‌ها فقط در admin.css بودند و صفحه‌های عمومی بی‌استایل می‌ماندند؛
+   تا وقتی محتوا به صفحه دوم نرسیده بود به چشم نمی‌آمد. */
+.pager {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pager-item {
+    min-width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    padding: 0 10px;
+    border: 1px solid var(--khat);
+    border-radius: var(--r);
+    font-size: 14px;
+    color: var(--matn);
+    font-variant-numeric: tabular-nums;
+    transition: .18s;
+}
+
+    .pager-item:hover {
+        border-color: var(--firouze);
+        color: var(--firouze-2)
+    }
+
+    .pager-item.on {
+        background: var(--firouze);
+        border-color: var(--firouze);
+        color: var(--ink);
+        font-weight: 700
+    }
+
+/* سه‌نقطه جای صفحه‌های حذف‌شده */
+.pager-gap {
+    min-width: 24px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    color: var(--matn-2);
+}
+
 .pager-public {
     justify-content: center;
     border: 0;

@@ -8,7 +8,11 @@ using NurSite.Infrastructure.Persistence;
 namespace NurSite.Infrastructure.Services;
 
 /// <summary>
-/// جستجو در مقالات، احکام و سخنرانی‌ها.
+/// جستجو در مقالات و احکام.
+///
+/// صوت‌ها عمداً اینجا نیستند. کسی که «محرم» را در جستجوی سایت می‌نویسد
+/// دنبال متن است؛ اگر ده مداحی هم‌نام بالای نتایج بنشیند، احکام و
+/// مقالات را می‌پوشاند. جستجوی صوت در خودِ همان بخش انجام می‌شود.
 ///
 /// روی ستون یکسان‌شده SearchText انجام می‌شود، نه روی متن اصلی — تا
 /// تفاوت‌های نگارشی فارسی مانع پیدا شدن نتیجه نشوند.
@@ -41,9 +45,6 @@ public sealed class SearchService(AppDbContext db) : ISearchService
 
         if (kind is SearchKind.All or SearchKind.Article)
             hits.AddRange(await SearchArticlesAsync(terms, ct));
-
-        if (kind is SearchKind.All or SearchKind.Lecture)
-            hits.AddRange(await SearchLecturesAsync(terms, ct));
 
         var ordered = hits
             .OrderByDescending(h => h.Score)
@@ -154,53 +155,6 @@ public sealed class SearchService(AppDbContext db) : ISearchService
                 $"/maghalat/{a.Slug}",
                 a.Category,
                 a.PublishedAtUtc,
-                score);
-        }).ToList();
-    }
-
-    private async Task<List<SearchHit>> SearchLecturesAsync(string[] terms, CancellationToken ct)
-    {
-        var query = db.Lectures.AsNoTracking()
-            .Include(l => l.Speaker)
-            .Include(l => l.LectureSeries)
-            .Where(l => l.Status == PublishStatus.Published);
-
-        foreach (var term in terms)
-        {
-            var t = term;
-            query = query.Where(l => l.SearchText != null && l.SearchText.Contains(t));
-        }
-
-        var rows = await query
-            .Select(l => new
-            {
-                l.Title,
-                l.Description,
-                l.Slug,
-                l.Kind,
-                Speaker = l.Speaker != null ? l.Speaker.FullName : null,
-                Series = l.LectureSeries != null ? l.LectureSeries.Title : null,
-                l.PublishedAtUtc
-            })
-            .Take(200)
-            .ToListAsync(ct);
-
-        return rows.Select(l =>
-        {
-            // نام سخنران کنار عنوان می‌آید چون کاربر معمولاً «فلانی درباره فلان»
-            // را جستجو می‌کند و هر دو باید در وزن عنوان حساب شوند
-            var normalizedTitle = PersianText.Normalize($"{l.Title} {l.Speaker}");
-            var normalizedBody = PersianText.Normalize(l.Description);
-            var score = Score(terms, normalizedTitle, normalizedBody);
-
-            // هر نوع صوت بخش خودش را دارد، پس نشانی از روی نوع ساخته می‌شود
-            return new SearchHit(
-                SearchKind.Lecture,
-                l.Title,
-                Snippet(l.Description, terms),
-                AudioKinds.Url(l.Kind, l.Slug),
-                l.Series ?? l.Speaker ?? AudioKinds.PluralLabel(l.Kind),
-                l.PublishedAtUtc,
                 score);
         }).ToList();
     }

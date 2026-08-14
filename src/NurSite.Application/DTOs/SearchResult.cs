@@ -4,8 +4,7 @@ public enum SearchKind
 {
     All = 0,
     Article = 1,
-    Ruling = 2,
-    Lecture = 3
+    Ruling = 2
 }
 
 /// <summary>یک نتیجه جستجو، مستقل از اینکه مقاله باشد یا حکم.</summary>

@@ -89,6 +89,9 @@ public class EditModel(
         [Display(Name = "وضعیت")]
         public PublishStatus Status { get; set; } = PublishStatus.Draft;
 
+        [Display(Name = "نمایش در صفحه اصلی")]
+        public bool IsFeatured { get; set; }
+
         // ---------- سئو ----------
         [Display(Name = "تصویر")]
         public string? OgImagePath { get; set; }
@@ -135,6 +138,7 @@ public class EditModel(
             RecordedOn = PersianDateText.Format(item.RecordedOnUtc),
             DownloadAccess = item.DownloadAccess,
             Status = item.Status,
+            IsFeatured = item.IsFeatured,
             OgImagePath = item.OgImagePath,
             MetaTitle = item.MetaTitle,
             MetaDescription = item.MetaDescription
@@ -289,6 +293,11 @@ public class EditModel(
             $"{item.Title} {item.Title} {speakerName} {seriesTitle} {AudioKinds.Label(item.Kind)} {item.Description}");
 
         item.Status = Input.Status;
+
+        // صوت پیش‌نویس نباید در صفحه اصلی بماند؛ اگر از انتشار درآمد،
+        // خودبه‌خود از جعبه صفحه اصلی هم بیرون می‌رود
+        item.IsFeatured = Input.IsFeatured && Input.Status == PublishStatus.Published;
+
         if (Input.Status == PublishStatus.Published)
             item.PublishedAtUtc ??= DateTime.UtcNow;
 

@@ -872,6 +872,15 @@
         font-weight: 700
     }
 
+/* سه‌نقطه جای صفحه‌های حذف‌شده */
+.pager-gap {
+    min-width: 24px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    color: var(--matn-2);
+}
+
 /* ---------- فرم ویرایش ---------- */
 .edit-form {
     display: block

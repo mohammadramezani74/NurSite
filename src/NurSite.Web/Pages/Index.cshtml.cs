@@ -22,7 +22,10 @@ public class IndexModel(
     public int SelectedCityId { get; private set; }
     public IReadOnlyList<Event> UpcomingEvents { get; private set; } = [];
     public IReadOnlyList<Article> LatestArticles { get; private set; } = [];
-    /// <summary>تازه‌ترین صوت‌ها برای جعبه کنار صفحه اصلی.</summary>
+    /// <summary>چند صوت در جعبه کنار صفحه اصلی جا می‌شود.</summary>
+    private const int AudioBoxSize = 6;
+
+    /// <summary>صوت‌های جعبه صفحه اصلی — دستچین مدیر، و بعد تازه‌ترین‌ها.</summary>
     public IReadOnlyList<Lecture> LatestAudio { get; private set; } = [];
     public IReadOnlyList<Ruling> FaqRulings { get; private set; } = [];
 
@@ -79,20 +82,39 @@ public class IndexModel(
             .Take(3)
             .ToListAsync(ct);
 
-        // از هر نوع دو تای تازه، نه چهار تای آخر بدون توجه به نوع.
-        // وگرنه یک شب محرم که ده مداحی منتشر می‌شود، سخنرانی‌ها کلاً
-        // از صفحه اصلی محو می‌شوند.
-        var latestAudio = new List<Lecture>();
-        foreach (var kind in AudioKinds.All)
+        // اول آنچه مدیر دستی برای صفحه اصلی علامت زده است
+        var featured = await db.Lectures.AsNoTracking()
+            .Include(l => l.Speaker)
+            .Where(l => l.IsFeatured && l.Status == PublishStatus.Published)
+            .OrderByDescending(l => l.PublishedAtUtc)
+            .Take(AudioBoxSize)
+            .ToListAsync(ct);
+
+        var audio = new List<Lecture>(featured);
+
+        // اگر جای خالی ماند، از هر نوع تازه‌ترین‌ها پر می‌شود — نه چند تای
+        // آخر بدون توجه به نوع، وگرنه یک شب محرم که ده مداحی منتشر می‌شود
+        // سخنرانی‌ها کلاً از صفحه اصلی محو می‌شوند.
+        if (audio.Count < AudioBoxSize)
         {
-            latestAudio.AddRange(await db.Lectures.AsNoTracking()
-                .Include(l => l.Speaker)
-                .Where(l => l.Kind == kind && l.Status == PublishStatus.Published)
-                .OrderByDescending(l => l.PublishedAtUtc)
-                .Take(2)
-                .ToListAsync(ct));
+            var chosen = audio.Select(l => l.Id).ToList();
+
+            foreach (var kind in AudioKinds.All)
+            {
+                if (audio.Count >= AudioBoxSize) break;
+
+                audio.AddRange(await db.Lectures.AsNoTracking()
+                    .Include(l => l.Speaker)
+                    .Where(l => l.Kind == kind
+                             && l.Status == PublishStatus.Published
+                             && !chosen.Contains(l.Id))
+                    .OrderByDescending(l => l.PublishedAtUtc)
+                    .Take(2)
+                    .ToListAsync(ct));
+            }
         }
-        LatestAudio = latestAudio;
+
+        LatestAudio = audio.Take(AudioBoxSize).ToList();
 
         FaqRulings = await db.Rulings.AsNoTracking()
             .Where(r => r.Status == PublishStatus.Published && r.IsFrequentlyAsked)

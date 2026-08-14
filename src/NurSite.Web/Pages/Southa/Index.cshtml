@@ -4,12 +4,16 @@
 @{
     ViewData["Title"] = Model.PageTitle;
     ViewData["MetaDescription"] = Model.PageDescription;
+    ViewData["NoIndex"] = Model.NoIndex;
 }
 
 @section Head {
     @* کلاس‌های فهرست صوت هم در همین فایل‌اند، نه فقط پخش‌کننده *@
     <link rel="stylesheet" href="~/css/player.css" asp-append-version="true">
-    <json-ld data="@Model.BuildItemListSchema()" />
+    @if (!Model.NoIndex)
+    {
+        <json-ld data="@Model.BuildItemListSchema()" />
+    }
 }
 
 <section class="tone-2 girih page-head">
@@ -37,6 +41,20 @@
 <section class="tone-1">
     <div class="wrap">
 
+        @* جستجو فقط داخل همین بخش. جستجوی سراسری سایت متنی است و
+           صوت‌ها در آن نمی‌آیند. *@
+        <form method="get" class="search-form" role="search">
+            <input type="hidden" name="goyande" value="@Model.SpeakerSlug" />
+            <input type="hidden" name="majmooe" value="@Model.SeriesSlug" />
+            <div class="search-input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                <label class="sr" for="sectionSearch">جستجو در @AudioKinds.PluralLabel(Model.Kind)</label>
+                <input id="sectionSearch" name="q" value="@Model.Query"
+                       placeholder="جستجو در @AudioKinds.PluralLabel(Model.Kind)…" />
+            </div>
+            <button type="submit" class="btn btn-gold">جستجو</button>
+        </form>
+
         @* پیوند میان سه بخش صوتی، تا کاربر بداند بقیه هم هست *@
         <nav class="chips" aria-label="بخش‌های صوتی">
             @foreach (var k in AudioKinds.All)
@@ -53,7 +71,7 @@
                    class="chip @(Model.ActiveSeries is null && Model.ActiveSpeaker is null ? "on" : "")">همه</a>
                 @foreach (var s in Model.SeriesList)
                 {
-                    <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug" asp-route-majmooe="@s.Slug"
+                    <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug" asp-route-q="@Model.Query" asp-route-majmooe="@s.Slug"
                        class="chip @(Model.ActiveSeries?.Id == s.Id ? "on" : "")">@s.Title</a>
                 }
             </nav>
@@ -64,7 +82,7 @@
             <nav class="chips" aria-label="گویندگان">
                 @foreach (var s in Model.Speakers)
                 {
-                    <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug" asp-route-goyande="@s.Slug"
+                    <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug" asp-route-q="@Model.Query" asp-route-goyande="@s.Slug"
                        class="chip @(Model.ActiveSpeaker?.Id == s.Id ? "on" : "")">@s.FullName</a>
                 }
             </nav>
@@ -72,7 +90,22 @@
 
         @if (Model.Items.Count == 0)
         {
-            <p class="empty-public">هنوز در این بخش چیزی منتشر نشده است.</p>
+            <p class="empty-public">
+                @if (!string.IsNullOrWhiteSpace(Model.Query))
+                {
+                    <span>نتیجه‌ای برای «@Model.Query» پیدا نشد.</span>
+                }
+                else
+                {
+                    <span>هنوز در این بخش چیزی منتشر نشده است.</span>
+                }
+            </p>
+            @if (Model.HasFilter)
+            {
+                <p style="text-align:center">
+                    <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug" class="link-quiet">حذف فیلترها</a>
+                </p>
+            }
         }
         else
         {
@@ -121,15 +154,23 @@
             @if (Model.TotalPages > 1)
             {
                 <nav class="pager pager-public" aria-label="صفحه‌بندی">
-                    @for (var p = 1; p <= Model.TotalPages; p++)
+                    @foreach (var p in Model.PagerPages)
                     {
-                        <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug"
-                           asp-route-goyande="@Model.SpeakerSlug" asp-route-majmooe="@Model.SeriesSlug"
-                           asp-route-safhe="@p"
-                           class="pager-item @(p == Model.PageNumber ? "on" : "")"
-                           aria-current="@(p == Model.PageNumber ? "page" : null)">
-                            <fa-num>@p</fa-num>
-                        </a>
+                        @if (p is null)
+                        {
+                            <span class="pager-gap" aria-hidden="true">…</span>
+                        }
+                        else
+                        {
+                            <a asp-page="/Southa/Index" asp-route-section="@Model.SectionSlug"
+                               asp-route-q="@Model.Query"
+                               asp-route-goyande="@Model.SpeakerSlug" asp-route-majmooe="@Model.SeriesSlug"
+                               asp-route-safhe="@p"
+                               class="pager-item @(p == Model.PageNumber ? "on" : "")"
+                               aria-current="@(p == Model.PageNumber ? "page" : null)">
+                                <fa-num>@p</fa-num>
+                            </a>
+                        }
                     }
                 </nav>
             }

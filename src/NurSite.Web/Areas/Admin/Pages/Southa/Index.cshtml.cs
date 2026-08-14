@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using NurSite.Application.Services;
 using NurSite.Domain.Entities;
 using NurSite.Domain.Enums;
 using NurSite.Infrastructure.Persistence;
@@ -31,6 +32,9 @@ public class IndexModel(AppDbContext db, FileUploadService uploads) : PageModel
 
     public int TotalCount { get; private set; }
     public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
+
+    /// <summary>شماره صفحه‌ها با سه‌نقطه، تا با هزار صوت نوار عدد نشود.</summary>
+    public IReadOnlyList<int?> PagerPages => Pager.Pages(PageNumber, TotalPages);
 
     [TempData] public string? Flash { get; set; }
     [TempData] public string? FlashKind { get; set; }
@@ -103,6 +107,22 @@ public class IndexModel(AppDbContext db, FileUploadService uploads) : PageModel
 
         FlashKind ??= "ok";
         await db.SaveChangesAsync(ct);
+        return RedirectToCurrent();
+    }
+
+    /// <summary>نشان دادن یا برداشتن از جعبه آرشیو صوتی صفحه اصلی.</summary>
+    public async Task<IActionResult> OnPostFeatureAsync(int id, CancellationToken ct)
+    {
+        var item = await db.Lectures.FirstOrDefaultAsync(l => l.Id == id, ct);
+        if (item is null) return NotFound();
+
+        item.IsFeatured = !item.IsFeatured;
+        await db.SaveChangesAsync(ct);
+
+        Flash = item.IsFeatured
+            ? $"«{item.Title}» در صفحه اصلی نمایش داده می‌شود."
+            : $"«{item.Title}» از صفحه اصلی برداشته شد.";
+        FlashKind = "ok";
         return RedirectToCurrent();
     }
 

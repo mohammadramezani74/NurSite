@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Application.Services;
@@ -26,6 +27,7 @@ public class IndexModel(AppDbContext db) : PageModel
     public Speaker? ActiveSpeaker { get; private set; }
     public LectureSeries? ActiveSeries { get; private set; }
 
+    [BindProperty(SupportsGet = true, Name = "q")] public string? Query { get; set; }
     [BindProperty(SupportsGet = true, Name = "goyande")] public string? SpeakerSlug { get; set; }
     [BindProperty(SupportsGet = true, Name = "majmooe")] public string? SeriesSlug { get; set; }
     [BindProperty(SupportsGet = true, Name = "safhe")] public int PageNumber { get; set; } = 1;
@@ -34,6 +36,13 @@ public class IndexModel(AppDbContext db) : PageModel
     public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
 
     public string BaseUrl { get; private set; } = "";
+
+    /// <summary>شماره صفحه‌ها با سه‌نقطه. null یعنی چند صفحه اینجا حذف شده.</summary>
+    public IReadOnlyList<int?> PagerPages => Pager.Pages(PageNumber, TotalPages);
+
+    /// <summary>فیلتری روشن است؟ برای نمایش دکمه «حذف فیلترها».</summary>
+    public bool HasFilter =>
+        !string.IsNullOrWhiteSpace(Query) || ActiveSpeaker is not null || ActiveSeries is not null;
 
     public async Task<IActionResult> OnGetAsync(string section, CancellationToken ct)
     {
@@ -83,10 +92,22 @@ public class IndexModel(AppDbContext db) : PageModel
             query = query.Where(l => l.LectureSeriesId == ActiveSeries.Id);
         }
 
+        // جستجو داخل همین بخش. روی ستون یکسان‌شده انجام می‌شود تا
+        // «مداحی» و «مداحى» یک نتیجه بدهند، و منطقش AND است نه OR،
+        // وگرنه هر واژه‌ای نصف آرشیو را برمی‌گرداند.
+        var terms = PersianText.Tokenize(Query);
+        foreach (var term in terms)
+        {
+            var t = term;
+            query = query.Where(l => l.SearchText != null && l.SearchText.Contains(t));
+        }
+
         TotalCount = await query.CountAsync(ct);
 
         if (PageNumber < 1) PageNumber = 1;
         if (TotalPages > 0 && PageNumber > TotalPages) return NotFound();
+
+        if (TotalCount == 0) return Page();
 
         // در یک مجموعه، ترتیب جلسه مهم‌تر از تاریخ انتشار است
         query = ActiveSeries is null
@@ -100,6 +121,9 @@ public class IndexModel(AppDbContext db) : PageModel
 
         return Page();
     }
+
+    /// <summary>صفحه نتیجه جستجو محتوای پایدار ندارد و نباید ایندکس شود.</summary>
+    public bool NoIndex => !string.IsNullOrWhiteSpace(Query);
 
     public string PageTitle => ActiveSeries?.Title
         ?? (ActiveSpeaker is null

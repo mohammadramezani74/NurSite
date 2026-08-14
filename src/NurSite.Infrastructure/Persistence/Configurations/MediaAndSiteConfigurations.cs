@@ -33,6 +33,9 @@ public class LectureConfiguration : IEntityTypeConfiguration<Lecture>
         // باید ستون اول ایندکس باشد وگرنه ایندکس بالا به کارش نمی‌آید
         b.HasIndex(x => new { x.Kind, x.Status, x.PublishedAtUtc });
 
+        // صفحه اصلی هر بار این را می‌پرسد
+        b.HasIndex(x => x.IsFeatured);
+
         // فهرست هر مجموعه به ترتیب جلسه خوانده می‌شود
         b.HasIndex(x => new { x.LectureSeriesId, x.EpisodeNumber });
 

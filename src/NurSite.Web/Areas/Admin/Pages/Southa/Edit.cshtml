@@ -188,6 +188,14 @@
                         </select>
                     </div>
 
+                    <label class="checkbox">
+                        <input asp-for="Input.IsFeatured" type="checkbox" />
+                        <span>
+                            نمایش در صفحه اصلی
+                            <span class="label-hint">در جعبه آرشیو صوتی، پیش از تازه‌ترین‌ها</span>
+                        </span>
+                    </label>
+
                     <div class="field">
                         <label asp-for="Input.DownloadAccess" class="label">دسترسی دانلود</label>
                         <select asp-for="Input.DownloadAccess" class="input input-plain">

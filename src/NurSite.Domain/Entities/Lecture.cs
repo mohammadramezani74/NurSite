@@ -57,6 +57,13 @@ public class Lecture : BaseEntity, IAuditable, ISoftDelete, ISeoAware
     /// </summary>
     public DownloadAccess DownloadAccess { get; set; } = DownloadAccess.Everyone;
 
+    /// <summary>
+    /// در جعبه آرشیو صوتی صفحه اصلی نشان داده شود.
+    /// بدون این، صفحه اصلی همیشه تازه‌ترین‌ها را نشان می‌داد و مدیر
+    /// نمی‌توانست اثر شاخصی را بالا نگه دارد.
+    /// </summary>
+    public bool IsFeatured { get; set; }
+
     /// <summary>متن یکسان‌شده عنوان و توضیح و نام سخنران، فقط برای جستجو.</summary>
     public string? SearchText { get; set; }
 
