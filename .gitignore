@@ -361,3 +361,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/src/NurSite.Web/wwwroot/uploads/gallery/2026/08
