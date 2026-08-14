@@ -80,7 +80,7 @@ public class IndexModel(AppDbContext db, ISlugService slugs) : PageModel
         if (category is null) return NotFound();
 
         var desiredSlug = string.IsNullOrWhiteSpace(Input.Slug) ? Input.Title : Input.Slug;
-        category.Slug = await slugs.GenerateUniqueAsync<Category>(
+        category.Slug = await slugs.GenerateUniqueAsync<RulingCategory>(
             desiredSlug, isNew ? null : category.Id, ct);
 
         category.Title = Input.Title.Trim();

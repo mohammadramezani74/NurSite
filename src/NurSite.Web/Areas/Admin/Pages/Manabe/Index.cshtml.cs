@@ -125,7 +125,7 @@ public class IndexModel(AppDbContext db, ISlugService slugs) : PageModel
         if (source is null) return NotFound();
 
         var desired = string.IsNullOrWhiteSpace(Input.Slug) ? Input.Title : Input.Slug;
-        source.Slug = await slugs.GenerateUniqueAsync<Category>(
+        source.Slug = await slugs.GenerateUniqueAsync<RulingSource>(
             desired, isNew ? null : source.Id, ct);
 
         source.Title = Input.Title.Trim();

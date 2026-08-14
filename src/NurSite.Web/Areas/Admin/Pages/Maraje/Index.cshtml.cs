@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -23,25 +23,25 @@ public class IndexModel(AppDbContext db, ISlugService slugs) : PageModel
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "??? ???? ?? ???????")]
+        [Required(ErrorMessage = "نام مرجع را بنویسید")]
         [StringLength(150)]
-        [Display(Name = "???")]
+        [Display(Name = "نام")]
         public string FullName { get; set; } = default!;
 
         [StringLength(150)]
-        [Display(Name = "?????")]
+        [Display(Name = "نشانی")]
         public string? Slug { get; set; }
 
         [StringLength(300)]
-        [Url(ErrorMessage = "????? ???? ????? ????")]
-        [Display(Name = "???? ????")]
+        [Url(ErrorMessage = "نشانی سایت معتبر نیست")]
+        [Display(Name = "سایت رسمی")]
         public string? OfficialSiteUrl { get; set; }
 
         [Range(0, 999)]
-        [Display(Name = "?????")]
+        [Display(Name = "ترتیب")]
         public int SortOrder { get; set; }
 
-        [Display(Name = "????")]
+        [Display(Name = "فعال")]
         public bool IsActive { get; set; } = true;
     }
 
@@ -81,7 +81,7 @@ public class IndexModel(AppDbContext db, ISlugService slugs) : PageModel
         if (marja is null) return NotFound();
 
         var desiredSlug = string.IsNullOrWhiteSpace(Input.Slug) ? Input.FullName : Input.Slug;
-        marja.Slug = await slugs.GenerateUniqueAsync<Category>(
+        marja.Slug = await slugs.GenerateUniqueAsync<Marja>(
             desiredSlug, isNew ? null : marja.Id, ct);
 
         marja.FullName = Input.FullName.Trim();
@@ -94,7 +94,7 @@ public class IndexModel(AppDbContext db, ISlugService slugs) : PageModel
         if (isNew) db.Marjas.Add(marja);
         await db.SaveChangesAsync(ct);
 
-        Flash = isNew ? "???? ????? ??." : "??????? ????? ??.";
+        Flash = isNew ? "مرجع اضافه شد." : "تغییرات ذخیره شد.";
         FlashKind = "ok";
         return RedirectToPage();
     }
@@ -104,12 +104,13 @@ public class IndexModel(AppDbContext db, ISlugService slugs) : PageModel
         var marja = await db.Marjas.FirstOrDefaultAsync(m => m.Id == id, ct);
         if (marja is null) return NotFound();
 
-        // ????? ?????? ??? ????????? ???? ????? SetNull ???.
-        // ??? ???? ??? ????? ????? ??? ??? ??????? ???????.
+        // کلید خارجی احکام روی مرجع SetNull است، پس حذف مرجع خودِ احکام را
+        // از بین نمی‌برد ولی استنادشان را می‌اندازد و حکمی بی‌مرجع می‌ماند.
         var count = await db.Rulings.CountAsync(r => r.MarjaId == id, ct);
         if (count > 0)
         {
-            Flash = $"�{marja.FullName}� ?? {count} ??? ???? ???. ??? ?? ????? ?? ?? ???? ????? ???? ????.";
+            Flash = $"«{marja.FullName}» به {count} حکم متصل است و حذف نمی‌شود. " +
+                    "برای پنهان کردنش، به‌جای حذف آن را غیرفعال کنید.";
             FlashKind = "warn";
             return RedirectToPage();
         }
@@ -117,7 +118,7 @@ public class IndexModel(AppDbContext db, ISlugService slugs) : PageModel
         db.Marjas.Remove(marja);
         await db.SaveChangesAsync(ct);
 
-        Flash = $"�{marja.FullName}� ??? ??.";
+        Flash = $"«{marja.FullName}» حذف شد.";
         FlashKind = "ok";
         return RedirectToPage();
     }
@@ -136,6 +137,7 @@ public class IndexModel(AppDbContext db, ISlugService slugs) : PageModel
 
         Rows = marjas.Select(m => new Row(m, counts.GetValueOrDefault(m.Id))).ToList();
 
+        // مرجع تازه به انتهای فهرست می‌رود، نه ابتدای آن
         if (Input.Id == 0 && Input.SortOrder == 0)
             Input.SortOrder = marjas.Count == 0 ? 1 : marjas.Max(m => m.SortOrder) + 1;
     }
