@@ -1,0 +1,203 @@
+﻿@page
+@model NurSite.Web.Areas.Admin.Pages.Galeri.IndexModel
+@{
+    ViewData["Title"] = "گالری";
+    ViewData["Subtitle"] = "آلبوم‌های پوستر، استوری، والپیپر و کلیپ";
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash @(Model.FlashKind == "ok" ? "flash-ok" : "flash-warn")" role="status">@Model.Flash</div>
+}
+
+<div class="edit-cols">
+    <div class="edit-main">
+        <section class="panel">
+            <header class="panel-head">
+                <h2>آلبوم‌ها <span class="count"><fa-num>@Model.Rows.Count</fa-num></span></h2>
+            </header>
+
+            @if (Model.Rows.Count == 0)
+            {
+                <p class="empty">
+                    هنوز آلبومی ساخته نشده است. آلبوم یعنی یک مجموعه مناسبتی،
+                    مثل «پوسترهای محرم ۱۴۰۵». از فرم کنار شروع کنید.
+                </p>
+            }
+            else
+            {
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>عنوان</th>
+                                <th>محتوا</th>
+                                <th>وضعیت</th>
+                                <th class="cell-actions">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.Rows)
+                            {
+                                var a = row.Album;
+                                <tr>
+                                    <td style="width:64px">
+                                        @if (!string.IsNullOrWhiteSpace(row.FirstImage))
+                                        {
+                                            <img src="@row.FirstImage" alt="" width="48" height="48"
+                                                 style="width:48px;height:48px;object-fit:cover;border-radius:.4rem"
+                                                 loading="lazy" decoding="async">
+                                        }
+                                        else
+                                        {
+                                            <span class="seo-dot miss">بی‌تصویر</span>
+                                        }
+                                    </td>
+                                    <td class="cell-title">
+                                        <a asp-page="./Album" asp-route-id="@a.Id">@a.Title</a>
+                                        <span class="cell-slug">/galeri/@a.Slug</span>
+                                    </td>
+                                    <td>
+                                        @if (row.ItemCount > 0)
+                                        {
+                                            <span class="badge badge-ok"><fa-num>@row.ItemCount</fa-num> قلم</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-draft">خالی</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @switch (a.Status)
+                                        {
+                                            case PublishStatus.Published:
+                                                <span class="badge badge-ok">منتشرشده</span>
+                                                break;
+                                            case PublishStatus.Archived:
+                                                <span class="badge">بایگانی</span>
+                                                break;
+                                            default:
+                                                <span class="badge badge-draft">پیش‌نویس</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="cell-actions">
+                                        <div class="actions">
+                                            <a asp-page="./Album" asp-route-id="@a.Id" class="icon-btn" title="محتوای آلبوم">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-5-5L5 21" /></svg>
+                                            </a>
+                                            <a asp-page="./Index" asp-route-edit="@a.Id" class="icon-btn" title="ویرایش مشخصات">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                                            </a>
+                                            <form method="post" asp-page-handler="Delete" asp-route-id="@a.Id"
+                                                  data-confirm="«@a.Title» حذف شود؟">
+                                                <button type="submit" class="icon-btn danger" title="حذف">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" /></svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </div>
+
+    <aside class="edit-side">
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="Input.Id" />
+            <input type="hidden" asp-for="Input.CoverImagePath" />
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>@(Model.Input.Id == 0 ? "آلبوم تازه" : "ویرایش آلبوم")</h2>
+                </header>
+                <div class="panel-body">
+                    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+                    <div class="field">
+                        <label asp-for="Input.Title" class="label">عنوان</label>
+                        <input asp-for="Input.Title" class="input input-plain"
+                               placeholder="مثلاً: پوسترهای محرم ۱۴۰۵" />
+                        <span asp-validation-for="Input.Title" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Description" class="label">توضیح</label>
+                        <textarea asp-for="Input.Description" class="input input-plain" rows="3"></textarea>
+                        <span asp-validation-for="Input.Description" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="CoverFile" class="label">
+                            تصویر آلبوم
+                            <span class="label-hint">خالی بماند، اولین قلم آلبوم استفاده می‌شود</span>
+                        </label>
+                        @if (!string.IsNullOrWhiteSpace(Model.Input.CoverImagePath))
+                        {
+                            <img src="@Model.Input.CoverImagePath" alt="تصویر @Model.Input.Title"
+                                 style="width:100%;max-height:120px;object-fit:cover;border-radius:.5rem;margin-bottom:.5rem" />
+                        }
+                        <input asp-for="CoverFile" type="file" accept="image/*" class="input input-plain" />
+                        <span asp-validation-for="CoverFile" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.Status" class="label">وضعیت</label>
+                        <select asp-for="Input.Status" class="input input-plain">
+                            <option value="@PublishStatus.Draft">پیش‌نویس</option>
+                            <option value="@PublishStatus.Published">منتشرشده</option>
+                            <option value="@PublishStatus.Archived">بایگانی</option>
+                        </select>
+                    </div>
+
+                    <details class="more-fields">
+                        <summary>سئو و نشانی</summary>
+
+                        <div class="field">
+                            <label asp-for="Input.Slug" class="label">
+                                نشانی
+                                <span class="label-hint">خالی بماند از عنوان ساخته می‌شود</span>
+                            </label>
+                            <div class="slug-row">
+                                <span class="slug-prefix" dir="ltr">@Model.CanonicalBase/galeri/</span>
+                                <input asp-for="Input.Slug" class="input input-plain" />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label asp-for="Input.MetaTitle" class="label">
+                                عنوان متا
+                                <span class="label-hint">خالی بماند از عنوان ساخته می‌شود</span>
+                            </label>
+                            <input asp-for="Input.MetaTitle" class="input input-plain" maxlength="70" />
+                            <span asp-validation-for="Input.MetaTitle" class="field-error"></span>
+                        </div>
+
+                        <div class="field">
+                            <label asp-for="Input.MetaDescription" class="label">
+                                توضیح متا
+                                <span class="label-hint">خالی بماند از توضیح ساخته می‌شود</span>
+                            </label>
+                            <textarea asp-for="Input.MetaDescription" class="input input-plain" rows="3" maxlength="170"></textarea>
+                            <span asp-validation-for="Input.MetaDescription" class="field-error"></span>
+                        </div>
+                    </details>
+
+                    <div class="side-actions">
+                        <button type="submit" class="btn btn-gold auth-submit">
+                            @(Model.Input.Id == 0 ? "ساخت آلبوم" : "ذخیره")
+                        </button>
+                        @if (Model.Input.Id != 0)
+                        {
+                            <a asp-page="./Index" class="btn btn-ghost auth-submit">انصراف</a>
+                        }
+                    </div>
+                </div>
+            </section>
+        </form>
+    </aside>
+</div>

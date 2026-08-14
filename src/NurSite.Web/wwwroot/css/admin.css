@@ -1396,3 +1396,57 @@ a.badge {
         .more-fields .field:last-of-type {
             padding-bottom: 14px
         }
+
+/* ---------- شبکه محتوای گالری ---------- */
+.media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 16px;
+}
+
+.media-cell {
+    margin: 0;
+    border: 1px solid var(--khat);
+    border-radius: var(--r);
+    overflow: hidden;
+    background: var(--panel-2);
+}
+
+    .media-cell img {
+        display: block;
+        width: 100%;
+        /* پوستر عمودی است و استوری عمودی‌تر؛ برش یکسان جلوی بی‌ریختی
+           شبکه را می‌گیرد بدون اینکه ابعاد واقعی از دست برود */
+        aspect-ratio: 3 / 4;
+        object-fit: cover;
+        background: var(--ink);
+    }
+
+    .media-cell figcaption {
+        padding: 10px 12px;
+        font-size: 13px;
+        line-height: 1.9;
+    }
+
+        .media-cell figcaption b {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+.media-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin-top: 4px;
+    color: var(--matn-2);
+    font-size: 12px;
+}
+
+.media-actions {
+    display: flex;
+    gap: 2px;
+    padding: 8px 10px;
+    border-top: 1px solid var(--khat-2);
+}

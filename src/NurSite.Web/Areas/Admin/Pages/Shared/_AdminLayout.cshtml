@@ -95,7 +95,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
                     برنامه‌ها
                 </a>
-                <a href="#" class="nav-item soon">
+                <a asp-area="Admin" asp-page="/Galeri/Index" class="nav-item @(current.StartsWith("/Galeri", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-5-5L5 21" /></svg>
                     گالری
                 </a>
