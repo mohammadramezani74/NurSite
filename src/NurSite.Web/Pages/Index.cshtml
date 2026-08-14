@@ -161,12 +161,9 @@
                             </div>
                             <h3>@ev.Title</h3>
                             <p>@ev.Summary</p>
-                            <div class="card-foot">
-                                <a asp-page="/Barnameh/Details" asp-route-slug="@ev.Slug" class="link-more">
-                                    ثبت‌نام و جزئیات
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6 6 6" /></svg>
-                                </a>
-                            </div>
+                            @* لینک «ثبت‌نام و جزئیات» تا وقتی بخش برنامه‌ها ساخته
+                               نشده برداشته شده است؛ صفحه‌ای که وجود ندارد href خالی
+                               می‌گیرد و کلیک روی آن همین صفحه را دوباره باز می‌کند. *@
                         </div>
                     </article>
                 }

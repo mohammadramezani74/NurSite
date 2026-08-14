@@ -38,7 +38,9 @@ public class SitemapModel(AppDbContext db) : PageModel
             Url($"{baseUrl}/owqat", DateTime.UtcNow, "daily", "0.8"),
             Url($"{baseUrl}/monasebat", DateTime.UtcNow, "weekly", "0.7"),
             Url($"{baseUrl}/tamas", DateTime.UtcNow, "monthly", "0.5"),
-            Url($"{baseUrl}/galeri", DateTime.UtcNow, "weekly", "0.8")
+            Url($"{baseUrl}/galeri", DateTime.UtcNow, "weekly", "0.8"),
+            Url($"{baseUrl}/harim-khosoosi", DateTime.UtcNow, "yearly", "0.2"),
+            Url($"{baseUrl}/sharayet", DateTime.UtcNow, "yearly", "0.2")
         };
 
         // فهرست هر بخش صوتی
