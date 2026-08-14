@@ -64,8 +64,11 @@ public class IndexModel(AppDbContext db) : PageModel
         var speakerIds = await query.Where(l => l.SpeakerId != null)
             .Select(l => l.SpeakerId!.Value).Distinct().ToListAsync(ct);
 
+        // تیک «فعال» در پنل باید در سایت هم معنا بدهد: گوینده غیرفعال
+        // نه در فیلترها می‌آید نه صفحه فیلترشده‌اش باز می‌شود. نامش روی
+        // خود صوت می‌ماند، چون استناد اثر است نه تبلیغ او.
         Speakers = await db.Speakers.AsNoTracking()
-            .Where(s => speakerIds.Contains(s.Id))
+            .Where(s => speakerIds.Contains(s.Id) && s.IsActive)
             .OrderBy(s => s.FullName).ToListAsync(ct);
 
         var seriesIds = await query.Where(l => l.LectureSeriesId != null)
@@ -129,6 +132,14 @@ public class IndexModel(AppDbContext db) : PageModel
             ? AudioKinds.PluralLabel(Kind)
             : $"{AudioKinds.PluralLabel(Kind)} {ActiveSpeaker.FullName}");
 
+    /// <summary>روی گوینده یا مجموعه فیلتر شده‌ایم؟ برای نمایش کارت معرفی.</summary>
+    public bool HasProfile => ActiveSpeaker is not null || ActiveSeries is not null;
+
+    /// <summary>متن معرفی گوینده یا مجموعه، همان که در پنل نوشته شده.</summary>
+    public string? ProfileBio => ActiveSpeaker?.Bio ?? ActiveSeries?.Description;
+
+    public string? ProfileImage => ActiveSpeaker?.PortraitPath ?? ActiveSeries?.CoverImagePath;
+
     public string PageDescription => ActiveSeries?.MetaDescription
         ?? ActiveSpeaker?.Bio
         ?? Kind switch
@@ -137,6 +148,52 @@ public class IndexModel(AppDbContext db) : PageModel
             AudioKind.Anthem => "سرودها و آهنگ‌های مذهبی مؤسسه فرهنگی نورالثقلین، برای شنیدن و دانلود.",
             _ => "سخنرانی‌ها و درس‌گفتارهای مؤسسه فرهنگی نورالثقلین، برای شنیدن و دانلود."
         };
+
+    /// <summary>
+    /// معرفی گوینده یا مجموعه برای گوگل.
+    /// وقتی صفحه درباره یک نفر است، ItemList تنها بخشی از ماجراست.
+    /// </summary>
+    public object? BuildProfileSchema()
+    {
+        if (ActiveSpeaker is not null)
+        {
+            var person = new Dictionary<string, object?>
+            {
+                ["@context"] = "https://schema.org",
+                ["@type"] = "Person",
+                ["name"] = ActiveSpeaker.FullName,
+                ["jobTitle"] = ActiveSpeaker.Title,
+                ["description"] = ActiveSpeaker.Bio,
+                ["url"] = $"{BaseUrl}/{SectionSlug}?goyande={ActiveSpeaker.Slug}"
+            };
+
+            if (!string.IsNullOrWhiteSpace(ActiveSpeaker.PortraitPath))
+                person["image"] = $"{BaseUrl}{ActiveSpeaker.PortraitPath}";
+
+            return person;
+        }
+
+        if (ActiveSeries is not null)
+        {
+            var series = new Dictionary<string, object?>
+            {
+                ["@context"] = "https://schema.org",
+                ["@type"] = "CreativeWorkSeries",
+                ["name"] = ActiveSeries.Title,
+                ["description"] = ActiveSeries.Description ?? ActiveSeries.MetaDescription,
+                ["inLanguage"] = "fa-IR",
+                ["numberOfEpisodes"] = TotalCount,
+                ["url"] = $"{BaseUrl}/{SectionSlug}?majmooe={ActiveSeries.Slug}"
+            };
+
+            if (!string.IsNullOrWhiteSpace(ActiveSeries.CoverImagePath))
+                series["image"] = $"{BaseUrl}{ActiveSeries.CoverImagePath}";
+
+            return series;
+        }
+
+        return null;
+    }
 
     /// <summary>فهرست صوت‌ها به شکل ساختاریافته، تا گوگل بداند این صفحه یک آرشیو است.</summary>
     public object BuildItemListSchema() => new Dictionary<string, object?>

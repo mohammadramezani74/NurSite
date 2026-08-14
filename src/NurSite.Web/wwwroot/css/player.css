@@ -321,3 +321,65 @@
         font-size: .82rem;
         color: var(--matn-2);
     }
+
+/* ---------- کارت معرفی گوینده و مجموعه ----------
+   بالای فهرست، وقتی روی یک گوینده یا مجموعه فیلتر شده باشیم. */
+.profile-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-top: 8px;
+}
+
+.profile-img {
+    flex: none;
+    width: 104px;
+    height: 104px;
+    object-fit: cover;
+    border-radius: var(--r);
+    border: 1px solid var(--khat);
+}
+
+    /* تصویر آدم گرد است، تصویر مجموعه نه */
+    .profile-img.round {
+        border-radius: 50%;
+    }
+
+.profile-body {
+    min-width: 0;
+}
+
+    .profile-body h1 {
+        margin: 0 0 6px;
+    }
+
+    .profile-body p {
+        margin: 0;
+        max-width: 62ch;
+    }
+
+.profile-role {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--tala-2);
+    font-size: .9rem;
+}
+
+.profile-count {
+    display: inline-block;
+    margin-top: 12px;
+    color: var(--matn-2);
+    font-size: .85rem;
+}
+
+@media (max-width: 560px) {
+    .profile-head {
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .profile-img {
+        width: 84px;
+        height: 84px;
+    }
+}

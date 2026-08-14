@@ -13,6 +13,14 @@
     @if (!Model.NoIndex)
     {
         <json-ld data="@Model.BuildItemListSchema()" />
+
+        @* وقتی صفحه درباره یک گوینده یا یک مجموعه است، فهرست تنها
+           بخشی از ماجراست *@
+        var profile = Model.BuildProfileSchema();
+        if (profile is not null)
+        {
+            <json-ld data="@profile" />
+        }
     }
 }
 
@@ -33,8 +41,41 @@
             }
         </nav>
 
-        <h1>@Model.PageTitle</h1>
-        <p>@Model.PageDescription</p>
+        @if (Model.HasProfile)
+        {
+            @* معرفی و تصویری که در پنل ثبت شده، بالاخره اینجا دیده می‌شود *@
+            <div class="profile-head">
+                @if (!string.IsNullOrWhiteSpace(Model.ProfileImage))
+                {
+                    <img class="profile-img @(Model.ActiveSpeaker is not null ? "round" : "")"
+                         src="@Model.ProfileImage" alt="@Model.PageTitle"
+                         width="104" height="104" loading="lazy" decoding="async">
+                }
+
+                <div class="profile-body">
+                    <h1>@Model.PageTitle</h1>
+
+                    @if (Model.ActiveSpeaker is not null && !string.IsNullOrWhiteSpace(Model.ActiveSpeaker.Title))
+                    {
+                        <span class="profile-role">@Model.ActiveSpeaker.Title</span>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Model.ProfileBio))
+                    {
+                        <p>@Model.ProfileBio</p>
+                    }
+
+                    <span class="profile-count">
+                        <fa-num>@Model.TotalCount</fa-num> اثر در این بخش
+                    </span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <h1>@Model.PageTitle</h1>
+            <p>@Model.PageDescription</p>
+        }
     </div>
 </section>
 
