@@ -2,70 +2,134 @@
 @model VoroodModel
 @{
     ViewData["Title"] = "ورود به حساب";
+    ViewData["NoIndex"] = true;
     Layout = "_AuthLayout";
 }
 
 <div class="auth-head">
     <h1>خوش آمدید</h1>
-    <p>برای ورود، شماره موبایل و رمز عبور خود را وارد کنید.</p>
+    @if (Model.AwaitingCode)
+    {
+        <p>
+            کد پنج‌رقمی که به شماره
+            <b dir="ltr"><fa-num>@Model.PendingMobile</fa-num></b>
+            پیامک شد را وارد کنید.
+        </p>
+    }
+    else
+    {
+        <p>شماره موبایل خود را وارد کنید تا کد ورود برایتان پیامک شود.</p>
+    }
 </div>
 
-<form method="post" class="auth-form" novalidate>
-    <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="auth-note" role="status">@Model.Flash</div>
+}
 
-    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+@if (!Model.AwaitingCode)
+{
+    <form method="post" asp-page-handler="Send" class="auth-form" novalidate>
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+        <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
 
-    <div class="field">
-        <label asp-for="Input.Mobile" class="label">شماره موبایل</label>
-        <div class="input-wrap">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-                <rect x="6" y="2" width="12" height="20" rx="2.5" />
-                <path d="M11 18.5h2" />
-            </svg>
-            <input asp-for="Input.Mobile" class="input" type="tel" inputmode="numeric"
-                   autocomplete="username" dir="ltr" placeholder="۰۹۱۲۳۴۵۶۷۸۹"
-                   data-persian-digits autofocus />
-        </div>
-        <span asp-validation-for="Input.Mobile" class="field-error"></span>
-    </div>
-
-    <div class="field">
-        <label asp-for="Input.Password" class="label">رمز عبور</label>
-        <div class="input-wrap">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-                <rect x="4" y="10" width="16" height="11" rx="2" />
-                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-            </svg>
-            <input asp-for="Input.Password" id="passwordInput" class="input" type="password"
-                   autocomplete="current-password" dir="ltr" placeholder="••••••••" />
-            <button type="button" class="pass-toggle" data-toggle-password="passwordInput"
-                    aria-label="نمایش رمز عبور" aria-pressed="false">
-                <svg data-icon-open viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-                    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" />
-                    <circle cx="12" cy="12" r="3" />
+        <div class="field">
+            <label asp-for="Input.Mobile" class="label">شماره موبایل</label>
+            <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                    <rect x="6" y="2" width="12" height="20" rx="2.5" />
+                    <path d="M11 18.5h2" />
                 </svg>
-                <svg data-icon-closed viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" style="display:none">
-                    <path d="M2 12s3.6-7 10-7c2 0 3.7.7 5.1 1.6M22 12s-3.6 7-10 7c-2 0-3.7-.7-5.1-1.6" />
-                    <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
-                    <path d="M3 3l18 18" />
-                </svg>
-            </button>
+                <input asp-for="Input.Mobile" class="input" type="tel" inputmode="numeric"
+                       autocomplete="tel" dir="ltr" placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                       data-persian-digits autofocus />
+            </div>
+            <span asp-validation-for="Input.Mobile" class="field-error"></span>
         </div>
-        <span asp-validation-for="Input.Password" class="field-error"></span>
-        <p class="caps-hint" data-caps-hint hidden>کلید Caps Lock روشن است.</p>
-    </div>
 
-    <div class="field-row">
-        <label class="checkbox">
-            <input asp-for="Input.RememberMe" type="checkbox" />
-            <span>مرا به خاطر بسپار</span>
-        </label>
-        @* لینک فراموشی رمز پس از ساخت صفحه /Faramooshi فعال می‌شود *@
-    </div>
+        <button type="submit" class="btn btn-gold auth-submit">دریافت کد</button>
 
-    <button type="submit" class="btn btn-gold auth-submit">ورود به حساب</button>
-</form>
+        <p class="auth-foot">
+            اگر تا به حال وارد نشده‌اید، با همین کد حساب شما ساخته می‌شود.
+        </p>
+    </form>
+}
+else
+{
+    <form method="post" asp-page-handler="Verify" class="auth-form" novalidate>
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+        <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
 
-<p class="auth-note">
-    اگر حساب ندارید، برای عضویت با دفتر مؤسسه تماس بگیرید.
-</p>
+        <div class="field">
+            <label asp-for="Input.Code" class="label">کد تأیید</label>
+            <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                    <rect x="4" y="10" width="16" height="11" rx="2" />
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                </svg>
+
+                @* autocomplete=one-time-code باعث می‌شود گوشی کد را از
+                   خود پیامک پیشنهاد بدهد و کاربر تایپش نکند *@
+                <input asp-for="Input.Code" class="input code-input" type="text"
+                       inputmode="numeric" autocomplete="one-time-code"
+                       maxlength="5" dir="ltr" placeholder="۱۲۳۴۵"
+                       data-persian-digits autofocus />
+            </div>
+            <span asp-validation-for="Input.Code" class="field-error"></span>
+        </div>
+
+        <button type="submit" class="btn btn-gold auth-submit">ورود</button>
+    </form>
+
+    <form method="post" asp-page-handler="Send" class="auth-form" novalidate>
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+        <input type="hidden" asp-for="Input.Mobile" value="@Model.PendingMobile" />
+
+        <button type="submit" class="btn btn-ghost auth-submit" id="resendBtn"
+                data-wait="@Model.ResendIn">
+            ارسال دوباره کد
+        </button>
+    </form>
+
+    <form method="post" asp-page-handler="ChangeMobile" class="auth-form">
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+        <button type="submit" class="link-quiet auth-link">شماره را اشتباه وارد کردم</button>
+    </form>
+}
+
+@section Scripts {
+    <script>
+        /* شمارش معکوس دکمه ارسال دوباره. بدون این، کاربر پیاپی کلیک
+           می‌کند و هر بار پیام «کد قبلی هنوز معتبر است» می‌گیرد. */
+        (function () {
+            var btn = document.getElementById('resendBtn');
+            if (!btn) return;
+
+            var left = parseInt(btn.dataset.wait, 10) || 0;
+            if (left <= 0) return;
+
+            var label = btn.textContent.trim();
+
+            function fa(n) {
+                return String(n).replace(/[0-9]/g, function (d) {
+                    return String.fromCharCode(d.charCodeAt(0) + 0x06F0 - 48);
+                });
+            }
+
+            function tick() {
+                if (left <= 0) {
+                    btn.disabled = false;
+                    btn.textContent = label;
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.textContent = label + ' (' + fa(left) + ')';
+                left--;
+                window.setTimeout(tick, 1000);
+            }
+
+            tick();
+        })();
+    </script>
+}

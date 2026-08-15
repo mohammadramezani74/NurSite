@@ -34,6 +34,10 @@ public static class DependencyInjection
         // برای فعال کردن پیامک، فقط همین خط به پیاده‌سازی تازه تغییر می‌کند.
         services.AddScoped<INotificationService, LoggingNotificationService>();
 
+        // ثبت سرویس پیامک در لایه Web است، نه اینجا: به HttpClient و
+        // بایندر پیکربندی نیاز دارد که هر دو بسته‌های وب‌اند.
+        services.AddScoped<ILoginCodeService, LoginCodeService>();
+
         return services;
     }
 }

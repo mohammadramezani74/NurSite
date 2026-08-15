@@ -20,6 +20,7 @@ builder.Host.UseSerilog();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddSiteIdentity();
+builder.Services.AddSmsServices(builder.Configuration);
 builder.Services.AddScoped<ThemeResolver>();
 builder.Services.Configure<UploadOptions>(builder.Configuration.GetSection("Upload"));
 builder.Services.AddScoped<FileUploadService>();

@@ -34,6 +34,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<Album> Albums => Set<Album>();
     public DbSet<Photo> Photos => Set<Photo>();
+    public DbSet<LoginCode> LoginCodes => Set<LoginCode>();
 
     public DbSet<City> Cities => Set<City>();
     public DbSet<HeroVerse> HeroVerses => Set<HeroVerse>();
