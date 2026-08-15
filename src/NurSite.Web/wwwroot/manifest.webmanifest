@@ -1,7 +1,7 @@
 {
   "name": "مؤسسه فرهنگی نورالثقلین",
   "short_name": "نورالثقلین",
-  "description": "اوقات شرعی، برنامه‌های هفتگی، احکام، مقالات و سخنرانی‌های صوتی",
+  "description": "اوقات شرعی، احکام، مقالات، آرشیو صوتی و گالری پوستر",
   "lang": "fa",
   "dir": "rtl",
   "start_url": "/?source=pwa",
@@ -10,16 +10,70 @@
   "orientation": "portrait-primary",
   "background_color": "#04121F",
   "theme_color": "#04121F",
-  "categories": ["education", "lifestyle", "books"],
+  "categories": [
+    "education",
+    "lifestyle",
+    "books"
+  ],
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "اوقات شرعی", "short_name": "اوقات", "url": "/owqat", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "برنامه‌های این هفته", "short_name": "برنامه‌ها", "url": "/barnameh", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "پرسش شرعی", "short_name": "پرسش", "url": "/porsesh", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+    {
+      "name": "اوقات شرعی",
+      "short_name": "اوقات",
+      "url": "/owqat",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "پرسش شرعی",
+      "short_name": "پرسش",
+      "url": "/porsesh",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "آرشیو صوتی",
+      "short_name": "صوت‌ها",
+      "url": "/sokhanraniha",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

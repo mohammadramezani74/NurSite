@@ -174,6 +174,29 @@
         <button type="button" class="btn btn-gold">به‌روزرسانی</button>
     </div>
 
+    @* پیشنهاد نصب. تا وقتی مرورگر نگوید نصب ممکن است، پنهان می‌ماند —
+       در iOS هم به‌جای دکمه، راهنمای دستی نشان داده می‌شود. *@
+    <div class="install-panel" id="installPanel" role="dialog" aria-label="نصب برنامه">
+        <button type="button" class="install-close" data-install-close aria-label="بستن">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
+        </button>
+
+        <img src="~/icons/icon-192.png" alt="" width="44" height="44" class="install-icon">
+
+        <div class="install-body">
+            <b>نورالثقلین را نصب کنید</b>
+            <span>دسترسی سریع به اوقات شرعی، احکام و آرشیو صوتی — بدون باز کردن مرورگر.</span>
+
+            <p data-ios-help hidden class="install-ios">
+                در سافاری، دکمه اشتراک‌گذاری
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 16V4M8 8l4-4 4 4" /><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" /></svg>
+                را بزنید و «افزودن به صفحه اصلی» را انتخاب کنید.
+            </p>
+        </div>
+
+        <button type="button" class="btn btn-gold" data-install hidden>نصب</button>
+    </div>
+
     <script src="~/js/site.js" asp-append-version="true" defer></script>
     <script src="~/js/pwa.js" asp-append-version="true" defer></script>
     @await RenderSectionAsync("Scripts", required: false)

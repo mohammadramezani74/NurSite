@@ -3758,3 +3758,91 @@ mark {
         order: 2
     }
 }
+
+/* ---------- پیشنهاد نصب برنامه ---------- */
+.install-panel {
+    position: fixed;
+    inset-block-end: 20px;
+    inset-inline-end: 20px;
+    z-index: 92;
+    display: none;
+    align-items: flex-start;
+    gap: 14px;
+    max-width: min(420px, 92vw);
+    padding: 16px 18px;
+    background: var(--lajvard-2);
+    border: 1px solid var(--khat);
+    border-radius: var(--r);
+    box-shadow: 0 18px 44px -22px rgba(0,0,0,.8);
+}
+
+    .install-panel.show {
+        display: flex
+    }
+
+.install-icon {
+    flex: none;
+    border-radius: 10px
+}
+
+.install-body {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    line-height: 1.9
+}
+
+    .install-body b {
+        display: block;
+        color: #fff;
+        margin-bottom: 2px
+    }
+
+    .install-body span {
+        color: var(--matn-2)
+    }
+
+.install-ios {
+    margin: 8px 0 0;
+    color: var(--tala-2);
+    font-size: 13px
+}
+
+    .install-ios svg {
+        width: 15px;
+        height: 15px;
+        vertical-align: -3px;
+        display: inline-block
+    }
+
+.install-close {
+    position: absolute;
+    inset-block-start: 6px;
+    inset-inline-start: 6px;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    background: none;
+    border: 0;
+    color: var(--matn-2);
+    cursor: pointer
+}
+
+    .install-close svg {
+        width: 15px;
+        height: 15px
+    }
+
+@media (max-width: 560px) {
+    .install-panel {
+        inset-inline: 12px;
+        inset-block-end: 12px;
+        max-width: none;
+        flex-wrap: wrap
+    }
+
+        .install-panel .btn {
+            width: 100%
+        }
+}
