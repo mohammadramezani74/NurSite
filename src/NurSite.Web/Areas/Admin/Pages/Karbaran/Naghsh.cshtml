@@ -1,0 +1,121 @@
+﻿@page "{id}"
+@model NurSite.Web.Areas.Admin.Pages.Karbaran.NaghshModel
+@{
+    ViewData["Title"] = string.IsNullOrWhiteSpace(Model.Target.FullName) ? "کاربر" : Model.Target.FullName;
+    ViewData["Subtitle"] = "نقش‌ها و دسترسی‌ها";
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash @(Model.FlashKind == "ok" ? "flash-ok" : "flash-warn")" role="status">@Model.Flash</div>
+}
+
+<p style="margin-bottom:1rem">
+    <a asp-page="./Index" class="link-quiet">→ بازگشت به کاربران</a>
+</p>
+
+<form method="post" class="edit-form">
+    <input type="hidden" asp-for="Input.Id" />
+    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+    <div class="edit-cols">
+        <div class="edit-main">
+            <section class="panel">
+                <header class="panel-head"><h2>مشخصات</h2></header>
+                <div class="panel-body">
+                    <div class="field">
+                        <label class="label">شماره موبایل</label>
+                        <input class="input input-plain" dir="ltr" value="@Model.Target.UserName" disabled />
+                        <span class="label-hint">
+                            شماره، نام کاربری است و عوض نمی‌شود.
+                            @if (!Model.Target.PhoneNumberConfirmed)
+                            {
+                                <text>این کاربر هنوز با کد پیامکی وارد نشده است.</text>
+                            }
+                        </span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.FullName" class="label">نام و نام خانوادگی</label>
+                        <input asp-for="Input.FullName" class="input input-plain" />
+                        <span asp-validation-for="Input.FullName" class="field-error"></span>
+                    </div>
+
+                    <dl class="media-facts">
+                        <dt>عضویت</dt>
+                        <dd><persian-date value="@Model.Target.CreatedAtUtc" /></dd>
+                        <dt>آخرین ورود</dt>
+                        <dd>
+                            @if (Model.Target.LastLoginAtUtc is not null)
+                            {
+                                <persian-date value="@Model.Target.LastLoginAtUtc" />
+                            }
+                            else
+                            {
+                                <span class="muted-cell">هنوز وارد نشده</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </section>
+
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>دسترسی‌های فعلی</h2>
+                    <span class="panel-hint">حاصل نقش‌های انتخاب‌شده</span>
+                </header>
+                <div class="panel-body">
+                    @if (Model.EffectivePermissions.Count == 0)
+                    {
+                        <p class="empty">این کاربر به هیچ بخشی از پنل دسترسی ندارد.</p>
+                    }
+                    else
+                    {
+                        <div class="chips">
+                            @foreach (var p in Model.EffectivePermissions)
+                            {
+                                <span class="chip">@NurSite.Web.Areas.Admin.Pages.Karbaran.NaghshModel.PermissionDisplay(p)</span>
+                            }
+                        </div>
+                        <p class="label-hint" style="margin-top:.8rem">
+                            دسترسی‌ها مستقیم به کاربر داده نمی‌شوند؛ از نقش‌ها می‌آیند.
+                            برای تغییرشان باید دسترسی خود نقش عوض شود.
+                        </p>
+                    }
+                </div>
+            </section>
+        </div>
+
+        <aside class="edit-side">
+            <section class="panel">
+                <header class="panel-head"><h2>نقش‌ها</h2></header>
+                <div class="panel-body">
+                    @if (Model.IsSelf)
+                    {
+                        <div class="flash flash-warn" style="margin:0 0 1rem">
+                            این حساب خودتان است. اگر نقشی را از خودتان بگیرید،
+                            ممکن است دسترسی به همین صفحه را از دست بدهید.
+                        </div>
+                    }
+
+                    @foreach (var role in Model.AllRoles)
+                    {
+                        <label class="checkbox">
+                            <input type="checkbox" name="Input.RoleNames" value="@role.Name"
+                                   checked="@(Model.Input.RoleNames.Contains(role.Name))" />
+                            <span>
+                                @role.DisplayName
+                                <span class="label-hint">@role.Description</span>
+                            </span>
+                        </label>
+                    }
+
+                    <div class="side-actions">
+                        <button type="submit" class="btn btn-gold auth-submit">ذخیره</button>
+                        <a asp-page="./Index" class="btn btn-ghost auth-submit">انصراف</a>
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</form>

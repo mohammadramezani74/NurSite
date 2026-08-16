@@ -1,0 +1,216 @@
+﻿@page
+@model NurSite.Web.Areas.Admin.Pages.Karbaran.IndexModel
+@{
+    ViewData["Title"] = "کاربران";
+    ViewData["Subtitle"] = "حساب‌ها و نقش‌هایشان";
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash @(Model.FlashKind == "ok" ? "flash-ok" : "flash-warn")" role="status">@Model.Flash</div>
+}
+
+<div class="edit-cols">
+    <div class="edit-main">
+        <section class="panel">
+            <header class="panel-head">
+                <h2>کاربران <span class="count"><fa-num>@Model.TotalCount</fa-num></span></h2>
+            </header>
+
+            <form method="get" class="filter-bar">
+                <div class="filter-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                    <label class="sr" for="q">جستجو با نام یا شماره</label>
+                    <input id="q" name="q" value="@Model.Q" placeholder="نام یا شماره موبایل…" data-persian-digits />
+                </div>
+
+                <label class="sr" for="role">نقش</label>
+                <select id="role" name="role" class="filter-select">
+                    <option value="">همه نقش‌ها</option>
+                    @foreach (var r in Model.AllRoles)
+                    {
+                        <option value="@r.Name" selected="@(Model.Role == r.Name)">@r.DisplayName</option>
+                    }
+                </select>
+
+                <label class="sr" for="active">وضعیت</label>
+                <select id="active" name="active" class="filter-select">
+                    <option value="">همه</option>
+                    <option value="true" selected="@(Model.Active == true)">فعال</option>
+                    <option value="false" selected="@(Model.Active == false)">غیرفعال</option>
+                </select>
+
+                <button type="submit" class="btn btn-ghost btn-sm">اعمال</button>
+                @if (!string.IsNullOrWhiteSpace(Model.Q) || !string.IsNullOrWhiteSpace(Model.Role) || Model.Active is not null)
+                {
+                    <a asp-page="./Index" class="link-quiet">حذف فیلترها</a>
+                }
+            </form>
+
+            @if (Model.Rows.Count == 0)
+            {
+                <p class="empty">کاربری با این مشخصات پیدا نشد.</p>
+            }
+            else
+            {
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>کاربر</th>
+                                <th>نقش‌ها</th>
+                                <th>آخرین ورود</th>
+                                <th>وضعیت</th>
+                                <th class="cell-actions">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.Rows)
+                            {
+                                var u = row.User;
+                                <tr>
+                                    <td class="cell-title">
+                                        <a asp-page="./Naghsh" asp-route-id="@u.Id">
+                                            @(string.IsNullOrWhiteSpace(u.FullName) ? "بدون نام" : u.FullName)
+                                        </a>
+                                        <span class="cell-slug" dir="ltr"><fa-num>@u.UserName</fa-num></span>
+                                    </td>
+                                    <td>
+                                        @if (row.Roles.Count == 0)
+                                        {
+                                            <span class="seo-dot miss">بدون نقش</span>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var r in row.Roles)
+                                            {
+                                                <span class="badge">@Model.RoleDisplay(r)</span>
+                                            }
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (u.LastLoginAtUtc is not null)
+                                        {
+                                            <persian-date value="@u.LastLoginAtUtc" />
+                                        }
+                                        else
+                                        {
+                                            <span class="muted-cell">هنوز وارد نشده</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (u.IsActive)
+                                        {
+                                            <span class="badge badge-ok">فعال</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-draft">غیرفعال</span>
+                                        }
+
+                                        @if (!u.PhoneNumberConfirmed)
+                                        {
+                                            <span class="badge badge-wait" title="هنوز با کد پیامکی وارد نشده">تأییدنشده</span>
+                                        }
+                                    </td>
+                                    <td class="cell-actions">
+                                        <div class="actions">
+                                            <a asp-page="./Naghsh" asp-route-id="@u.Id" class="icon-btn" title="نقش‌ها">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                                            </a>
+
+                                            <form method="post" asp-page-handler="ToggleActive" asp-route-id="@u.Id"
+                                                  asp-route-q="@Model.Q" asp-route-role="@Model.Role"
+                                                  asp-route-active="@Model.Active" asp-route-safhe="@Model.PageNumber"
+                                                  data-confirm="@(u.IsActive ? $"حساب «{u.FullName ?? u.UserName}» غیرفعال شود؟" : null)">
+                                                <button type="submit" class="icon-btn @(u.IsActive ? "danger" : "")"
+                                                        title="@(u.IsActive ? "غیرفعال کردن" : "فعال کردن")">
+                                                    @if (u.IsActive)
+                                                    {
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M5.6 5.6l12.8 12.8" /></svg>
+                                                    }
+                                                    else
+                                                    {
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5" /></svg>
+                                                    }
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (Model.TotalPages > 1)
+                {
+                    <nav class="pager" aria-label="صفحه‌بندی">
+                        @foreach (var p in Model.PagerPages)
+                        {
+                            @if (p is null)
+                            {
+                                <span class="pager-gap" aria-hidden="true">…</span>
+                            }
+                            else
+                            {
+                                <a asp-page="./Index" asp-route-q="@Model.Q" asp-route-role="@Model.Role"
+                                   asp-route-active="@Model.Active" asp-route-safhe="@p"
+                                   class="pager-item @(p == Model.PageNumber ? "on" : "")"
+                                   aria-current="@(p == Model.PageNumber ? "page" : null)">
+                                    <fa-num>@p</fa-num>
+                                </a>
+                            }
+                        }
+                    </nav>
+                }
+            }
+        </section>
+    </div>
+
+    <aside class="edit-side">
+        <form method="post" asp-page-handler="Create">
+            <section class="panel">
+                <header class="panel-head">
+                    <h2>کاربر تازه</h2>
+                </header>
+                <div class="panel-body">
+                    <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+                    <p class="label-hint" style="margin-bottom:1rem">
+                        رمز عبوری تعیین نمی‌شود. کاربر هر وقت با همین شماره و کد پیامکی
+                        وارد شود، حسابش با نقشی که اینجا می‌دهید آماده است.
+                    </p>
+
+                    <div class="field">
+                        <label asp-for="Input.Mobile" class="label">شماره موبایل</label>
+                        <input asp-for="Input.Mobile" class="input input-plain" dir="ltr"
+                               inputmode="numeric" placeholder="۰۹۱۲۳۴۵۶۷۸۹" data-persian-digits />
+                        <span asp-validation-for="Input.Mobile" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.FullName" class="label">نام و نام خانوادگی</label>
+                        <input asp-for="Input.FullName" class="input input-plain" />
+                        <span asp-validation-for="Input.FullName" class="field-error"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="Input.RoleName" class="label">نقش</label>
+                        <select asp-for="Input.RoleName" class="input input-plain">
+                            @foreach (var r in Model.AllRoles)
+                            {
+                                <option value="@r.Name">@r.DisplayName</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.RoleName" class="field-error"></span>
+                    </div>
+
+                    <div class="side-actions">
+                        <button type="submit" class="btn btn-gold auth-submit">ساخت کاربر</button>
+                    </div>
+                </div>
+            </section>
+        </form>
+    </aside>
+</div>
