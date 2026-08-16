@@ -23,6 +23,7 @@ namespace NurSite.Web.Pages;
 public class VoroodModel(
     SignInManager<ApplicationUser> signInManager,
     UserManager<ApplicationUser> userManager,
+    RoleManager<ApplicationRole> roleManager,
     ILoginCodeService codes,
     ILogger<VoroodModel> logger) : PageModel
 {
@@ -207,12 +208,32 @@ public class VoroodModel(
 
         if (ReturnUrl is not null) return LocalRedirect(ReturnUrl);
 
-        var isAdmin = await userManager.IsInRoleAsync(user, AppRoles.SuperAdmin)
-                   || await userManager.IsInRoleAsync(user, AppRoles.Admin);
+        // مقصد بر اساس دسترسی تعیین می‌شود نه نقش. با بررسی نقش، پاسخگوی
+        // شرعی و ویراستار روی صفحه اصلی سایت رها می‌شدند، در حالی که
+        // کارشان در پنل است.
+        var hasPanelAccess = await HasAnyPermissionAsync(user);
 
-        return isAdmin
+        return hasPanelAccess
             ? RedirectToPage("/Index", new { area = "Admin" })
             : RedirectToPage("/Index");
+    }
+
+    /// <summary>
+    /// کاربر از راه نقش‌هایش دست‌کم یک دسترسی دارد؟ همان شرطی که
+    /// سیاست AdminArea هم بررسی می‌کند.
+    /// </summary>
+    private async Task<bool> HasAnyPermissionAsync(ApplicationUser user)
+    {
+        foreach (var roleName in await userManager.GetRolesAsync(user))
+        {
+            var role = await roleManager.FindByNameAsync(roleName);
+            if (role is null) continue;
+
+            var claims = await roleManager.GetClaimsAsync(role);
+            if (claims.Any(c => c.Type == Permissions.ClaimType)) return true;
+        }
+
+        return false;
     }
 
     /// <summary>بازگشت به مرحله اول، برای وقتی که شماره اشتباه وارد شده.</summary>

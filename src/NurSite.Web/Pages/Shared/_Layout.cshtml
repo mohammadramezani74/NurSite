@@ -80,19 +80,25 @@
                 <a asp-page="/Southa/Index" asp-route-section="sokhanraniha">سخنرانی‌ها</a>
                 <a asp-page="/Southa/Index" asp-route-section="madahiha">مداحی‌ها</a>
                 <a asp-page="/Galeri/Index">گالری</a>
+                @* پرسش شرعی نیازی به ورود ندارد، پس کسی که سؤال پرسیده
+                   معمولاً وارد نشده است — لینک پیگیری باید جایی باشد که
+                   بدون ورود هم دیده شود *@
+                <a asp-page="/Peygiri">پیگیری پرسش</a>
                 <a asp-page="/Tamas">تماس با ما</a>
             </nav>
 
             <div class="head-cta">
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    @if (User.IsInRole(AppRoles.SuperAdmin) || User.IsInRole(AppRoles.Admin))
+                    @* لینک پنل بر اساس دسترسی است نه نقش. با بررسی نقش،
+                       پاسخگوی شرعی و ویراستار با اینکه به پنل راه دارند،
+                       هیچ راهی برای رسیدن به آن نمی‌دیدند. *@
+                    @if (User.HasClaim(c => c.Type == Permissions.ClaimType))
                     {
                         <a asp-area="Admin" asp-page="/Index" class="btn btn-ghost">پنل مدیریت</a>
                     }
                     else
                     {
-                        @* کاربر عادی فقط شماره خودش را می‌بیند، بدون لینک به پنل *@
                         <span class="user-chip" title="شماره موبایل شما">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
@@ -146,6 +152,7 @@
                     <h4>خدمات</h4>
                     <ul>
                         <li><a asp-page="/Porsesh">پرسش شرعی</a></li>
+                        <li><a asp-page="/Peygiri">پیگیری پرسش</a></li>
                         <li><a asp-page="/Southa/Index" asp-route-section="sorudha">سرودهای مذهبی</a></li>
                         <li><a asp-page="/Galeri/Index">گالری پوستر و کلیپ</a></li>
                         <li><a asp-page="/Owqat">اوقات شرعی شهرها</a></li>

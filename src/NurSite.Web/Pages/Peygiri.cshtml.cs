@@ -21,8 +21,16 @@ public class PeygiriModel(AppDbContext db) : PageModel
     public string? PublishedSlug { get; private set; }
     public bool Searched { get; private set; }
 
+    /// <summary>
+    /// پرسش‌های خودِ کاربر واردشده. کسی که با شماره‌اش وارد شده نباید
+    /// مجبور باشد کد رهگیری را از جایی پیدا کند؛ پرسش‌هایش را همین‌جا می‌بیند.
+    /// </summary>
+    public IReadOnlyList<UserQuestion> MyQuestions { get; private set; } = [];
+
     public async Task OnGetAsync(CancellationToken ct)
     {
+        await LoadMineAsync(ct);
+
         if (string.IsNullOrWhiteSpace(Code)) return;
 
         Searched = true;
@@ -40,6 +48,18 @@ public class PeygiriModel(AppDbContext db) : PageModel
                 .Select(r => r.Slug)
                 .FirstOrDefaultAsync(ct);
         }
+    }
+
+    private async Task LoadMineAsync(CancellationToken ct)
+    {
+        var mobile = User.Identity?.IsAuthenticated == true ? User.Identity.Name : null;
+        if (string.IsNullOrWhiteSpace(mobile)) return;
+
+        MyQuestions = await db.UserQuestions.AsNoTracking()
+            .Where(q => q.SenderMobile == mobile)
+            .OrderByDescending(q => q.CreatedAtUtc)
+            .Take(20)
+            .ToListAsync(ct);
     }
 
     public static string StatusLabel(QuestionStatus status) => status switch

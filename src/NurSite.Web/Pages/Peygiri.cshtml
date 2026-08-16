@@ -34,6 +34,29 @@
 <section class="tone-1">
     <div class="wrap" style="max-width:720px">
 
+        @* کاربری که وارد شده، پرسش‌هایش را بدون کد رهگیری می‌بیند *@
+        @if (Model.MyQuestions.Count > 0 && !Model.Searched)
+        {
+            <section class="my-questions">
+                <h2>پرسش‌های شما</h2>
+
+                <ul class="track-list">
+                    @foreach (var mine in Model.MyQuestions)
+                    {
+                        <li>
+                            <a asp-page="/Peygiri" asp-route-code="@mine.TrackingCode">
+                                <span class="track-code" dir="ltr">@mine.TrackingCode</span>
+                                <span class="track-title">@mine.Body</span>
+                            </a>
+                            <span class="badge @(mine.Status is QuestionStatus.Answered or QuestionStatus.Published ? "badge-ok" : "badge-wait")">
+                                @PeygiriModel.StatusLabel(mine.Status)
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+
         @if (Model.Searched && Model.Question is null)
         {
             <div class="search-empty">
