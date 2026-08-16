@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -7,11 +8,13 @@ using NurSite.Application.Interfaces;
 using NurSite.Application.Services;
 using NurSite.Domain.Entities;
 using NurSite.Domain.Enums;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 using NurSite.Web.Services;
 
 namespace NurSite.Web.Areas.Admin.Pages.Southa;
 
+[Authorize(Policy = Permissions.Media.Manage)]
 public class EditModel(
     AppDbContext db,
     ISlugService slugs,

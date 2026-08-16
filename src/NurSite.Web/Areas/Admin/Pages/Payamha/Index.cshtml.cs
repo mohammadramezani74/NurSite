@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Domain.Entities;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Areas.Admin.Pages.Payamha;
 
+[Authorize(Policy = Permissions.Settings.Manage)]
 public class IndexModel(AppDbContext db) : PageModel
 {
     private const int PageSize = 20;

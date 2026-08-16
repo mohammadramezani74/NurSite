@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -6,10 +7,12 @@ using NurSite.Application.Interfaces;
 using NurSite.Application.Services;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Domain.Entities;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Areas.Admin.Pages.Ahkam;
 
+[Authorize(Policy = Permissions.Rulings.Answer)]
 public class NemodarModel(
     AppDbContext db,
     IRulingDiagramService diagrams) : PageModel

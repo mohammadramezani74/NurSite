@@ -64,14 +64,22 @@ builder.Services.AddRazorPages(options =>
 });
 
 builder.Services.AddAuthorizationBuilder()
-    // فقط مدیران به پنل راه دارند. نقش‌های محتوایی مثل نویسنده و
-    // پاسخگوی شرعی فعلاً دسترسی ندارند و هر وقت لازم شد اینجا اضافه می‌شوند.
-    .AddPolicy("AdminArea", policy => policy.RequireRole(
-        AppRoles.SuperAdmin, AppRoles.Admin))
-    // هر دسترسی به صورت Claim بررسی می‌شود
-    .AddPolicy(Permissions.Articles.Publish, p => p.RequireClaim(Permissions.ClaimType, Permissions.Articles.Publish))
-    .AddPolicy(Permissions.Users.Manage, p => p.RequireClaim(Permissions.ClaimType, Permissions.Users.Manage))
-    .AddPolicy(Permissions.Settings.Manage, p => p.RequireClaim(Permissions.ClaimType, Permissions.Settings.Manage));
+    // ورود به پنل با داشتن دست‌کم یک دسترسی است، نه با نقش.
+    // پیش از این فقط مدیر و مدیر ارشد راه داشتند، یعنی نویسنده و
+    // پاسخگوی شرعی با اینکه دسترسی داشتند، پشت در می‌ماندند.
+    .AddPolicy("AdminArea", policy => policy.RequireAssertion(context =>
+        context.User.HasClaim(c => c.Type == Permissions.ClaimType)));
+
+// هر دسترسی یک سیاست هم‌نام خودش می‌گیرد. حلقه‌ای ثبت می‌شوند تا با
+// افزودن دسترسی تازه به Permissions، ثبت سیاستش فراموش نشود.
+builder.Services.AddAuthorization(options =>
+{
+    foreach (var permission in Permissions.All())
+    {
+        options.AddPolicy(permission, policy =>
+            policy.RequireClaim(Permissions.ClaimType, permission));
+    }
+});
 
 builder.Services.AddResponseCompression(options =>
 {

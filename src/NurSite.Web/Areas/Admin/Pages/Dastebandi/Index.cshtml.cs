@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Domain.Entities;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Areas.Admin.Pages.Dastebandi;
 
+[Authorize(Policy = Permissions.Articles.Edit)]
 public class IndexModel(AppDbContext db) : PageModel
 {
     /// <summary>یک دسته‌بندی، همراه با عمقش در درخت و تعداد مقالاتش.</summary>

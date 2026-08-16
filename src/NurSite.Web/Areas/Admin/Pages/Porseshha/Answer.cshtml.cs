@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -6,10 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using NurSite.Application.Interfaces;
 using NurSite.Domain.Entities;
 using NurSite.Domain.Enums;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Areas.Admin.Pages.Porseshha;
 
+[Authorize(Policy = Permissions.Rulings.Answer)]
 public class AnswerModel(
     AppDbContext db,
     INotificationService notifications,

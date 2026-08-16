@@ -1,13 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Domain.Entities;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Areas.Admin.Pages.Ayat;
 
 /// <summary>آیات اسلایدر صفحه اصلی.</summary>
+[Authorize(Policy = Permissions.Settings.Manage)]
 public class IndexModel(AppDbContext db) : PageModel
 {
     public IReadOnlyList<HeroVerse> Verses { get; private set; } = [];

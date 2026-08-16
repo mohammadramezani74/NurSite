@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Domain.Entities;
 using NurSite.Domain.Enums;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Areas.Admin.Pages.Ahkam;
 
+[Authorize(Policy = Permissions.Rulings.View)]
 public class IndexModel(AppDbContext db) : PageModel
 {
     private const int PageSize = 20;

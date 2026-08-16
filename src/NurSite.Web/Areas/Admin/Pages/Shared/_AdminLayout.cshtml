@@ -7,6 +7,19 @@
     bool IsCurrent(string page) =>
         current.Equals(page, StringComparison.OrdinalIgnoreCase);
 
+    // منو فقط چیزهایی را نشان می‌دهد که کاربر واقعاً به آن‌ها راه دارد.
+    // بدون این، ویراستار لینک تنظیمات را می‌بیند و با کلیک، صفحه
+    // «دسترسی ندارید» می‌گیرد — که هم گیج‌کننده است هم ساختار پنل را لو می‌دهد.
+    bool Can(string permission) =>
+        User.HasClaim(NurSite.Infrastructure.Identity.Permissions.ClaimType, permission);
+
+    var canArticles = Can(NurSite.Infrastructure.Identity.Permissions.Articles.View);
+    var canRulings = Can(NurSite.Infrastructure.Identity.Permissions.Rulings.View)
+                  || Can(NurSite.Infrastructure.Identity.Permissions.Rulings.Answer);
+    var canMedia = Can(NurSite.Infrastructure.Identity.Permissions.Media.Manage);
+    var canUsers = Can(NurSite.Infrastructure.Identity.Permissions.Users.Manage);
+    var canSettings = Can(NurSite.Infrastructure.Identity.Permissions.Settings.Manage);
+
     var displayName = User.Identity?.Name ?? "";
     var roleLabel = User.IsInRole(AppRoles.SuperAdmin) ? "مدیر ارشد"
                   : User.IsInRole(AppRoles.Admin) ? "مدیر"
@@ -54,83 +67,147 @@
                     داشبورد
                 </a>
 
-                <p class="nav-group">محتوا</p>
-                <a asp-area="Admin" asp-page="/Maghalat/Index" class="nav-item @(current.StartsWith("/Maghalat", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V6a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" /><path d="M9 8h5" /></svg>
-                    مقالات
-                </a>
-                <a asp-area="Admin" asp-page="/Dastebandi/Index" class="nav-item @(current.StartsWith("/Dastebandi", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h6l2 2h10v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z" /></svg>
-                    دسته‌بندی‌ها
-                </a>
-                <a asp-area="Admin" asp-page="/Ahkam/Index" class="nav-item @(current.StartsWith("/Ahkam", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" /></svg>
-                    احکام
-                </a>
-                <a asp-area="Admin" asp-page="/Abvab/Index" class="nav-item @(current.StartsWith("/Abvab", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V6a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" /><path d="M9 12h5M9 8h5" /></svg>
-                    ابواب احکام
-                </a>
-                <a asp-area="Admin" asp-page="/Maraje/Index" class="nav-item @(current.StartsWith("/Maraje", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 3 8v2h18V8Z" /><path d="M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18" /></svg>
-                    مراجع تقلید
-                </a>
-                <a asp-area="Admin" asp-page="/Manabe/Index" class="nav-item @(current.StartsWith("/Manabe", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V6a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" /><path d="M9 8h5M9 12h5" /></svg>
-                    منابع احکام
-                </a>
-                <a asp-area="Admin" asp-page="/Southa/Index" class="nav-item @(current.StartsWith("/Southa", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
-                    صوت‌ها
-                </a>
-                <a asp-area="Admin" asp-page="/Sokhanranan/Index" class="nav-item @(current.StartsWith("/Sokhanranan", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 14a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v4a4 4 0 0 0 4 4Z" /><path d="M5 10a7 7 0 0 0 14 0M12 17v4M8 21h8" /></svg>
-                    سخنرانان
-                </a>
-                <a asp-area="Admin" asp-page="/Majmooeha/Index" class="nav-item @(current.StartsWith("/Majmooeha", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="7" width="14" height="14" rx="2" /><path d="M7 3h12a2 2 0 0 1 2 2v12" /></svg>
-                    مجموعه‌ها
-                </a>
+                @if (canArticles || canRulings || canMedia)
+                {
+                    <p class="nav-group">محتوا</p>
+                }
+                @if (canArticles)
+                {
+                    <a asp-area="Admin" asp-page="/Maghalat/Index" class="nav-item @(current.StartsWith("/Maghalat", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V6a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" /><path d="M9 8h5" /></svg>
+                        مقالات
+                    </a>
+                }
+                @if (canArticles)
+                {
+                    <a asp-area="Admin" asp-page="/Dastebandi/Index" class="nav-item @(current.StartsWith("/Dastebandi", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h6l2 2h10v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z" /></svg>
+                        دسته‌بندی‌ها
+                    </a>
+                }
+                @if (canRulings)
+                {
+                    <a asp-area="Admin" asp-page="/Ahkam/Index" class="nav-item @(current.StartsWith("/Ahkam", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" /></svg>
+                        احکام
+                    </a>
+                }
+                @if (canRulings)
+                {
+                    <a asp-area="Admin" asp-page="/Abvab/Index" class="nav-item @(current.StartsWith("/Abvab", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V6a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" /><path d="M9 12h5M9 8h5" /></svg>
+                        ابواب احکام
+                    </a>
+                }
+                @if (canRulings)
+                {
+                    <a asp-area="Admin" asp-page="/Maraje/Index" class="nav-item @(current.StartsWith("/Maraje", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 3 8v2h18V8Z" /><path d="M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18" /></svg>
+                        مراجع تقلید
+                    </a>
+                }
+                @if (canRulings)
+                {
+                    <a asp-area="Admin" asp-page="/Manabe/Index" class="nav-item @(current.StartsWith("/Manabe", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V6a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" /><path d="M9 8h5M9 12h5" /></svg>
+                        منابع احکام
+                    </a>
+                }
+                @if (canMedia)
+                {
+                    <a asp-area="Admin" asp-page="/Southa/Index" class="nav-item @(current.StartsWith("/Southa", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
+                        صوت‌ها
+                    </a>
+                }
+                @if (canMedia)
+                {
+                    <a asp-area="Admin" asp-page="/Sokhanranan/Index" class="nav-item @(current.StartsWith("/Sokhanranan", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 14a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v4a4 4 0 0 0 4 4Z" /><path d="M5 10a7 7 0 0 0 14 0M12 17v4M8 21h8" /></svg>
+                        سخنرانان
+                    </a>
+                }
+                @if (canMedia)
+                {
+                    <a asp-area="Admin" asp-page="/Majmooeha/Index" class="nav-item @(current.StartsWith("/Majmooeha", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="7" width="14" height="14" rx="2" /><path d="M7 3h12a2 2 0 0 1 2 2v12" /></svg>
+                        مجموعه‌ها
+                    </a>
+                }
                 @* <a href="#" class="nav-item soon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
                     برنامه‌ها
                 </a> *@
-                <a asp-area="Admin" asp-page="/Galeri/Index" class="nav-item @(current.StartsWith("/Galeri", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-5-5L5 21" /></svg>
-                    گالری
-                </a>
+                @if (canMedia)
+                {
+                    <a asp-area="Admin" asp-page="/Galeri/Index" class="nav-item @(current.StartsWith("/Galeri", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-5-5L5 21" /></svg>
+                        گالری
+                    </a>
+                }
 
-                <p class="nav-group">ارتباطات</p>
-                <a asp-area="Admin" asp-page="/Porseshha/Index" class="nav-item @(current.StartsWith("/Porseshha", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.6-2.5 2.6M12 17h.01" /></svg>
-                    پرسش‌های شرعی
-                </a>
-                <a asp-area="Admin" asp-page="/Payamha/Index" class="nav-item @(current.StartsWith("/Payamha", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
-                    پیام‌های تماس
-                </a>
+                @if (canRulings || canSettings)
+                {
+                    <p class="nav-group">ارتباطات</p>
+                }
+                @if (canRulings)
+                {
+                    <a asp-area="Admin" asp-page="/Porseshha/Index" class="nav-item @(current.StartsWith("/Porseshha", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.6-2.5 2.6M12 17h.01" /></svg>
+                        پرسش‌های شرعی
+                    </a>
+                }
+                @if (canSettings)
+                {
+                    <a asp-area="Admin" asp-page="/Payamha/Index" class="nav-item @(current.StartsWith("/Payamha", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+                        پیام‌های تماس
+                    </a>
+                }
                 <a href="#" class="nav-item soon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></svg>
                     خبرنامه
                 </a>
 
-                <p class="nav-group">سیستم</p>
-                <a asp-area="Admin" asp-page="/Karbaran/Index" class="nav-item @(current.StartsWith("/Karbaran", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9.5" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /></svg>
-                    کاربران
-                </a>
-                <a asp-area="Admin" asp-page="/Ayat/Index" class="nav-item @(current.StartsWith("/Ayat", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v18M5 7h14M7 11h10M9 15h6" /></svg>
-                    آیات صفحه اصلی
-                </a>
-                <a asp-area="Admin" asp-page="/TaghvimGhamari/Index" class="nav-item @(current.StartsWith("/TaghvimGhamari", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /><circle cx="12" cy="15" r="2" /></svg>
-                    تقویم قمری
-                </a>
-                <a asp-area="Admin" asp-page="/Tanzimat/Index" class="nav-item @(current.StartsWith("/Tanzimat", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h.09A1.65 1.65 0 0 0 10.6 3.09V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.09A1.65 1.65 0 0 0 21 10.6H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" /></svg>
-                    تنظیمات سایت
-                </a>
+                @if (canUsers || canSettings)
+                {
+                    <p class="nav-group">سیستم</p>
+                }
+                @if (canUsers)
+                {
+                    <a asp-area="Admin" asp-page="/Karbaran/Naghshha" class="nav-item @(current.StartsWith("/Karbaran/Naghshha", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7Z" /><path d="m9 12 2 2 4-4" /></svg>
+                        نقش‌ها و دسترسی‌ها
+                    </a>
+                }
+                @if (canUsers)
+                {
+                    <a asp-area="Admin" asp-page="/Karbaran/Index" class="nav-item @(current.Equals("/Karbaran/Index", StringComparison.OrdinalIgnoreCase) || current.StartsWith("/Karbaran/Naghsh/", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9.5" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /></svg>
+                        کاربران
+                    </a>
+                }
+                @if (canSettings)
+                {
+                    <a asp-area="Admin" asp-page="/Ayat/Index" class="nav-item @(current.StartsWith("/Ayat", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v18M5 7h14M7 11h10M9 15h6" /></svg>
+                        آیات صفحه اصلی
+                    </a>
+                }
+                @if (canSettings)
+                {
+                    <a asp-area="Admin" asp-page="/TaghvimGhamari/Index" class="nav-item @(current.StartsWith("/TaghvimGhamari", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /><circle cx="12" cy="15" r="2" /></svg>
+                        تقویم قمری
+                    </a>
+                }
+                @if (canSettings)
+                {
+                    <a asp-area="Admin" asp-page="/Tanzimat/Index" class="nav-item @(current.StartsWith("/Tanzimat", StringComparison.OrdinalIgnoreCase) ? "on" : "")">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h.09A1.65 1.65 0 0 0 10.6 3.09V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.09A1.65 1.65 0 0 0 21 10.6H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" /></svg>
+                        تنظیمات سایت
+                    </a>
+                }
             </nav>
 
             <div class="admin-side-foot">

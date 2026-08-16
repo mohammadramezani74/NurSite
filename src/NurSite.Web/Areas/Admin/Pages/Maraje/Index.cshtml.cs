@@ -1,13 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Application.Interfaces;
 using NurSite.Domain.Entities;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Areas.Admin.Pages.Maraje;
 
+[Authorize(Policy = Permissions.Rulings.View)]
 public class IndexModel(AppDbContext db, ISlugService slugs) : PageModel
 {
     public sealed record Row(Marja Marja, int RulingCount);

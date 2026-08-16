@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Application.Interfaces;
 using NurSite.Domain.Entities;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Areas.Admin.Pages.Abvab;
@@ -12,6 +14,7 @@ namespace NurSite.Web.Areas.Admin.Pages.Abvab;
 /// ابواب احکام. چون تعدادشان کم و ساختارشان ساده است، فهرست و فرم
 /// در یک صفحه‌اند تا رفت و برگشت بین صفحات لازم نباشد.
 /// </summary>
+[Authorize(Policy = Permissions.Rulings.View)]
 public class IndexModel(AppDbContext db, ISlugService slugs) : PageModel
 {
     public sealed record Row(RulingCategory Category, int RulingCount);

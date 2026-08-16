@@ -1,14 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Application.Interfaces;
 using NurSite.Domain.Entities;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Areas.Admin.Pages.Dastebandi;
 
+[Authorize(Policy = Permissions.Articles.Edit)]
 public class EditModel(AppDbContext db, ISlugService slugs) : PageModel
 {
     [BindProperty] public InputModel Input { get; set; } = new();

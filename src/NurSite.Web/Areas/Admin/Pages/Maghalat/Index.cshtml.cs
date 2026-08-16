@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Domain.Entities;
 using NurSite.Domain.Enums;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 using NurSite.Web.Services;
 
 namespace NurSite.Web.Areas.Admin.Pages.Maghalat;
 
+[Authorize(Policy = Permissions.Articles.View)]
 public class IndexModel(AppDbContext db, FileUploadService uploads) : PageModel
 {
     private const int PageSize = 15;

@@ -1,11 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using NurSite.Application.Interfaces;
 using NurSite.Domain.Entities;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Areas.Admin.Pages.TaghvimGhamari;
@@ -14,6 +16,7 @@ namespace NurSite.Web.Areas.Admin.Pages.TaghvimGhamari;
 /// ثبت آغاز ماه‌های قمری از تقویم رسمی ایران.
 /// سالی یک بار، دوازده ردیف — و تاریخ همه مناسبت‌ها دقیق می‌شود.
 /// </summary>
+[Authorize(Policy = Permissions.Settings.Manage)]
 public class IndexModel(
     AppDbContext db,
     IMemoryCache cache,

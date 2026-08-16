@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using NurSite.Domain.Entities;
 using NurSite.Domain.Enums;
 using NurSite.Web.Services;
 
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Areas.Admin.Pages.Galeri;
@@ -15,6 +17,7 @@ namespace NurSite.Web.Areas.Admin.Pages.Galeri;
 /// فهرست آلبوم‌های گالری. ساخت آلبوم تازه در همین صفحه است؛
 /// افزودن پوستر و کلیپ در صفحه خود آلبوم.
 /// </summary>
+[Authorize(Policy = Permissions.Media.Manage)]
 public class IndexModel(AppDbContext db, ISlugService slugs, FileUploadService uploads) : PageModel
 {
     public sealed record Row(Album Album, int ItemCount, string? FirstImage);

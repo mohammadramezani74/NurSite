@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NurSite.Application.Interfaces;
 using NurSite.Domain.Entities;
 using NurSite.Domain.Enums;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 using NurSite.Web.Services;
 
@@ -13,6 +15,7 @@ namespace NurSite.Web.Areas.Admin.Pages.Majmooeha;
 /// <summary>
 /// مجموعه‌های سخنرانی — مثل «شرح دعای ابوحمزه ثمالی» که چند جلسه دارد.
 /// </summary>
+[Authorize(Policy = Permissions.Media.Manage)]
 public class IndexModel(AppDbContext db, ISlugService slugs, FileUploadService uploads) : PageModel
 {
     public sealed record Row(LectureSeries Series, int LectureCount, int PublishedCount);

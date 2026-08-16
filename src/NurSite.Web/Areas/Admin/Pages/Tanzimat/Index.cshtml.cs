@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -8,10 +9,12 @@ using Microsoft.Extensions.Caching.Memory;
 using NurSite.Application.Interfaces;
 using NurSite.Domain.Entities;
 using NurSite.Domain.Enums;
+using NurSite.Infrastructure.Identity;
 using NurSite.Infrastructure.Persistence;
 
 namespace NurSite.Web.Areas.Admin.Pages.Tanzimat;
 
+[Authorize(Policy = Permissions.Settings.Manage)]
 public class IndexModel(
     AppDbContext db,
     IMemoryCache cache,
